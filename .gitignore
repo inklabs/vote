@@ -1,0 +1,8 @@
+.idea/
+*_gen.go
+.leveldb*/
+.badger.db/
+*.gob
+*.proto
+*.pb.go
+*.private.env.json

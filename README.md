@@ -25,6 +25,13 @@ Demo application using the [Go CQRS](https://github.com/inklabs/cqrs) applicatio
     - ElectionWinnerVoterNotification: ElectionWinnerWasSelected -> notify voters via SMS, Slack, or email
     - ElectionWinnerMediaNotification: ElectionWinnerWasSelected -> send press release email
 
+## Test
+
+```
+go generate .
+go test ./...
+```
+
 ## Links
 
 - https://github.com/inklabs/cqrs
