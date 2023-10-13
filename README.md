@@ -40,6 +40,7 @@ go test ./...
 ```
 go run cmd/httpapi/main.go
 go run cmd/grpcapi/main.go
+go run cmd/cli-local/main.go --help
 ```
 
 ## Links

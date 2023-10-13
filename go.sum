@@ -199,6 +199,8 @@ github.com/inklabs/cqrs v0.0.0-20231012234526-7202f0985870 h1:aJrQ86aQ9se1Wbjad/
 github.com/inklabs/cqrs v0.0.0-20231012234526-7202f0985870/go.mod h1:YBzrGLhjVtbb8pUJbV8wvf/8FY3z671H284Y6ufkeks=
 github.com/inklabs/cqrs v0.0.0-20231013000030-c8bb389d3a07 h1:smKAOH/xoiEeuvv10f7GXtf3dPovlA9RQYt53cO8m1c=
 github.com/inklabs/cqrs v0.0.0-20231013000030-c8bb389d3a07/go.mod h1:RkTf7oDvssi9+ioZEa0RpdaU8bREmmbWtxwsw7hEBsM=
+github.com/inklabs/cqrs v0.0.0-20231013232252-080ae97830da h1:i9cki6+G4SXhKtyFMx2wd3P+KqQpyIVmb+4wdPd+4zM=
+github.com/inklabs/cqrs v0.0.0-20231013232252-080ae97830da/go.mod h1:RkTf7oDvssi9+ioZEa0RpdaU8bREmmbWtxwsw7hEBsM=
 github.com/jonboulle/clockwork v0.1.0/go.mod h1:Ii8DK3G1RaLaWxj9trq07+26W01tbo22gdxWY5EU2bo=
 github.com/jpillora/backoff v1.0.0/go.mod h1:J/6gKK9jxlEcS3zixgDgUAsiuZ7yrSoa/FX5e0EB2j4=
 github.com/json-iterator/go v1.1.6/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=

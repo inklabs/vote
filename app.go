@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"log"
 
+	"github.com/dgraph-io/badger/v4"
 	"github.com/inklabs/cqrs"
 	"github.com/inklabs/cqrs/asynccommandbus"
 	"github.com/inklabs/cqrs/asynccommandstore"
@@ -25,10 +26,11 @@ import (
 var DomainBytes []byte
 
 type app struct {
-	commandBus      cqrs.CommandBus
-	asyncCommandBus cqrs.AsyncCommandBus
-	queryBus        cqrs.QueryBus
-	eventDispatcher cqrs.EventDispatcher
+	commandBus        cqrs.CommandBus
+	asyncCommandBus   cqrs.AsyncCommandBus
+	queryBus          cqrs.QueryBus
+	eventDispatcher   cqrs.EventDispatcher
+	asyncCommandStore cqrs.AsyncCommandStore
 }
 
 func NewApp() *app {
@@ -38,7 +40,6 @@ func NewApp() *app {
 		getAsyncCommandHandlers(),
 	)
 	queryHandlerRegistry := cqrs.NewQueryHandlerRegistry(getQueryHandlers())
-	asyncCommandStore := asynccommandstore.NewInMemory()
 	logger := log.Default()
 	clock := systemclock.New()
 	eventDispatcher := eventdispatcher.NewConcurrentLocal(logger, domainEventListeners)
@@ -48,6 +49,12 @@ func NewApp() *app {
 		commandHandlerRegistry,
 		eventDispatcher,
 		authorization,
+	)
+
+	asyncCommandStore := asynccommandstore.NewBadgerAsyncCommandStore(
+		badger.DefaultOptions("./.badger.db").
+			WithLogger(nil),
+		GetAsyncCommands(),
 	)
 
 	asyncCommandBus := asynccommandbus.NewConcurrentLocal(
@@ -64,10 +71,11 @@ func NewApp() *app {
 	)
 
 	a := &app{
-		commandBus:      commandBus,
-		asyncCommandBus: asyncCommandBus,
-		queryBus:        queryBus,
-		eventDispatcher: eventDispatcher,
+		commandBus:        commandBus,
+		asyncCommandBus:   asyncCommandBus,
+		queryBus:          queryBus,
+		eventDispatcher:   eventDispatcher,
+		asyncCommandStore: asyncCommandStore,
 	}
 
 	return a
@@ -88,6 +96,7 @@ func (a *app) QueryBus() cqrs.QueryBus {
 func (a *app) Stop() {
 	a.asyncCommandBus.Stop()
 	a.eventDispatcher.Stop()
+	_ = a.asyncCommandStore.Close()
 }
 
 func getCommandHandlers() []cqrs.CommandHandler {
