@@ -19,6 +19,7 @@ import (
 //go:generate go run github.com/inklabs/cqrs/cmd/domaingenerator -module github.com/inklabs/vote
 //go:generate go run github.com/inklabs/cqrs/cmd/httpgenerator
 //go:generate go run github.com/inklabs/cqrs/cmd/grpcgenerator
+//go:generate go run github.com/inklabs/cqrs/cmd/sdkgenerator
 
 //go:embed domain.gob
 var DomainBytes []byte
