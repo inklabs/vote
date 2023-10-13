@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello World - Local CLI")
+	fmt.Println("Vote - Local CLI")
 
 	app := vote.NewApp()
 	defer app.Stop()

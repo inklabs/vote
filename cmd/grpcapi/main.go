@@ -11,9 +11,10 @@ import (
 )
 
 func main() {
+	fmt.Println("Vote - gRPC API")
+
 	app := vote.NewApp()
 
-	fmt.Println("Hello World - gRPC API")
 	grpcserver.Start(app, func(grpcServer *grpc.Server) {
 		grpcservergen.RegisterServers(grpcServer, app)
 	})

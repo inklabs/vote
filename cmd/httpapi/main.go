@@ -9,10 +9,10 @@ import (
 )
 
 func main() {
-	app := vote.NewApp()
+	fmt.Println("Vote - HTTP API")
 
+	app := vote.NewApp()
 	httpActionDecoder := vote.NewHTTPActionDecoder()
 
-	fmt.Println("Hello World - HTTP API")
 	httpserver.Start(app, httpActionDecoder, vote.DomainBytes)
 }
