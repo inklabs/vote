@@ -39,6 +39,7 @@ go test ./...
 
 ```
 go run cmd/httpapi/main.go
+go run cmd/grpcapi/main.go
 ```
 
 ## Links
