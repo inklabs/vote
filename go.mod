@@ -3,7 +3,7 @@ module github.com/inklabs/vote
 go 1.21
 
 require (
-	github.com/inklabs/cqrs v0.0.0-20231012234526-7202f0985870
+	github.com/inklabs/cqrs v0.0.0-20231013000030-c8bb389d3a07
 	github.com/spf13/cobra v1.0.0
 	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.28.1
