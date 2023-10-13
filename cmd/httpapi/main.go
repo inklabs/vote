@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/inklabs/cqrs/api/httpcmd"
+	"github.com/inklabs/cqrs/api/httpserver"
 
 	"github.com/inklabs/vote"
 )
@@ -14,5 +14,5 @@ func main() {
 	httpActionDecoder := vote.NewHTTPActionDecoder()
 
 	fmt.Println("Hello World - HTTP API")
-	httpcmd.Start(app, httpActionDecoder, vote.DomainBytes)
+	httpserver.Start(app, httpActionDecoder, vote.DomainBytes)
 }
