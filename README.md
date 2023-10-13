@@ -2,6 +2,8 @@
 
 Demo application using the [Go CQRS](https://github.com/inklabs/cqrs) application framework
 
+Ranked Choice Voting - https://fairvote.org/our-reforms/ranked-choice-voting/
+
 ## Design
 
 - Events
@@ -29,7 +31,14 @@ Demo application using the [Go CQRS](https://github.com/inklabs/cqrs) applicatio
 
 ```
 go generate .
+go mod download
 go test ./...
+```
+
+## Run
+
+```
+go run cmd/httpapi/main.go
 ```
 
 ## Links

@@ -1,6 +1,7 @@
 package vote
 
 import (
+	_ "embed"
 	"log"
 
 	"github.com/inklabs/cqrs"
@@ -16,11 +17,16 @@ import (
 )
 
 //go:generate go run github.com/inklabs/cqrs/cmd/domaingenerator -module github.com/inklabs/vote
+//go:generate go run github.com/inklabs/cqrs/cmd/httpgenerator
+
+//go:embed domain.gob
+var DomainBytes []byte
 
 type app struct {
 	commandBus      cqrs.CommandBus
 	asyncCommandBus cqrs.AsyncCommandBus
 	queryBus        cqrs.QueryBus
+	eventDispatcher cqrs.EventDispatcher
 }
 
 func NewApp() *app {
@@ -59,6 +65,7 @@ func NewApp() *app {
 		commandBus:      commandBus,
 		asyncCommandBus: asyncCommandBus,
 		queryBus:        queryBus,
+		eventDispatcher: eventDispatcher,
 	}
 
 	return a
@@ -74,6 +81,11 @@ func (a *app) AsyncCommandBus() cqrs.AsyncCommandBus {
 
 func (a *app) QueryBus() cqrs.QueryBus {
 	return a.queryBus
+}
+
+func (a *app) Stop() {
+	a.asyncCommandBus.Stop()
+	a.eventDispatcher.Stop()
 }
 
 func getCommandHandlers() []cqrs.CommandHandler {
