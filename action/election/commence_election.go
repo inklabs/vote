@@ -10,7 +10,7 @@ import (
 )
 
 type CommenceElection struct {
-	ID              string
+	ElectionID      string
 	OrganizerUserID string
 	Name            string
 	Description     string
@@ -26,7 +26,7 @@ func (h *commenceElectionHandler) On(_ context.Context, cmd CommenceElection, ev
 	// TODO: Save election details to storage
 
 	eventRaiser.Raise(event.ElectionHasCommenced{
-		ElectionID:      cmd.ID,
+		ElectionID:      cmd.ElectionID,
 		OrganizerUserID: cmd.OrganizerUserID,
 		Name:            cmd.Name,
 		Description:     cmd.Description,

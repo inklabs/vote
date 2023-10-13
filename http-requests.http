@@ -1,0 +1,14 @@
+###
+GET http://localhost:8080/schema/
+Accept: application/json
+
+###
+POST http://localhost:8080/election/CommenceElection
+Content-Type: application/json
+
+{
+  "ElectionID": "{{random.uuid}}",
+  "OrganizerUserID": "34fb3192-d5a0-4e68-83cd-b50a1c7946f4",
+  "Name": "Where to Eat",
+  "Description": "My gustatory elegance yearns for replenishment."
+}

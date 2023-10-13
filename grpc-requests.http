@@ -1,0 +1,9 @@
+###
+GRPC localhost:8081/electionpb.Election/CommenceElection
+
+{
+  "election_id": "{{random.uuid}}",
+  "organizer_user_id": "34fb3192-d5a0-4e68-83cd-b50a1c7946f4",
+  "name": "Where to Eat",
+  "description": "A culinary yearning beseeches my refined senses."
+}
