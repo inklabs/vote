@@ -8,7 +8,11 @@ import (
 
 type ElectionWinnerVoterNotification struct{}
 
+func NewElectionWinnerVoterNotification() *ElectionWinnerVoterNotification {
+	return &ElectionWinnerVoterNotification{}
+}
+
 func (e *ElectionWinnerVoterNotification) On(event event.ElectionWinnerWasSelected) error {
-	log.Printf("%+v", event)
+	log.Printf("%#v", event)
 	return nil
 }

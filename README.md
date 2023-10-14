@@ -9,7 +9,7 @@ Ranked Choice Voting - https://fairvote.org/our-reforms/ranked-choice-voting/
 - Events
     - ElectionHasCommenced: ElectionID, OrganizerUserID, Name, Description, ts
     - ProposalWasMade: ElectionID, ProposalID, OwnerUserID, Name, Description, ts
-    - VoteWasCast: ElectionID, ProposalID, UserID, []RankedProposalIDs{1, 2}, ts
+    - VoteWasCast: ElectionID, UserID, []RankedProposalIDs{1, 2}, ts
     - ElectionWasClosedByOwner: ElectionID, OwnerUserID, ts
     - ElectionWinnerWasSelected: ElectionID, WinningProposalID, ts
 - Commands

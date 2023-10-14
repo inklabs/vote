@@ -20,7 +20,7 @@ func NewCloseElectionByOwnerHandler() *closeElectionByOwnerHandler {
 	return &closeElectionByOwnerHandler{}
 }
 
-func (h *closeElectionByOwnerHandler) On(_ context.Context, cmd CloseElectionByOwner, eventRaiser cqrs.EventRaiser, logger cqrs.AsyncCommandLogger) error {
+func (h *closeElectionByOwnerHandler) On(_ context.Context, cmd CloseElectionByOwner, eventRaiser cqrs.EventRaiser, _ cqrs.AsyncCommandLogger) error {
 	// TODO: tabulate results, and persist to storage
 	winningProposalID := "todo"
 

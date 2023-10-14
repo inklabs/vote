@@ -15,6 +15,7 @@ import (
 	"github.com/inklabs/cqrs/querybus"
 
 	"github.com/inklabs/vote/action/election"
+	"github.com/inklabs/vote/listener"
 )
 
 //go:generate go run github.com/inklabs/cqrs/cmd/domaingenerator -module github.com/inklabs/vote
@@ -103,6 +104,8 @@ func (a *app) Stop() {
 func getCommandHandlers() []cqrs.CommandHandler {
 	return []cqrs.CommandHandler{
 		election.NewCommenceElectionHandler(),
+		election.NewMakeProposalHandler(),
+		election.NewCastVoteHandler(),
 	}
 }
 
@@ -117,5 +120,8 @@ func getQueryHandlers() []cqrs.QueryHandler {
 }
 
 func getDomainEventListeners() []cqrs.EventListener {
-	return []cqrs.EventListener{}
+	return []cqrs.EventListener{
+		listener.NewElectionWinnerVoterNotification(),
+		listener.NewElectionWinnerMediaNotification(),
+	}
 }

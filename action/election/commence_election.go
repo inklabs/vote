@@ -32,5 +32,6 @@ func (h *commenceElectionHandler) On(_ context.Context, cmd CommenceElection, ev
 		Description:     cmd.Description,
 		OccurredAt:      int(time.Now().Unix()),
 	})
+
 	return nil
 }
