@@ -3,6 +3,14 @@ GET http://localhost:8080/schema/
 Accept: application/json
 
 ###
+GET http://localhost:8080/schema/election
+Accept: application/json
+
+###
+GET http://localhost:8080/schema/election/CastVote
+Accept: application/json
+
+###
 POST http://localhost:8080/election/CommenceElection
 Content-Type: application/json
 
@@ -12,3 +20,58 @@ Content-Type: application/json
   "Name": "Where to Eat",
   "Description": "My gustatory elegance yearns for replenishment."
 }
+
+###
+GET http://localhost:8080/election/ListOpenElections
+Accept: application/json
+
+###
+POST http://localhost:8080/election/MakeProposal
+Content-Type: application/json
+
+{
+  "ElectionID": "4a62e77a-a8ae-41f5-abb8-9d2ef5cb094f",
+  "ProposalID": "{{random.uuid}}",
+  "OwnerUserID": "28cc5071-3855-4638-82f1-54f30245fe4e",
+  "Name": "Cosmic Cravings",
+  "Description": "Taste the galaxy in every bite."
+}
+
+###
+GET http://localhost:8080/election/ListProposals
+Accept: application/json
+
+###
+GET http://localhost:8080/election/GetProposalDetails?ProposalID=330301cd-c24c-46eb-b9de-dea93eb82adb
+Accept: application/json
+
+###
+POST http://localhost:8080/election/CastVote
+Content-Type: application/json
+
+{
+  "ElectionID": "4a62e77a-a8ae-41f5-abb8-9d2ef5cb094f",
+  "UserID": "9f32d3e2-6839-4164-99ca-24bb32a697f9",
+  "RankedProposalIDs": [
+    "06ba4246-bb6b-44f7-89a2-c1839660a9d0",
+    "02eb1c26-7cc3-485b-9e1b-599a7342bc5e",
+    "2d64d4f8-bdf8-4bc2-a07a-e25c4b0d8213"
+  ]
+}
+
+###
+POST http://localhost:8080/election/CloseElectionByOwner
+Content-Type: application/json
+
+{
+  "ID": "0efc5cb3-54e3-4f20-b264-a30b2f22ad28",
+  "ElectionID": "4a62e77a-a8ae-41f5-abb8-9d2ef5cb094f"
+}
+
+###
+GET http://localhost:8080/async-command-status/0efc5cb3-54e3-4f20-b264-a30b2f22ad28?include_logs=true
+Content-Type: application/json
+
+###
+GET http://localhost:8080/election/GetElectionResults?ElectionID=4a62e77a-a8ae-41f5-abb8-9d2ef5cb094f
+Accept: application/json

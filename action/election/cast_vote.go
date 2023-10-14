@@ -2,6 +2,7 @@ package election
 
 import (
 	"context"
+	"time"
 
 	"github.com/inklabs/cqrs"
 
@@ -29,7 +30,7 @@ func (h *castVoteHandler) On(_ context.Context, cmd CastVote, eventRaiser cqrs.E
 		ElectionID:        cmd.ElectionID,
 		UserID:            cmd.UserID,
 		RankedProposalIDs: rankedProposalIDs,
-		OccurredAt:        0,
+		OccurredAt:        int(time.Now().Unix()),
 	})
 
 	return nil
