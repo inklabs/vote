@@ -116,7 +116,12 @@ func getAsyncCommandHandlers() []cqrs.AsyncCommandHandler {
 }
 
 func getQueryHandlers() []cqrs.QueryHandler {
-	return []cqrs.QueryHandler{}
+	return []cqrs.QueryHandler{
+		election.NewListOpenElectionsHandler(),
+		election.NewListProposalsHandler(),
+		election.NewGetProposalDetailsHandler(),
+		election.NewGetElectionResultsHandler(),
+	}
 }
 
 func getDomainEventListeners() []cqrs.EventListener {
