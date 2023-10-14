@@ -31,7 +31,6 @@ Ranked Choice Voting - https://fairvote.org/our-reforms/ranked-choice-voting/
 
 ```
 go generate .
-go mod download
 go test ./...
 ```
 

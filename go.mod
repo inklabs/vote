@@ -3,7 +3,8 @@ module github.com/inklabs/vote
 go 1.21
 
 require (
-	github.com/inklabs/cqrs v0.0.0-20231013232252-080ae97830da
+	github.com/dgraph-io/badger/v4 v4.2.0
+	github.com/inklabs/cqrs v0.0.0-20231014000746-4a9d7a6f418b
 	github.com/spf13/cobra v1.0.0
 	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.28.1
@@ -19,7 +20,6 @@ require (
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dgraph-io/badger/v4 v4.2.0 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
