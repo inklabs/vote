@@ -38,7 +38,7 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/election/ListProposals
+GET http://localhost:8080/election/ListProposals?ElectionID=4a62e77a-a8ae-41f5-abb8-9d2ef5cb094f
 Accept: application/json
 
 ###

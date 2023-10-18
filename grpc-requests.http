@@ -7,3 +7,67 @@ GRPC localhost:8081/electionpb.Election/CommenceElection
   "name": "Where to Eat",
   "description": "A culinary yearning beseeches my refined senses."
 }
+
+###
+GRPC localhost:8081/electionpb.Election/ListOpenElections
+
+###
+GRPC localhost:8081/electionpb.Election/MakeProposal
+
+{
+  "election_id": "e81fdad0-0e55-4dc4-a531-ef1f2679fff0",
+  "proposal_id": "bd457628-9c24-43ee-a97f-0d7bc2a07a85",
+  "owner_user_id": "34fb3192-d5a0-4e68-83cd-b50a1c7946f4",
+  "name": "Cosmic Cravings",
+  "description": "Taste the galaxy in every bite."
+}
+
+###
+GRPC localhost:8081/electionpb.Election/ListProposals
+
+{
+  "election_id": "4a62e77a-a8ae-41f5-abb8-9d2ef5cb094f"
+}
+
+###
+GRPC localhost:8081/electionpb.Election/GetProposalDetails
+
+{
+  "proposal_id": "bd457628-9c24-43ee-a97f-0d7bc2a07a85"
+}
+
+###
+GRPC localhost:8081/electionpb.Election/CastVote
+
+{
+  "election_id": "e81fdad0-0e55-4dc4-a531-ef1f2679fff0",
+  "user_id": "b980ecf7-5f48-46fd-99a4-b0b10e94d84f",
+  "ranked_proposal_ids": [
+    "69db7504-7880-49a7-b5aa-ce36b4fd3ff2",
+    "0d27df97-bcd6-4981-81fe-8a84919f0e15",
+    "a4c8de09-310d-4790-a227-40808178ce4c"
+  ]
+}
+
+###
+GRPC localhost:8081/electionpb.Election/CloseElectionByOwner
+
+{
+  "id": "d520a069-4f1a-4c96-81a7-87a38cdae530",
+  "election_id": "e81fdad0-0e55-4dc4-a531-ef1f2679fff0"
+}
+
+###
+GRPC localhost:8081/asynccommandpb.AsyncCommandService/Status
+
+{
+  "command_id": "d520a069-4f1a-4c96-81a7-87a38cdae530",
+  "include_logs": true
+}
+
+###
+GRPC localhost:8081/electionpb.Election/GetElectionResults
+
+{
+  "election_id": "e81fdad0-0e55-4dc4-a531-ef1f2679fff0"
+}
