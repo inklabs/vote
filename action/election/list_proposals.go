@@ -5,7 +5,7 @@ type ListProposals struct {
 }
 
 type ListProposalsResponse struct {
-	// TODO: Add support for slices
+	// TODO: Add support for complex slices
 }
 
 type listProposalsHandler struct{}

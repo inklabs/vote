@@ -42,7 +42,7 @@ GRPC localhost:8081/electionpb.Election/CastVote
 {
   "election_id": "e81fdad0-0e55-4dc4-a531-ef1f2679fff0",
   "user_id": "b980ecf7-5f48-46fd-99a4-b0b10e94d84f",
-  "ranked_proposal_ids": [
+  "ranked_proposal_i_ds": [
     "69db7504-7880-49a7-b5aa-ce36b4fd3ff2",
     "0d27df97-bcd6-4981-81fe-8a84919f0e15",
     "a4c8de09-310d-4790-a227-40808178ce4c"

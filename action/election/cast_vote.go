@@ -2,6 +2,7 @@ package election
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/inklabs/cqrs"
@@ -24,12 +25,12 @@ func NewCastVoteHandler() *castVoteHandler {
 func (h *castVoteHandler) On(_ context.Context, cmd CastVote, eventRaiser cqrs.EventRaiser) error {
 	// TODO: save vote details to storage
 
-	rankedProposalIDs := append([]string{}, cmd.RankedProposalIDs...)
+	log.Printf("cmd: %#v", cmd)
 
 	eventRaiser.Raise(event.VoteWasCast{
 		ElectionID:        cmd.ElectionID,
 		UserID:            cmd.UserID,
-		RankedProposalIDs: rankedProposalIDs,
+		RankedProposalIDs: append([]string(nil), cmd.RankedProposalIDs...),
 		OccurredAt:        int(time.Now().Unix()),
 	})
 
