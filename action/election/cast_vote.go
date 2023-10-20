@@ -2,7 +2,6 @@ package election
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/inklabs/cqrs"
@@ -24,8 +23,6 @@ func NewCastVoteHandler() *castVoteHandler {
 
 func (h *castVoteHandler) On(_ context.Context, cmd CastVote, eventRaiser cqrs.EventRaiser) error {
 	// TODO: save vote details to storage
-
-	log.Printf("cmd: %#v", cmd)
 
 	eventRaiser.Raise(event.VoteWasCast{
 		ElectionID:        cmd.ElectionID,

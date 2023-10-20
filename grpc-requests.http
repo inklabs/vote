@@ -53,7 +53,7 @@ GRPC localhost:8081/electionpb.Election/CastVote
 GRPC localhost:8081/electionpb.Election/CloseElectionByOwner
 
 {
-  "id": "d520a069-4f1a-4c96-81a7-87a38cdae530",
+  "id": "e13e1b40-a6be-4179-ade2-aa7a8c046c6f",
   "election_id": "e81fdad0-0e55-4dc4-a531-ef1f2679fff0"
 }
 
@@ -61,7 +61,7 @@ GRPC localhost:8081/electionpb.Election/CloseElectionByOwner
 GRPC localhost:8081/asynccommandpb.AsyncCommandService/Status
 
 {
-  "command_id": "d520a069-4f1a-4c96-81a7-87a38cdae530",
+  "command_id": "e13e1b40-a6be-4179-ade2-aa7a8c046c6f",
   "include_logs": true
 }
 
