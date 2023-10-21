@@ -2,7 +2,7 @@
 GRPC localhost:8081/electionpb.Election/CommenceElection
 
 {
-  "election_id": "{{random.uuid}}",
+  "election_id": "12e73910-f001-423e-a795-09790b927d6a",
   "organizer_user_id": "34fb3192-d5a0-4e68-83cd-b50a1c7946f4",
   "name": "Where to Eat",
   "description": "A culinary yearning beseeches my refined senses."
@@ -53,7 +53,7 @@ GRPC localhost:8081/electionpb.Election/CastVote
 GRPC localhost:8081/electionpb.Election/CloseElectionByOwner
 
 {
-  "id": "e13e1b40-a6be-4179-ade2-aa7a8c046c6f",
+  "id": {{$random.uuid}},
   "election_id": "e81fdad0-0e55-4dc4-a531-ef1f2679fff0"
 }
 
@@ -61,7 +61,7 @@ GRPC localhost:8081/electionpb.Election/CloseElectionByOwner
 GRPC localhost:8081/asynccommandpb.AsyncCommandService/Status
 
 {
-  "command_id": "e13e1b40-a6be-4179-ade2-aa7a8c046c6f",
+  "command_id": "12241ed5-d5bf-4b70-9a15-366e68d5bda6",
   "include_logs": true
 }
 

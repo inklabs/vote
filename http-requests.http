@@ -15,7 +15,7 @@ POST http://localhost:8080/election/CommenceElection
 Content-Type: application/json
 
 {
-  "ElectionID": "{{random.uuid}}",
+  "ElectionID": "{{$random.uuid}}",
   "OrganizerUserID": "34fb3192-d5a0-4e68-83cd-b50a1c7946f4",
   "Name": "Where to Eat",
   "Description": "My gustatory elegance yearns for replenishment."
@@ -31,7 +31,7 @@ Content-Type: application/json
 
 {
   "ElectionID": "4a62e77a-a8ae-41f5-abb8-9d2ef5cb094f",
-  "ProposalID": "{{random.uuid}}",
+  "ProposalID": "{{$random.uuid}}",
   "OwnerUserID": "28cc5071-3855-4638-82f1-54f30245fe4e",
   "Name": "Cosmic Cravings",
   "Description": "Taste the galaxy in every bite."
