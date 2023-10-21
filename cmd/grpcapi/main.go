@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/inklabs/vote"
-	"github.com/inklabs/vote/grpc/grpcservergen"
+	voteserver "github.com/inklabs/vote/grpc/grpcserver"
 )
 
 func main() {
@@ -16,6 +16,6 @@ func main() {
 	app := vote.NewApp()
 
 	grpcserver.Start(app, func(grpcServer *grpc.Server) {
-		grpcservergen.RegisterServers(grpcServer, app)
+		voteserver.RegisterServers(grpcServer, app)
 	})
 }
