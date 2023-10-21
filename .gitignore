@@ -6,3 +6,5 @@
 *.proto
 *.pb.go
 *.private.env.json
+*_pb2.py*
+*_pb2_*
