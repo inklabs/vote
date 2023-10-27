@@ -47,11 +47,14 @@ func TestCommenceElection(t *testing.T) {
 		actualElection, err := app.ElectionRepository.GetElection(ctx, electionID)
 		require.NoError(t, err)
 		assert.Equal(t, electionrepository.Election{
-			ElectionID:      electionID,
-			OrganizerUserID: command.OrganizerUserID,
-			Name:            command.Name,
-			Description:     command.Description,
-			OccurredAt:      0,
+			ElectionID:        electionID,
+			OrganizerUserID:   command.OrganizerUserID,
+			Name:              command.Name,
+			Description:       command.Description,
+			OccurredAt:        0,
+			WinningProposalID: "",
+			IsClosed:          false,
+			ClosedAt:          0,
 		}, actualElection)
 	})
 }

@@ -6,11 +6,14 @@ import (
 )
 
 type Election struct {
-	ElectionID      string
-	OrganizerUserID string
-	Name            string
-	Description     string
-	OccurredAt      int
+	ElectionID        string
+	OrganizerUserID   string
+	Name              string
+	Description       string
+	OccurredAt        int
+	WinningProposalID string
+	IsClosed          bool
+	ClosedAt          int
 }
 
 type Repository interface {

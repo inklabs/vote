@@ -30,13 +30,14 @@ import (
 var DomainBytes []byte
 
 type app struct {
-	commandBus        cqrs.CommandBus
-	asyncCommandBus   cqrs.AsyncCommandBus
-	queryBus          cqrs.QueryBus
-	eventDispatcher   cqrs.EventDispatcher
-	asyncCommandStore cqrs.AsyncCommandStore
-	authorization     cqrs.Authorization
-	clock             clock.Clock
+	commandBus             cqrs.CommandBus
+	asyncCommandBus        cqrs.AsyncCommandBus
+	queryBus               cqrs.QueryBus
+	eventDispatcher        cqrs.EventDispatcher
+	asyncCommandStore      cqrs.AsyncCommandStore
+	authorization          cqrs.Authorization
+	clock                  clock.Clock
+	useSyncLocalCommandBus bool
 
 	electionRepository electionrepository.Repository
 }
@@ -70,6 +71,12 @@ func WithClock(clock clock.Clock) Option {
 func WithElectionRepository(repository electionrepository.Repository) Option {
 	return func(a *app) {
 		a.electionRepository = repository
+	}
+}
+
+func WithSyncLocalAsyncCommandBus() Option {
+	return func(a *app) {
+		a.useSyncLocalCommandBus = true
 	}
 }
 
@@ -115,13 +122,23 @@ func NewApp(opts ...Option) *app {
 		a.authorization,
 	)
 
-	a.asyncCommandBus = asynccommandbus.NewConcurrentLocal(
-		commandHandlerRegistry,
-		a.eventDispatcher,
-		a.asyncCommandStore,
-		a.clock,
-		a.authorization,
-	)
+	if a.useSyncLocalCommandBus {
+		a.asyncCommandBus = asynccommandbus.NewSyncLocal(
+			commandHandlerRegistry,
+			a.eventDispatcher,
+			a.asyncCommandStore,
+			a.clock,
+			a.authorization,
+		)
+	} else {
+		a.asyncCommandBus = asynccommandbus.NewConcurrentLocal(
+			commandHandlerRegistry,
+			a.eventDispatcher,
+			a.asyncCommandStore,
+			a.clock,
+			a.authorization,
+		)
+	}
 
 	a.queryBus = querybus.NewLocal(
 		queryHandlerRegistry,
@@ -159,7 +176,7 @@ func (a *app) getCommandHandlers() []cqrs.CommandHandler {
 
 func (a *app) getAsyncCommandHandlers() []cqrs.AsyncCommandHandler {
 	return []cqrs.AsyncCommandHandler{
-		election.NewCloseElectionByOwnerHandler(),
+		election.NewCloseElectionByOwnerHandler(a.electionRepository, a.clock),
 	}
 }
 
