@@ -13,7 +13,7 @@ import (
 func main() {
 	fmt.Println("Vote - gRPC API")
 
-	app := vote.NewApp()
+	app := vote.NewProdApp()
 
 	grpcserver.Start(app, func(grpcServer *grpc.Server) {
 		voteserver.RegisterServers(grpcServer, app)

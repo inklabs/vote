@@ -11,7 +11,7 @@ import (
 func main() {
 	fmt.Println("Vote - HTTP API")
 
-	app := vote.NewApp()
+	app := vote.NewProdApp()
 	httpActionDecoder := vote.NewHTTPActionDecoder()
 
 	httpserver.Start(app, httpActionDecoder, vote.DomainBytes)

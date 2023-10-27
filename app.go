@@ -11,10 +11,12 @@ import (
 	"github.com/inklabs/cqrs/commandbus"
 	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/inklabs/cqrs/eventdispatcher"
+	"github.com/inklabs/cqrs/pkg/clock"
 	"github.com/inklabs/cqrs/pkg/clock/provider/systemclock"
 	"github.com/inklabs/cqrs/querybus"
 
 	"github.com/inklabs/vote/action/election"
+	"github.com/inklabs/vote/internal/electionrepository"
 	"github.com/inklabs/vote/listener"
 )
 
@@ -33,52 +35,98 @@ type app struct {
 	queryBus          cqrs.QueryBus
 	eventDispatcher   cqrs.EventDispatcher
 	asyncCommandStore cqrs.AsyncCommandStore
+	authorization     cqrs.Authorization
+	clock             clock.Clock
+
+	electionRepository electionrepository.Repository
 }
 
-func NewApp() *app {
-	domainEventListeners := getDomainEventListeners()
-	commandHandlerRegistry := cqrs.NewCommandHandlerRegistry(
-		getCommandHandlers(),
-		getAsyncCommandHandlers(),
-	)
-	queryHandlerRegistry := cqrs.NewQueryHandlerRegistry(getQueryHandlers())
-	logger := log.Default()
-	clock := systemclock.New()
-	eventDispatcher := eventdispatcher.NewConcurrentLocal(logger, domainEventListeners)
-	authorization := cqrstest.NewPassThruAuth()
+type Option func(a *app)
 
-	commandBus := commandbus.NewLocal(
-		commandHandlerRegistry,
-		eventDispatcher,
-		authorization,
-	)
-
-	asyncCommandStore := asynccommandstore.NewBadgerAsyncCommandStore(
-		badger.DefaultOptions("./.badger.db").
-			WithLogger(nil),
-		GetAsyncCommands(),
-	)
-
-	asyncCommandBus := asynccommandbus.NewConcurrentLocal(
-		commandHandlerRegistry,
-		eventDispatcher,
-		asyncCommandStore,
-		clock,
-		authorization,
-	)
-
-	queryBus := querybus.NewLocal(
-		queryHandlerRegistry,
-		authorization,
-	)
-
-	a := &app{
-		commandBus:        commandBus,
-		asyncCommandBus:   asyncCommandBus,
-		queryBus:          queryBus,
-		eventDispatcher:   eventDispatcher,
-		asyncCommandStore: asyncCommandStore,
+func WithAsyncCommandStore(store cqrs.AsyncCommandStore) Option {
+	return func(a *app) {
+		a.asyncCommandStore = store
 	}
+}
+
+func WithEventDispatcher(dispatcher cqrs.EventDispatcher) Option {
+	return func(a *app) {
+		a.eventDispatcher = dispatcher
+	}
+}
+
+func WithAuthorization(authorization cqrs.Authorization) Option {
+	return func(a *app) {
+		a.authorization = authorization
+	}
+}
+
+func WithClock(clock clock.Clock) Option {
+	return func(a *app) {
+		a.clock = clock
+	}
+}
+
+func WithElectionRepository(repository electionrepository.Repository) Option {
+	return func(a *app) {
+		a.electionRepository = repository
+	}
+}
+
+func NewProdApp() *app {
+	return NewApp(
+		WithAsyncCommandStore(
+			asynccommandstore.NewBadgerAsyncCommandStore(
+				badger.DefaultOptions("./.badger.db").
+					WithLogger(nil),
+				GetAsyncCommands(),
+			),
+		),
+	)
+}
+
+func NewApp(opts ...Option) *app {
+	a := &app{
+		clock:             systemclock.New(),
+		authorization:     cqrstest.NewPassThruAuth(),
+		asyncCommandStore: asynccommandstore.NewInMemory(),
+	}
+
+	a.eventDispatcher = eventdispatcher.NewConcurrentLocal(
+		log.Default(),
+		a.getDomainEventListeners(),
+	)
+
+	for _, opt := range opts {
+		opt(a)
+	}
+
+	commandHandlerRegistry := cqrs.NewCommandHandlerRegistry(
+		a.getCommandHandlers(),
+		a.getAsyncCommandHandlers(),
+	)
+	queryHandlerRegistry := cqrs.NewQueryHandlerRegistry(
+		a.getQueryHandlers(),
+	)
+
+	a.commandBus = commandbus.NewLocal(
+		commandHandlerRegistry,
+		a.eventDispatcher,
+		a.authorization,
+	)
+
+	a.asyncCommandBus = asynccommandbus.NewConcurrentLocal(
+		commandHandlerRegistry,
+		a.eventDispatcher,
+		a.asyncCommandStore,
+		a.clock,
+		a.authorization,
+	)
+
+	a.queryBus = querybus.NewLocal(
+		queryHandlerRegistry,
+		a.authorization,
+	)
 
 	return a
 }
@@ -101,21 +149,21 @@ func (a *app) Stop() {
 	_ = a.asyncCommandStore.Close()
 }
 
-func getCommandHandlers() []cqrs.CommandHandler {
+func (a *app) getCommandHandlers() []cqrs.CommandHandler {
 	return []cqrs.CommandHandler{
-		election.NewCommenceElectionHandler(),
+		election.NewCommenceElectionHandler(a.electionRepository, a.clock),
 		election.NewMakeProposalHandler(),
 		election.NewCastVoteHandler(),
 	}
 }
 
-func getAsyncCommandHandlers() []cqrs.AsyncCommandHandler {
+func (a *app) getAsyncCommandHandlers() []cqrs.AsyncCommandHandler {
 	return []cqrs.AsyncCommandHandler{
 		election.NewCloseElectionByOwnerHandler(),
 	}
 }
 
-func getQueryHandlers() []cqrs.QueryHandler {
+func (a *app) getQueryHandlers() []cqrs.QueryHandler {
 	return []cqrs.QueryHandler{
 		election.NewListOpenElectionsHandler(),
 		election.NewListProposalsHandler(),
@@ -124,7 +172,7 @@ func getQueryHandlers() []cqrs.QueryHandler {
 	}
 }
 
-func getDomainEventListeners() []cqrs.EventListener {
+func (a *app) getDomainEventListeners() []cqrs.EventListener {
 	return []cqrs.EventListener{
 		listener.NewElectionWinnerVoterNotification(),
 		listener.NewElectionWinnerMediaNotification(),

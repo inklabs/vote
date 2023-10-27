@@ -11,7 +11,7 @@ import (
 func main() {
 	fmt.Println("Vote - Local CLI")
 
-	app := vote.NewApp()
+	app := vote.NewProdApp()
 	defer app.Stop()
 
 	command := vote.GetCobraRootCommand(app)
