@@ -169,7 +169,7 @@ func (a *app) Stop() {
 func (a *app) getCommandHandlers() []cqrs.CommandHandler {
 	return []cqrs.CommandHandler{
 		election.NewCommenceElectionHandler(a.electionRepository, a.clock),
-		election.NewMakeProposalHandler(),
+		election.NewMakeProposalHandler(a.electionRepository, a.clock),
 		election.NewCastVoteHandler(),
 	}
 }

@@ -2,11 +2,12 @@ package election
 
 import (
 	"context"
-	"time"
 
 	"github.com/inklabs/cqrs"
+	"github.com/inklabs/cqrs/pkg/clock"
 
 	"github.com/inklabs/vote/event"
+	"github.com/inklabs/vote/internal/electionrepository"
 )
 
 type MakeProposal struct {
@@ -17,14 +18,31 @@ type MakeProposal struct {
 	Description string
 }
 
-type makeProposalHandler struct{}
-
-func NewMakeProposalHandler() *makeProposalHandler {
-	return &makeProposalHandler{}
+type makeProposalHandler struct {
+	repository electionrepository.Repository
+	clock      clock.Clock
 }
 
-func (h *makeProposalHandler) On(_ context.Context, cmd MakeProposal, eventRaiser cqrs.EventRaiser) error {
-	// TODO: save proposal details to storage
+func NewMakeProposalHandler(repository electionrepository.Repository, clock clock.Clock) *makeProposalHandler {
+	return &makeProposalHandler{
+		repository: repository,
+		clock:      clock,
+	}
+}
+
+func (h *makeProposalHandler) On(ctx context.Context, cmd MakeProposal, eventRaiser cqrs.EventRaiser) error {
+	occurredAt := int(h.clock.Now().Unix())
+
+	err := h.repository.SaveProposal(ctx, electionrepository.Proposal{
+		ElectionID:  cmd.ElectionID,
+		ProposalID:  cmd.ProposalID,
+		OwnerUserID: cmd.OwnerUserID,
+		Name:        cmd.Name,
+		Description: cmd.Description,
+	})
+	if err != nil {
+		return err
+	}
 
 	eventRaiser.Raise(event.ProposalWasMade{
 		ElectionID:  cmd.ElectionID,
@@ -32,7 +50,7 @@ func (h *makeProposalHandler) On(_ context.Context, cmd MakeProposal, eventRaise
 		OwnerUserID: cmd.OwnerUserID,
 		Name:        cmd.Name,
 		Description: cmd.Description,
-		OccurredAt:  int(time.Now().Unix()),
+		OccurredAt:  occurredAt,
 	})
 
 	return nil

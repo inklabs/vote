@@ -15,10 +15,9 @@ import (
 )
 
 func TestCommenceElection(t *testing.T) {
-	app := votetest.NewTestApp(t)
-
 	t.Run("saves to repository and raises event", func(t *testing.T) {
 		// Given
+		app := votetest.NewTestApp(t)
 		const electionID = "6c194c91-bb68-4933-a6ba-7c5867a5f54d"
 		command := election.CommenceElection{
 			ElectionID:      electionID,

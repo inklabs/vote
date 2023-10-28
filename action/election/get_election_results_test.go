@@ -13,10 +13,9 @@ import (
 )
 
 func TestGetElectionResults(t *testing.T) {
-	app := votetest.NewTestApp(t)
-
 	t.Run("returns election results", func(t *testing.T) {
 		// Given
+		app := votetest.NewTestApp(t)
 		const (
 			electionID        = "ef18565e-eba3-43ed-964e-40d872568f0a"
 			winningProposalID = "35d414ea-4b5f-430a-9f57-ef48bce34ef2"
