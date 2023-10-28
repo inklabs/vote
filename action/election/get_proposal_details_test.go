@@ -58,17 +58,19 @@ func TestGetProposalDetails(t *testing.T) {
 		}, response)
 	})
 
-	t.Run("errors when proposal not found", func(t *testing.T) {
-		// Given
-		app := votetest.NewTestApp(t)
-		query := election.GetProposalDetails{
-			ProposalID: "e0476e03-6c6e-4ab9-9c3b-c20970664b63",
-		}
+	t.Run("errors", func(t *testing.T) {
+		t.Run("when proposal not found", func(t *testing.T) {
+			// Given
+			app := votetest.NewTestApp(t)
+			query := election.GetProposalDetails{
+				ProposalID: "e0476e03-6c6e-4ab9-9c3b-c20970664b63",
+			}
 
-		// When
-		_, err := app.ExecuteQuery(query)
+			// When
+			_, err := app.ExecuteQuery(query)
 
-		// Then
-		require.Equal(t, err, electionrepository.ErrProposalNotFound)
+			// Then
+			require.Equal(t, err, electionrepository.ErrProposalNotFound)
+		})
 	})
 }

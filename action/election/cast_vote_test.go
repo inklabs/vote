@@ -31,7 +31,6 @@ func TestCastVote(t *testing.T) {
 			OrganizerUserID: "09dce1e9-568a-4fb2-945d-0ee9b95f5b04",
 			Name:            "Election Name",
 			Description:     "Election Description",
-			CommencedAt:     0,
 		}
 		proposal1 := electionrepository.Proposal{
 			ElectionID:  electionID,
@@ -39,7 +38,6 @@ func TestCastVote(t *testing.T) {
 			OwnerUserID: ownerUserID,
 			Name:        "Proposal Name 1",
 			Description: "Proposal Description 1",
-			ProposedAt:  0,
 		}
 		proposal2 := electionrepository.Proposal{
 			ElectionID:  electionID,
@@ -47,7 +45,6 @@ func TestCastVote(t *testing.T) {
 			OwnerUserID: ownerUserID,
 			Name:        "Proposal Name 2",
 			Description: "Proposal Description 2",
-			ProposedAt:  0,
 		}
 		proposal3 := electionrepository.Proposal{
 			ElectionID:  electionID,
@@ -55,7 +52,6 @@ func TestCastVote(t *testing.T) {
 			OwnerUserID: ownerUserID,
 			Name:        "Proposal Name 3",
 			Description: "Proposal Description 3",
-			ProposedAt:  0,
 		}
 		require.NoError(t, app.ElectionRepository.SaveElection(ctx, election1))
 		require.NoError(t, app.ElectionRepository.SaveProposal(ctx, proposal1))
@@ -97,5 +93,100 @@ func TestCastVote(t *testing.T) {
 				RankedProposalIDs: rankedProposalIDs,
 			},
 		}, actualVotes)
+	})
+
+	t.Run("errors", func(t *testing.T) {
+		t.Run("when election not found", func(t *testing.T) {
+			// Given
+			app := votetest.NewTestApp(t)
+			command := election.CastVote{
+				ElectionID: "8493f7d9-1080-42a7-ae08-5d42d06941de",
+				UserID:     "19a0abe7-fdd7-49f8-a01f-4fc0e0f12480",
+				RankedProposalIDs: []string{
+					"f6cec37d-cb86-4798-ae7d-51fd3cfc075b",
+				},
+			}
+
+			// When
+			response, err := app.ExecuteCommand(command)
+
+			// Then
+			require.Equal(t, err, electionrepository.ErrElectionNotFound)
+			assert.Nil(t, response)
+			assert.Empty(t, app.EventDispatcher.GetEvents())
+		})
+
+		t.Run("when proposal not found", func(t *testing.T) {
+			// Given
+			app := votetest.NewTestApp(t)
+			ctx := cqrstest.TimeoutContext(t)
+			election1 := electionrepository.Election{
+				ElectionID:      "a771df96-3957-48d0-bcd3-63e3ab73ac75",
+				OrganizerUserID: "3c51a70e-14cc-4cbb-b2dc-f58317470729",
+				Name:            "Election Name",
+				Description:     "Election Description",
+			}
+			require.NoError(t, app.ElectionRepository.SaveElection(ctx, election1))
+
+			command := election.CastVote{
+				ElectionID: election1.ElectionID,
+				UserID:     "19a0abe7-fdd7-49f8-a01f-4fc0e0f12480",
+				RankedProposalIDs: []string{
+					"306cf23d-8196-4742-aca8-4bf9f43cd301",
+				},
+			}
+
+			// When
+			response, err := app.ExecuteCommand(command)
+
+			// Then
+			require.Equal(t, err, electionrepository.ErrProposalNotFound)
+			assert.Nil(t, response)
+			assert.Empty(t, app.EventDispatcher.GetEvents())
+		})
+
+		t.Run("with proposal from another election", func(t *testing.T) {
+			// Given
+			app := votetest.NewTestApp(t)
+			ctx := cqrstest.TimeoutContext(t)
+			election1 := electionrepository.Election{
+				ElectionID:      "dce69b68-aaa4-4602-88c6-0790c13c73b4",
+				OrganizerUserID: "0c57ef2b-f0e1-40ef-a95e-82df8da6ad4e",
+				Name:            "Election Name 1",
+				Description:     "Election Description 1",
+			}
+			proposal1 := electionrepository.Proposal{
+				ElectionID:  election1.ElectionID,
+				ProposalID:  "841a61bd-6b8a-45ad-bd68-d01b7132e3b8",
+				OwnerUserID: "2c3bfc60-ad8c-4f70-bb2b-94a2b9d98464",
+				Name:        "Proposal Name 1",
+				Description: "Proposal Description 1",
+			}
+			election2 := electionrepository.Election{
+				ElectionID:      "cb14b1f7-47b3-4fbf-a554-79f4f5420a85",
+				OrganizerUserID: "843b7424-0512-44a8-9f9b-f87a2d736475",
+				Name:            "Election Name 2",
+				Description:     "Election Description 2",
+			}
+			require.NoError(t, app.ElectionRepository.SaveElection(ctx, election1))
+			require.NoError(t, app.ElectionRepository.SaveElection(ctx, election2))
+			require.NoError(t, app.ElectionRepository.SaveProposal(ctx, proposal1))
+
+			command := election.CastVote{
+				ElectionID: election2.ElectionID,
+				UserID:     "80d3c0bf-c523-459a-af47-36a2f3a643dd",
+				RankedProposalIDs: []string{
+					proposal1.ProposalID,
+				},
+			}
+
+			// When
+			response, err := app.ExecuteCommand(command)
+
+			// Then
+			require.Equal(t, err, electionrepository.ErrInvalidElectionProposal)
+			assert.Nil(t, response)
+			assert.Empty(t, app.EventDispatcher.GetEvents())
+		})
 	})
 }

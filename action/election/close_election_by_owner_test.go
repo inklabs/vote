@@ -86,43 +86,45 @@ func TestCloseElectionByOwner(t *testing.T) {
 		}, actualElection)
 	})
 
-	t.Run("errors when election not found", func(t *testing.T) {
-		// Given
-		app := votetest.NewTestApp(t)
-		const electionID = "a1255efd-3917-458e-83d3-24a7cc7e0b40"
+	t.Run("errors", func(t *testing.T) {
+		t.Run("when election not found", func(t *testing.T) {
+			// Given
+			app := votetest.NewTestApp(t)
+			const electionID = "a1255efd-3917-458e-83d3-24a7cc7e0b40"
 
-		ctx := cqrstest.TimeoutContext(t)
-		commandID := "4a9bc117-8ac9-4ad4-bee1-17ac1f044bf4"
-		command := election.CloseElectionByOwner{
-			ID:         commandID,
-			ElectionID: electionID,
-		}
+			ctx := cqrstest.TimeoutContext(t)
+			commandID := "4a9bc117-8ac9-4ad4-bee1-17ac1f044bf4"
+			command := election.CloseElectionByOwner{
+				ID:         commandID,
+				ElectionID: electionID,
+			}
 
-		// When
-		response, err := app.EnqueueCommand(command)
+			// When
+			response, err := app.EnqueueCommand(command)
 
-		// Then
-		require.NoError(t, err)
-		assert.Equal(t, &cqrs.AsyncCommandResponse{
-			ID:            commandID,
-			Status:        "QUEUED",
-			HasBeenQueued: true,
-		}, response)
-		assert.Empty(t, app.EventDispatcher.GetEvents())
+			// Then
+			require.NoError(t, err)
+			assert.Equal(t, &cqrs.AsyncCommandResponse{
+				ID:            commandID,
+				Status:        "QUEUED",
+				HasBeenQueued: true,
+			}, response)
+			assert.Empty(t, app.EventDispatcher.GetEvents())
 
-		status, err := app.AsyncCommandStore.GetAsyncCommandStatus(ctx, commandID)
-		require.NoError(t, err)
-		assert.True(t, status.IsFinished)
-		assert.False(t, status.IsSuccess)
+			status, err := app.AsyncCommandStore.GetAsyncCommandStatus(ctx, commandID)
+			require.NoError(t, err)
+			assert.True(t, status.IsFinished)
+			assert.False(t, status.IsSuccess)
 
-		logs, err := app.AsyncCommandStore.GetAsyncCommandLogs(ctx, commandID)
-		require.NoError(t, err)
-		assert.Equal(t, []cqrs.AsyncCommandLog{
-			{
-				Type:           cqrs.CommandLogError,
-				CreatedAtMicro: 2000000,
-				Message:        "election not found: " + electionID,
-			},
-		}, logs)
+			logs, err := app.AsyncCommandStore.GetAsyncCommandLogs(ctx, commandID)
+			require.NoError(t, err)
+			assert.Equal(t, []cqrs.AsyncCommandLog{
+				{
+					Type:           cqrs.CommandLogError,
+					CreatedAtMicro: 2000000,
+					Message:        "election not found: " + electionID,
+				},
+			}, logs)
+		})
 	})
 }

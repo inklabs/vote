@@ -44,3 +44,4 @@ type Repository interface {
 
 var ErrElectionNotFound = fmt.Errorf("election not found")
 var ErrProposalNotFound = fmt.Errorf("proposal not found")
+var ErrInvalidElectionProposal = fmt.Errorf("invalid election")

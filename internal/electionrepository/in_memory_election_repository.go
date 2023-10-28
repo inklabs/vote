@@ -96,6 +96,16 @@ func (r *inMemoryElectionRepository) SaveVote(_ context.Context, vote Vote) erro
 		return ErrElectionNotFound
 	}
 
+	for _, proposalID := range vote.RankedProposalIDs {
+		if proposal, ok := r.proposals[proposalID]; ok {
+			if proposal.ElectionID != vote.ElectionID {
+				return ErrInvalidElectionProposal
+			}
+		} else {
+			return ErrProposalNotFound
+		}
+	}
+
 	r.votes[vote.ElectionID] = append(r.votes[vote.ElectionID], vote)
 
 	return nil
