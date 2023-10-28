@@ -53,3 +53,8 @@ func (a *testApp) EnqueueCommand(asyncCommand cqrs.AsyncCommand) (*cqrs.AsyncCom
 	ctx := cqrstest.TimeoutContext(a.t)
 	return a.app.AsyncCommandBus().Enqueue(ctx, asyncCommand)
 }
+
+func (a *testApp) ExecuteQuery(query cqrs.Query) (cqrs.QueryResponse, error) {
+	ctx := cqrstest.TimeoutContext(a.t)
+	return a.app.QueryBus().Execute(ctx, query)
+}

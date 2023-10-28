@@ -215,6 +215,12 @@ github.com/inklabs/cqrs v0.0.0-20231021051022-fb3e6eb44bcd h1:8kg3Z0YFCtJqVOyZiT
 github.com/inklabs/cqrs v0.0.0-20231021051022-fb3e6eb44bcd/go.mod h1:RkTf7oDvssi9+ioZEa0RpdaU8bREmmbWtxwsw7hEBsM=
 github.com/inklabs/cqrs v0.0.0-20231027195755-1c21edac3209 h1:gIsKZ6E7qKVRcmpkdWl4YmeUwt9cF287p89Ty132t+k=
 github.com/inklabs/cqrs v0.0.0-20231027195755-1c21edac3209/go.mod h1:RkTf7oDvssi9+ioZEa0RpdaU8bREmmbWtxwsw7hEBsM=
+github.com/inklabs/cqrs v0.0.0-20231027210121-9b9151b3d5eb h1:il2O0pxJph4Q0w5dml5VDXSRnaYEkEGWTSBu7LpCpOk=
+github.com/inklabs/cqrs v0.0.0-20231027210121-9b9151b3d5eb/go.mod h1:RkTf7oDvssi9+ioZEa0RpdaU8bREmmbWtxwsw7hEBsM=
+github.com/inklabs/cqrs v0.0.0-20231027211148-aefadf105e18 h1:Y1LfQaKy1/HAzylYQCPp+QMGsDjt13UHGTdu/KnLJmw=
+github.com/inklabs/cqrs v0.0.0-20231027211148-aefadf105e18/go.mod h1:RkTf7oDvssi9+ioZEa0RpdaU8bREmmbWtxwsw7hEBsM=
+github.com/inklabs/cqrs v0.0.0-20231027213201-1b2ba847e8e0 h1:6TwFqiq/b00azuURebyfurWeDk1eM7UVOF6DAWwU3Ko=
+github.com/inklabs/cqrs v0.0.0-20231027213201-1b2ba847e8e0/go.mod h1:RkTf7oDvssi9+ioZEa0RpdaU8bREmmbWtxwsw7hEBsM=
 github.com/jonboulle/clockwork v0.1.0/go.mod h1:Ii8DK3G1RaLaWxj9trq07+26W01tbo22gdxWY5EU2bo=
 github.com/jpillora/backoff v1.0.0/go.mod h1:J/6gKK9jxlEcS3zixgDgUAsiuZ7yrSoa/FX5e0EB2j4=
 github.com/json-iterator/go v1.1.6/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=

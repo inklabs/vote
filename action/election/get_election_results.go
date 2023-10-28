@@ -1,7 +1,9 @@
 package election
 
 import (
-	"time"
+	"context"
+
+	"github.com/inklabs/vote/internal/electionrepository"
 )
 
 type GetElectionResults struct {
@@ -14,16 +16,25 @@ type GetElectionResultsResponse struct {
 	SelectedAt        int
 }
 
-type getElectionResultsHandler struct{}
-
-func NewGetElectionResultsHandler() *getElectionResultsHandler {
-	return &getElectionResultsHandler{}
+type getElectionResultsHandler struct {
+	repository electionrepository.Repository
 }
 
-func (h *getElectionResultsHandler) On(query GetElectionResults) (GetElectionResultsResponse, error) {
+func NewGetElectionResultsHandler(repository electionrepository.Repository) *getElectionResultsHandler {
+	return &getElectionResultsHandler{
+		repository: repository,
+	}
+}
+
+func (h *getElectionResultsHandler) On(ctx context.Context, query GetElectionResults) (GetElectionResultsResponse, error) {
+	election, err := h.repository.GetElection(ctx, query.ElectionID)
+	if err != nil {
+		return GetElectionResultsResponse{}, err
+	}
+
 	return GetElectionResultsResponse{
-		ElectionID:        query.ElectionID,
-		WinningProposalID: "250a63e3-97f6-452f-8557-9f85c5dc054f",
-		SelectedAt:        int(time.Now().Unix()),
+		ElectionID:        election.ElectionID,
+		WinningProposalID: election.WinningProposalID,
+		SelectedAt:        election.SelectedAt,
 	}, nil
 }

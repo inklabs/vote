@@ -185,7 +185,7 @@ func (a *app) getQueryHandlers() []cqrs.QueryHandler {
 		election.NewListOpenElectionsHandler(),
 		election.NewListProposalsHandler(),
 		election.NewGetProposalDetailsHandler(),
-		election.NewGetElectionResultsHandler(),
+		election.NewGetElectionResultsHandler(a.electionRepository),
 	}
 }
 

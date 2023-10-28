@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/dgraph-io/badger/v4 v4.2.0
-	github.com/inklabs/cqrs v0.0.0-20231027195755-1c21edac3209
+	github.com/inklabs/cqrs v0.0.0-20231027213201-1b2ba847e8e0
 	github.com/spf13/cobra v1.0.0
 	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.28.1
@@ -56,4 +56,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-//replace github.com/inklabs/cqrs => ../cqrs
+// replace github.com/inklabs/cqrs => ../cqrs

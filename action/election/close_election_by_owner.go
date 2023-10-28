@@ -28,8 +28,6 @@ func NewCloseElectionByOwnerHandler(repository electionrepository.Repository, cl
 }
 
 func (h *closeElectionByOwnerHandler) On(ctx context.Context, cmd CloseElectionByOwner, eventRaiser cqrs.EventRaiser, logger cqrs.AsyncCommandLogger) error {
-	occurredAt := int(h.clock.Now().Unix())
-
 	election, err := h.repository.GetElection(ctx, cmd.ElectionID)
 	if err != nil {
 		logger.LogError("election not found: %s", cmd.ElectionID)
@@ -37,10 +35,12 @@ func (h *closeElectionByOwnerHandler) On(ctx context.Context, cmd CloseElectionB
 	}
 
 	// TODO: tabulate results, and persist to storage
+	selectedAt := int(h.clock.Now().Unix())
 	winningProposalID := "todo"
 
 	election.IsClosed = true
-	election.ClosedAt = occurredAt
+	election.ClosedAt = selectedAt
+	election.SelectedAt = selectedAt
 	election.WinningProposalID = winningProposalID
 
 	err = h.repository.SaveElection(ctx, election)
@@ -53,7 +53,7 @@ func (h *closeElectionByOwnerHandler) On(ctx context.Context, cmd CloseElectionB
 	eventRaiser.Raise(event.ElectionWinnerWasSelected{
 		ElectionID:        cmd.ElectionID,
 		WinningProposalID: winningProposalID,
-		OccurredAt:        occurredAt,
+		SelectedAt:        selectedAt,
 	})
 
 	return nil

@@ -10,10 +10,11 @@ type Election struct {
 	OrganizerUserID   string
 	Name              string
 	Description       string
-	OccurredAt        int
 	WinningProposalID string
 	IsClosed          bool
+	CommencedAt       int
 	ClosedAt          int
+	SelectedAt        int
 }
 
 type Repository interface {

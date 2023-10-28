@@ -29,7 +29,7 @@ func TestCloseElectionByOwner(t *testing.T) {
 			OrganizerUserID: "1b207fbf-9797-4bfa-91e3-6b5eef1b9fc0",
 			Name:            "Election Name",
 			Description:     "Election Description",
-			OccurredAt:      0,
+			CommencedAt:     0,
 		}
 		require.NoError(t, app.ElectionRepository.SaveElection(ctx, election1))
 
@@ -53,7 +53,7 @@ func TestCloseElectionByOwner(t *testing.T) {
 		assert.Equal(t, event.ElectionWinnerWasSelected{
 			ElectionID:        electionID,
 			WinningProposalID: winningProposalID,
-			OccurredAt:        2,
+			SelectedAt:        2,
 		}, app.EventDispatcher.GetEvent(0))
 
 		status, err := app.AsyncCommandStore.GetAsyncCommandStatus(ctx, commandID)
@@ -78,10 +78,11 @@ func TestCloseElectionByOwner(t *testing.T) {
 			OrganizerUserID:   election1.OrganizerUserID,
 			Name:              election1.Name,
 			Description:       election1.Description,
-			OccurredAt:        0,
 			WinningProposalID: winningProposalID,
 			IsClosed:          true,
+			CommencedAt:       0,
 			ClosedAt:          2,
+			SelectedAt:        2,
 		}, actualElection)
 	})
 
@@ -119,7 +120,7 @@ func TestCloseElectionByOwner(t *testing.T) {
 		assert.Equal(t, []cqrs.AsyncCommandLog{
 			{
 				Type:           cqrs.CommandLogError,
-				CreatedAtMicro: 3000000,
+				CreatedAtMicro: 2000000,
 				Message:        "election not found: " + electionID,
 			},
 		}, logs)

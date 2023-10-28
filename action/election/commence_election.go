@@ -37,7 +37,7 @@ func (h *commenceElectionHandler) On(ctx context.Context, cmd CommenceElection, 
 		OrganizerUserID: cmd.OrganizerUserID,
 		Name:            cmd.Name,
 		Description:     cmd.Description,
-		OccurredAt:      occurredAt,
+		CommencedAt:     occurredAt,
 	})
 	if err != nil {
 		return err

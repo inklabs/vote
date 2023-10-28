@@ -32,5 +32,5 @@ type ElectionWasClosedByOwner struct {
 type ElectionWinnerWasSelected struct {
 	ElectionID        string
 	WinningProposalID string
-	OccurredAt        int
+	SelectedAt        int
 }

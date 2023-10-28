@@ -51,7 +51,7 @@ func TestCommenceElection(t *testing.T) {
 			OrganizerUserID:   command.OrganizerUserID,
 			Name:              command.Name,
 			Description:       command.Description,
-			OccurredAt:        0,
+			CommencedAt:       0,
 			WinningProposalID: "",
 			IsClosed:          false,
 			ClosedAt:          0,
