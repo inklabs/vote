@@ -23,7 +23,7 @@ type Proposal struct {
 	OwnerUserID string
 	Name        string
 	Description string
-	OccurredAt  int
+	ProposedAt  int
 }
 
 type Vote struct {
@@ -36,9 +36,11 @@ type Repository interface {
 	SaveElection(ctx context.Context, election Election) error
 	GetElection(ctx context.Context, electionID string) (Election, error)
 	SaveProposal(ctx context.Context, proposal Proposal) error
+	GetProposal(ctx context.Context, proposalID string) (Proposal, error)
 	GetProposals(ctx context.Context, electionID string) ([]Proposal, error)
 	SaveVote(ctx context.Context, vote Vote) error
 	GetVotes(ctx context.Context, electionID string) ([]Vote, error)
 }
 
 var ErrElectionNotFound = fmt.Errorf("election not found")
+var ErrProposalNotFound = fmt.Errorf("proposal not found")

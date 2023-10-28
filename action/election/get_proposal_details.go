@@ -1,7 +1,9 @@
 package election
 
 import (
-	"time"
+	"context"
+
+	"github.com/inklabs/vote/internal/electionrepository"
 )
 
 type GetProposalDetails struct {
@@ -17,19 +19,28 @@ type GetProposalDetailsResponse struct {
 	ProposedAt  int
 }
 
-type getProposalDetailsHandler struct{}
-
-func NewGetProposalDetailsHandler() *getProposalDetailsHandler {
-	return &getProposalDetailsHandler{}
+type getProposalDetailsHandler struct {
+	repository electionrepository.Repository
 }
 
-func (h *getProposalDetailsHandler) On(query GetProposalDetails) (GetProposalDetailsResponse, error) {
+func NewGetProposalDetailsHandler(repository electionrepository.Repository) *getProposalDetailsHandler {
+	return &getProposalDetailsHandler{
+		repository: repository,
+	}
+}
+
+func (h *getProposalDetailsHandler) On(ctx context.Context, query GetProposalDetails) (GetProposalDetailsResponse, error) {
+	proposal, err := h.repository.GetProposal(ctx, query.ProposalID)
+	if err != nil {
+		return GetProposalDetailsResponse{}, err
+	}
+
 	return GetProposalDetailsResponse{
-		ElectionID:  "073b1fdb-7af4-4d4d-b2de-50d8d64f8a15",
-		ProposalID:  query.ProposalID,
-		OwnerUserID: "b8192901-6384-4474-ba8f-531941348033",
-		Name:        "Lorem Ipsum",
-		Description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod",
-		ProposedAt:  int(time.Now().Unix()),
+		ElectionID:  proposal.ElectionID,
+		ProposalID:  proposal.ProposalID,
+		OwnerUserID: proposal.OwnerUserID,
+		Name:        proposal.Name,
+		Description: proposal.Description,
+		ProposedAt:  proposal.ProposedAt,
 	}, nil
 }

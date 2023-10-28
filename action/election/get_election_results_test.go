@@ -50,4 +50,18 @@ func TestGetElectionResults(t *testing.T) {
 			SelectedAt:        1,
 		}, response)
 	})
+
+	t.Run("errors when election not found", func(t *testing.T) {
+		// Given
+		app := votetest.NewTestApp(t)
+		query := election.GetElectionResults{
+			ElectionID: "574af1df-542a-4644-8977-a5c6b1e0b26a",
+		}
+
+		// When
+		_, err := app.ExecuteQuery(query)
+
+		// Then
+		require.Equal(t, err, electionrepository.ErrElectionNotFound)
+	})
 }

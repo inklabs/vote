@@ -39,7 +39,7 @@ func TestCastVote(t *testing.T) {
 			OwnerUserID: ownerUserID,
 			Name:        "Proposal Name 1",
 			Description: "Proposal Description 1",
-			OccurredAt:  0,
+			ProposedAt:  0,
 		}
 		proposal2 := electionrepository.Proposal{
 			ElectionID:  electionID,
@@ -47,7 +47,7 @@ func TestCastVote(t *testing.T) {
 			OwnerUserID: ownerUserID,
 			Name:        "Proposal Name 2",
 			Description: "Proposal Description 2",
-			OccurredAt:  0,
+			ProposedAt:  0,
 		}
 		proposal3 := electionrepository.Proposal{
 			ElectionID:  electionID,
@@ -55,7 +55,7 @@ func TestCastVote(t *testing.T) {
 			OwnerUserID: ownerUserID,
 			Name:        "Proposal Name 3",
 			Description: "Proposal Description 3",
-			OccurredAt:  0,
+			ProposedAt:  0,
 		}
 		require.NoError(t, app.ElectionRepository.SaveElection(ctx, election1))
 		require.NoError(t, app.ElectionRepository.SaveProposal(ctx, proposal1))

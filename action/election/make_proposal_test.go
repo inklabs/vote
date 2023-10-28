@@ -67,7 +67,7 @@ func TestMakeProposal(t *testing.T) {
 				OwnerUserID: command.OwnerUserID,
 				Name:        command.Name,
 				Description: command.Description,
-				OccurredAt:  0,
+				ProposedAt:  0,
 			},
 		}, actualElection)
 	})
