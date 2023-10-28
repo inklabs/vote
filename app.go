@@ -170,7 +170,7 @@ func (a *app) getCommandHandlers() []cqrs.CommandHandler {
 	return []cqrs.CommandHandler{
 		election.NewCommenceElectionHandler(a.electionRepository, a.clock),
 		election.NewMakeProposalHandler(a.electionRepository, a.clock),
-		election.NewCastVoteHandler(),
+		election.NewCastVoteHandler(a.electionRepository, a.clock),
 	}
 }
 

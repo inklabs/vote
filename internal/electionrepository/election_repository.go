@@ -26,11 +26,19 @@ type Proposal struct {
 	OccurredAt  int
 }
 
+type Vote struct {
+	ElectionID        string
+	UserID            string
+	RankedProposalIDs []string
+}
+
 type Repository interface {
 	SaveElection(ctx context.Context, election Election) error
 	GetElection(ctx context.Context, electionID string) (Election, error)
 	SaveProposal(ctx context.Context, proposal Proposal) error
 	GetProposals(ctx context.Context, electionID string) ([]Proposal, error)
+	SaveVote(ctx context.Context, vote Vote) error
+	GetVotes(ctx context.Context, electionID string) ([]Vote, error)
 }
 
 var ErrElectionNotFound = fmt.Errorf("election not found")
