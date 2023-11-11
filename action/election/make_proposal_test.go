@@ -55,7 +55,7 @@ func TestMakeProposal(t *testing.T) {
 			OwnerUserID: command.OwnerUserID,
 			Name:        command.Name,
 			Description: command.Description,
-			OccurredAt:  0,
+			ProposedAt:  0,
 		}, app.EventDispatcher.GetEvent(0))
 
 		actualElection, err := app.ElectionRepository.GetProposals(ctx, electionID)

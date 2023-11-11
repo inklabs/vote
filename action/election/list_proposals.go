@@ -1,7 +1,17 @@
 package election
 
+import (
+	"context"
+
+	"github.com/inklabs/cqrs"
+
+	"github.com/inklabs/vote/internal/electionrepository"
+)
+
 type ListProposals struct {
-	ElectionID string
+	ElectionID   string
+	Page         *int
+	ItemsPerPage *int
 }
 
 type ListProposalsResponse struct {
@@ -14,31 +24,49 @@ type Proposal struct {
 	OwnerUserID string
 	Name        string
 	Description string
+	ProposedAt  int
 }
 
-type listProposalsHandler struct{}
-
-func NewListProposalsHandler() *listProposalsHandler {
-	return &listProposalsHandler{}
+type listProposalsHandler struct {
+	repository electionrepository.Repository
 }
 
-func (h *listProposalsHandler) On(query ListProposals) (ListProposalsResponse, error) {
+func NewListProposalsHandler(repository electionrepository.Repository) *listProposalsHandler {
+	return &listProposalsHandler{
+		repository: repository,
+	}
+}
+
+func (h *listProposalsHandler) On(ctx context.Context, query ListProposals) (ListProposalsResponse, error) {
+
+	page, itemsPerPage := cqrs.DefaultPagination(query.Page, query.ItemsPerPage, electionrepository.DefaultItemsPerPage)
+
+	repoProposals, err := h.repository.ListProposals(ctx,
+		query.ElectionID,
+		page,
+		itemsPerPage,
+	)
+	if err != nil {
+		return ListProposalsResponse{}, err
+	}
+
+	proposals := make([]Proposal, len(repoProposals))
+	for i := range repoProposals {
+		proposals[i] = ToProposal(repoProposals[i])
+	}
+
 	return ListProposalsResponse{
-		Proposals: []Proposal{
-			{
-				ElectionID:  "ec938e42-2009-403c-9ffb-71ae3c709f7d",
-				ProposalID:  "261ef094-5a3d-47fd-aa4b-ee3c335e9f84",
-				OwnerUserID: "8123e8ee-ab86-4743-92fe-15797ab873b4",
-				Name:        "Lorem Ipsum",
-				Description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod",
-			},
-			{
-				ElectionID:  "ec938e42-2009-403c-9ffb-71ae3c709f7d",
-				ProposalID:  "abd18e54-0f1e-4e71-a02b-15e2011c6169",
-				OwnerUserID: "8123e8ee-ab86-4743-92fe-15797ab873b4",
-				Name:        "Ut enim",
-				Description: "Ut enim ad minim veniam, quis nostrud exercitation ullamco",
-			},
-		},
+		Proposals: proposals,
 	}, nil
+}
+
+func ToProposal(proposal electionrepository.Proposal) Proposal {
+	return Proposal{
+		ElectionID:  proposal.ElectionID,
+		OwnerUserID: proposal.OwnerUserID,
+		ProposalID:  proposal.ProposalID,
+		Name:        proposal.Name,
+		Description: proposal.Description,
+		ProposedAt:  proposal.ProposedAt,
+	}
 }

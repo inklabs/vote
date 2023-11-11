@@ -184,7 +184,7 @@ func (a *app) getAsyncCommandHandlers() []cqrs.AsyncCommandHandler {
 func (a *app) getQueryHandlers() []cqrs.QueryHandler {
 	return []cqrs.QueryHandler{
 		election.NewListOpenElectionsHandler(a.electionRepository),
-		election.NewListProposalsHandler(),
+		election.NewListProposalsHandler(a.electionRepository),
 		election.NewGetProposalDetailsHandler(a.electionRepository),
 		election.NewGetElectionResultsHandler(a.electionRepository),
 	}

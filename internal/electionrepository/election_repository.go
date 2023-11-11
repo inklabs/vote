@@ -43,6 +43,7 @@ type Repository interface {
 	SaveVote(ctx context.Context, vote Vote) error
 	GetVotes(ctx context.Context, electionID string) ([]Vote, error)
 	ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) ([]Election, error)
+	ListProposals(ctx context.Context, electionID string, page, itemsPerPage int) ([]Proposal, error)
 }
 
 var ErrElectionNotFound = fmt.Errorf("election not found")

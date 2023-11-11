@@ -31,7 +31,7 @@ func NewMakeProposalHandler(repository electionrepository.Repository, clock cloc
 }
 
 func (h *makeProposalHandler) On(ctx context.Context, cmd MakeProposal, eventRaiser cqrs.EventRaiser) error {
-	occurredAt := int(h.clock.Now().Unix())
+	proposedAt := int(h.clock.Now().Unix())
 
 	err := h.repository.SaveProposal(ctx, electionrepository.Proposal{
 		ElectionID:  cmd.ElectionID,
@@ -39,6 +39,7 @@ func (h *makeProposalHandler) On(ctx context.Context, cmd MakeProposal, eventRai
 		OwnerUserID: cmd.OwnerUserID,
 		Name:        cmd.Name,
 		Description: cmd.Description,
+		ProposedAt:  proposedAt,
 	})
 	if err != nil {
 		return err
@@ -50,7 +51,7 @@ func (h *makeProposalHandler) On(ctx context.Context, cmd MakeProposal, eventRai
 		OwnerUserID: cmd.OwnerUserID,
 		Name:        cmd.Name,
 		Description: cmd.Description,
-		OccurredAt:  occurredAt,
+		ProposedAt:  proposedAt,
 	})
 
 	return nil

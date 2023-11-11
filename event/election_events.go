@@ -14,7 +14,7 @@ type ProposalWasMade struct {
 	OwnerUserID string
 	Name        string
 	Description string
-	OccurredAt  int
+	ProposedAt  int
 }
 
 type VoteWasCast struct {

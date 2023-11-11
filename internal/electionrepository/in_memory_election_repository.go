@@ -139,9 +139,30 @@ func (r *inMemoryElectionRepository) ListOpenElections(_ context.Context, page, 
 
 	sortElections(openElections, sortBy, sortDirection)
 
-	openElections = pageElections(openElections, page, itemsPerPage)
+	return pageEntity(openElections, page, itemsPerPage), nil
+}
 
-	return openElections, nil
+func (r *inMemoryElectionRepository) ListProposals(_ context.Context, electionID string, page, itemsPerPage int) ([]Proposal, error) {
+	r.mux.RLock()
+	defer r.mux.RUnlock()
+
+	if _, ok := r.elections[electionID]; !ok {
+		return nil, ErrElectionNotFound
+	}
+
+	var proposals []Proposal
+
+	for _, proposal := range r.proposals {
+		if proposal.ElectionID == electionID {
+			proposals = append(proposals, proposal)
+		}
+	}
+
+	sort.Slice(proposals, func(i, j int) bool {
+		return proposals[i].ProposedAt < proposals[j].ProposedAt
+	})
+
+	return pageEntity(proposals, page, itemsPerPage), nil
 }
 
 func sortElections(elections []Election, by, direction *string) {
@@ -175,17 +196,17 @@ func sortElections(elections []Election, by, direction *string) {
 	sort.Slice(elections, sortFunction)
 }
 
-func pageElections(elections []Election, page, itemsPerPage int) []Election {
+func pageEntity[T any](entities []T, page, itemsPerPage int) []T {
 	startIndex := (page - 1) * itemsPerPage
 	endIndex := startIndex + itemsPerPage
 
-	if startIndex >= len(elections) {
+	if startIndex >= len(entities) {
 		return nil
 	}
 
-	if endIndex > len(elections) {
-		endIndex = len(elections)
+	if endIndex > len(entities) {
+		endIndex = len(entities)
 	}
 
-	return elections[startIndex:endIndex]
+	return entities[startIndex:endIndex]
 }
