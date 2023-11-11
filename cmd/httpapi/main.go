@@ -14,5 +14,5 @@ func main() {
 	app := vote.NewProdApp()
 	httpActionDecoder := vote.NewHTTPActionDecoder()
 
-	httpserver.Start(app, httpActionDecoder, vote.DomainBytes)
+	httpserver.Start(app, httpActionDecoder, vote.ValidationRules, vote.DomainBytes)
 }

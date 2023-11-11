@@ -94,9 +94,10 @@ func NewProdApp() *app {
 
 func NewApp(opts ...Option) *app {
 	a := &app{
-		clock:             systemclock.New(),
-		authorization:     cqrstest.NewPassThruAuth(),
-		asyncCommandStore: asynccommandstore.NewInMemory(),
+		clock:              systemclock.New(),
+		authorization:      cqrstest.NewPassThruAuth(),
+		asyncCommandStore:  asynccommandstore.NewInMemory(),
+		electionRepository: electionrepository.NewInMemory(),
 	}
 
 	a.eventDispatcher = eventdispatcher.NewConcurrentLocal(
@@ -182,7 +183,7 @@ func (a *app) getAsyncCommandHandlers() []cqrs.AsyncCommandHandler {
 
 func (a *app) getQueryHandlers() []cqrs.QueryHandler {
 	return []cqrs.QueryHandler{
-		election.NewListOpenElectionsHandler(),
+		election.NewListOpenElectionsHandler(a.electionRepository),
 		election.NewListProposalsHandler(),
 		election.NewGetProposalDetailsHandler(a.electionRepository),
 		election.NewGetElectionResultsHandler(a.electionRepository),

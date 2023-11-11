@@ -11,18 +11,22 @@ GET http://localhost:8080/schema/election/CastVote
 Accept: application/json
 
 ###
+GET http://localhost:8080/schema/election/ListOpenElections
+Accept: application/json
+
+###
 POST http://localhost:8080/election/CommenceElection
 Content-Type: application/json
 
 {
   "ElectionID": "{{$random.uuid}}",
   "OrganizerUserID": "34fb3192-d5a0-4e68-83cd-b50a1c7946f4",
-  "Name": "Where to Eat",
+  "Name": "Where to Eat 3",
   "Description": "My gustatory elegance yearns for replenishment."
 }
 
 ###
-GET http://localhost:8080/election/ListOpenElections
+GET http://localhost:8080/election/ListOpenElections?SortBy=CommencedAt&SortDirection=descending&Page=1&ItemsPerPage=2
 Accept: application/json
 
 ###

@@ -1,10 +1,31 @@
 package election
 
 import (
-	"time"
+	"context"
+
+	"github.com/inklabs/cqrs"
+
+	"github.com/inklabs/vote/internal/electionrepository"
 )
 
-type ListOpenElections struct{}
+type ListOpenElections struct {
+	Page          *int
+	ItemsPerPage  *int
+	SortBy        *string
+	SortDirection *string
+}
+
+func (q ListOpenElections) ValidationRules() cqrs.ValidationRuleMap {
+	return cqrs.ValidationRuleMap{
+		"SortBy": cqrs.OptionalValidValues(
+			"Name",
+			"CommencedAt",
+		),
+		"SortDirection": cqrs.OptionalValidSortDirection(),
+		"Page":          cqrs.OptionalValidMinRange(1),
+		"ItemsPerPage":  cqrs.OptionalValidRange(1, 10),
+	}
+}
 
 type ListOpenElectionsResponse struct {
 	OpenElections []OpenElection
@@ -15,32 +36,49 @@ type OpenElection struct {
 	OrganizerUserID string
 	Name            string
 	Description     string
-	OpenedAt        int
+	CommencedAt     int
 }
 
-type listOpenElectionsHandler struct{}
-
-func NewListOpenElectionsHandler() *listOpenElectionsHandler {
-	return &listOpenElectionsHandler{}
+type listOpenElectionsHandler struct {
+	repository electionrepository.Repository
 }
 
-func (h *listOpenElectionsHandler) On(query ListOpenElections) (ListOpenElectionsResponse, error) {
+func NewListOpenElectionsHandler(repository electionrepository.Repository) *listOpenElectionsHandler {
+	return &listOpenElectionsHandler{
+		repository: repository,
+	}
+}
+
+func (h *listOpenElectionsHandler) On(ctx context.Context, query ListOpenElections) (ListOpenElectionsResponse, error) {
+
+	page, itemsPerPage := cqrs.DefaultPagination(query.Page, query.ItemsPerPage, electionrepository.DefaultItemsPerPage)
+
+	elections, err := h.repository.ListOpenElections(ctx,
+		page,
+		itemsPerPage,
+		query.SortBy,
+		query.SortDirection,
+	)
+	if err != nil {
+		return ListOpenElectionsResponse{}, err
+	}
+
+	openElections := make([]OpenElection, len(elections))
+	for i := range elections {
+		openElections[i] = ToOpenElection(elections[i])
+	}
+
 	return ListOpenElectionsResponse{
-		OpenElections: []OpenElection{
-			{
-				ElectionID:      "0aa295fb-151e-48d1-87a5-241b6403728f",
-				OrganizerUserID: "df53cef2-18d1-47a2-81ba-e852e97c662e",
-				Name:            "Lorem Ipsum",
-				Description:     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod",
-				OpenedAt:        int(time.Now().Unix()),
-			},
-			{
-				ElectionID:      "3d8bd133-f5fd-45ac-acb4-be9d56de3ba1",
-				OrganizerUserID: "e6c718dc-d307-4f13-8844-a4e8cde67713",
-				Name:            "Ut enim",
-				Description:     "Ut enim ad minim veniam, quis nostrud exercitation ullamco",
-				OpenedAt:        int(time.Now().Unix()),
-			},
-		},
+		OpenElections: openElections,
 	}, nil
+}
+
+func ToOpenElection(election electionrepository.Election) OpenElection {
+	return OpenElection{
+		ElectionID:      election.ElectionID,
+		OrganizerUserID: election.OrganizerUserID,
+		Name:            election.Name,
+		Description:     election.Description,
+		CommencedAt:     election.CommencedAt,
+	}
 }

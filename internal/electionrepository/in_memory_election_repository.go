@@ -2,7 +2,10 @@ package electionrepository
 
 import (
 	"context"
+	"sort"
 	"sync"
+
+	"github.com/inklabs/cqrs"
 )
 
 type inMemoryElectionRepository struct {
@@ -120,4 +123,69 @@ func (r *inMemoryElectionRepository) GetVotes(_ context.Context, electionID stri
 	}
 
 	return nil, ErrElectionNotFound
+}
+
+func (r *inMemoryElectionRepository) ListOpenElections(_ context.Context, page, itemsPerPage int, sortBy, sortDirection *string) ([]Election, error) {
+	r.mux.RLock()
+	defer r.mux.RUnlock()
+
+	var openElections []Election
+
+	for _, election := range r.elections {
+		if !election.IsClosed {
+			openElections = append(openElections, election)
+		}
+	}
+
+	sortElections(openElections, sortBy, sortDirection)
+
+	openElections = pageElections(openElections, page, itemsPerPage)
+
+	return openElections, nil
+}
+
+func sortElections(elections []Election, by, direction *string) {
+	sortBy, sortDirection := cqrs.DefaultSort(by, direction, "CommencedAt", "ascending")
+
+	var sortFunction func(i, j int) bool
+
+	switch sortBy {
+	case "Name":
+		if sortDirection == "ascending" {
+			sortFunction = func(i, j int) bool {
+				return elections[i].Name < elections[j].Name
+			}
+		} else {
+			sortFunction = func(i, j int) bool {
+				return elections[i].Name > elections[j].Name
+			}
+		}
+	case "CommencedAt":
+		if sortDirection == "ascending" {
+			sortFunction = func(i, j int) bool {
+				return elections[i].CommencedAt < elections[j].CommencedAt
+			}
+		} else {
+			sortFunction = func(i, j int) bool {
+				return elections[i].CommencedAt > elections[j].CommencedAt
+			}
+		}
+	}
+
+	sort.Slice(elections, sortFunction)
+}
+
+func pageElections(elections []Election, page, itemsPerPage int) []Election {
+	startIndex := (page - 1) * itemsPerPage
+	endIndex := startIndex + itemsPerPage
+
+	if startIndex >= len(elections) {
+		return nil
+	}
+
+	if endIndex > len(elections) {
+		endIndex = len(elections)
+	}
+
+	return elections[startIndex:endIndex]
 }

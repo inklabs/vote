@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+const DefaultItemsPerPage = 10
+
 type Election struct {
 	ElectionID        string
 	OrganizerUserID   string
@@ -40,6 +42,7 @@ type Repository interface {
 	GetProposals(ctx context.Context, electionID string) ([]Proposal, error)
 	SaveVote(ctx context.Context, vote Vote) error
 	GetVotes(ctx context.Context, electionID string) ([]Vote, error)
+	ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) ([]Election, error)
 }
 
 var ErrElectionNotFound = fmt.Errorf("election not found")
