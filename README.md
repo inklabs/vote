@@ -6,26 +6,23 @@ Ranked Choice Voting - https://fairvote.org/our-reforms/ranked-choice-voting/
 
 ## Design
 
-- Events
-    - ElectionHasCommenced: ElectionID, OrganizerUserID, Name, Description, ts
-    - ProposalWasMade: ElectionID, ProposalID, OwnerUserID, Name, Description, ts
-    - VoteWasCast: ElectionID, UserID, []RankedProposalIDs{1, 2}, ts
-    - ElectionWasClosedByOwner: ElectionID, OwnerUserID, ts
-    - ElectionWinnerWasSelected: ElectionID, WinningProposalID, ts
 - Commands
-    - CommenceElection -> ElectionHasCommenced
-    - MakeProposal -> ProposalWasMade
-    - CastVote -> VoteWasCast
+    - [CommenceElection](action/election/commence_election.go)
+    - [MakeProposal](action/election/make_proposal.go)
+    - [CastVote](action/election/cast_vote.go)
 - AsyncCommands
-    - CloseElectionByOwner -> ElectionWasClosedByOwner, tabulate results -> ElectionWinnerWasSelected
+    - [CloseElectionByOwner](action/election/close_election_by_owner.go)
 - Queries
-    - ListOpenElections:
-    - ListProposals: ElectionID
-    - GetProposalDetails: ProposalID
-    - GetElectionResults: ElectionID
+    - [ListOpenElections](action/election/list_open_elections.go)
+    - [ListProposals](action/election/list_proposals.go)
+    - [GetProposalDetails](action/election/get_proposal_details.go)
+    - [GetElectionResults](action/election/get_election_results.go)
+- [Events](event/election_events.go)
 - Listeners
-    - ElectionWinnerVoterNotification: ElectionWinnerWasSelected -> notify voters via SMS, Slack, or email
-    - ElectionWinnerMediaNotification: ElectionWinnerWasSelected -> send press release email
+    - [ElectionWinnerVoterNotification](listener/election_winner_voter_notification.go)
+      - TODO: notify voters via SMS, Slack, or email
+    - [ElectionWinnerMediaNotification](listener/election_winner_media_notification.go)
+      - TODO: send press release email
 
 ## Test
 
