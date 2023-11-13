@@ -9,7 +9,7 @@ import (
 
 	"github.com/inklabs/vote/event"
 	"github.com/inklabs/vote/internal/electionrepository"
-	"github.com/inklabs/vote/internal/tabulation"
+	"github.com/inklabs/vote/internal/rcv"
 )
 
 type CloseElectionByOwner struct {
@@ -73,10 +73,10 @@ func (h *closeElectionByOwnerHandler) getWinningProposalID(ctx context.Context, 
 		return "", err
 	}
 
-	tabulator := tabulation.NewRankedChoice(toRankedProposalVotes(votes))
+	tabulator := rcv.NewSingleWinner(toRankedProposalVotes(votes))
 	winningProposalID, err := tabulator.GetWinningProposal()
 	if err != nil {
-		if errors.Is(err, tabulation.ErrWinnerNotFound) {
+		if errors.Is(err, rcv.ErrWinnerNotFound) {
 			logger.LogError("winner not found")
 		}
 		return "", err
@@ -85,8 +85,8 @@ func (h *closeElectionByOwnerHandler) getWinningProposalID(ctx context.Context, 
 	return winningProposalID, nil
 }
 
-func toRankedProposalVotes(votes []electionrepository.Vote) tabulation.Ballots {
-	var rankedProposalVotes tabulation.Ballots
+func toRankedProposalVotes(votes []electionrepository.Vote) rcv.Ballots {
+	var rankedProposalVotes rcv.Ballots
 
 	for _, vote := range votes {
 		proposalIDs := append([]string{}, vote.RankedProposalIDs...)

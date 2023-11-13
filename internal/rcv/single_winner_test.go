@@ -1,4 +1,4 @@
-package tabulation_test
+package rcv_test
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/inklabs/vote/internal/tabulation"
+	"github.com/inklabs/vote/internal/rcv"
 )
 
 const (
@@ -16,29 +16,29 @@ const (
 	D = "D"
 )
 
-func TestRankedChoice_Winner(t *testing.T) {
+func TestSingleWinner(t *testing.T) {
 	tests := []struct {
 		name    string
-		ballots tabulation.Ballots
+		ballots rcv.Ballots
 		winner  string
 	}{
 		{
 			name: "round 1: 1 ballot, 1 proposal",
-			ballots: tabulation.Ballots{
+			ballots: rcv.Ballots{
 				{A},
 			},
 			winner: A,
 		},
 		{
 			name: "round 1: 1 ballot, 3 proposals",
-			ballots: tabulation.Ballots{
+			ballots: rcv.Ballots{
 				{A, B, C},
 			},
 			winner: A,
 		},
 		{
 			name: "round 1: 3 ballots",
-			ballots: tabulation.Ballots{
+			ballots: rcv.Ballots{
 				{A, B, C},
 				{A, B, C},
 				{A, B, C},
@@ -47,7 +47,7 @@ func TestRankedChoice_Winner(t *testing.T) {
 		},
 		{
 			name: "round 2: 5 ballots",
-			ballots: tabulation.Ballots{
+			ballots: rcv.Ballots{
 				{A, B, C},
 				{B, A, C},
 				{C, B, A},
@@ -59,7 +59,7 @@ func TestRankedChoice_Winner(t *testing.T) {
 		{
 			//https://github.com/BrightSpots/rcv/blob/develop/src/test/resources/network/brightspots/rcv/test_data/minimum_threshold_test/minimum_threshold_test_expected_summary.csv
 			name: "round 3: minimum threshold",
-			ballots: tabulation.Ballots{
+			ballots: rcv.Ballots{
 				{A, B, C},
 				{A, B, C},
 				{A, B, C},
@@ -75,7 +75,7 @@ func TestRankedChoice_Winner(t *testing.T) {
 		},
 		{
 			name: "3 rounds",
-			ballots: tabulation.Ballots{
+			ballots: rcv.Ballots{
 				{A},
 				{A},
 				{A},
@@ -94,7 +94,7 @@ func TestRankedChoice_Winner(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			// Given
-			tabulator := tabulation.NewRankedChoice(tc.ballots)
+			tabulator := rcv.NewSingleWinner(tc.ballots)
 
 			// When
 			winningProposalID, err := tabulator.GetWinningProposal()
@@ -106,14 +106,14 @@ func TestRankedChoice_Winner(t *testing.T) {
 	}
 }
 
-func TestRankedChoice_NoWinner(t *testing.T) {
+func TestSingleWinner_WinnerNotFound(t *testing.T) {
 	tests := []struct {
 		name    string
-		ballots tabulation.Ballots
+		ballots rcv.Ballots
 	}{
 		{
 			name: "equal votes for all proposals with no majority",
-			ballots: tabulation.Ballots{
+			ballots: rcv.Ballots{
 				{A},
 				{B},
 				{C},
@@ -121,7 +121,7 @@ func TestRankedChoice_NoWinner(t *testing.T) {
 		},
 		{
 			name: "2nd round tie",
-			ballots: tabulation.Ballots{
+			ballots: rcv.Ballots{
 				{A},
 				{A},
 				{A},
@@ -146,13 +146,13 @@ func TestRankedChoice_NoWinner(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			// Given
-			tabulator := tabulation.NewRankedChoice(tc.ballots)
+			tabulator := rcv.NewSingleWinner(tc.ballots)
 
 			// When
 			winningProposalID, err := tabulator.GetWinningProposal()
 
 			// Then
-			assert.Equal(t, tabulation.ErrWinnerNotFound, err)
+			assert.Equal(t, rcv.ErrWinnerNotFound, err)
 			assert.Equal(t, "", winningProposalID)
 		})
 	}
