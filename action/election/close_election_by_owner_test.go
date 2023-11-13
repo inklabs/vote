@@ -19,8 +19,7 @@ func TestCloseElectionByOwner(t *testing.T) {
 		// Given
 		app := votetest.NewTestApp(t)
 		const (
-			electionID        = "c14490e2-c27f-4dd3-89e9-d8a0f17341f1"
-			winningProposalID = "todo"
+			electionID = "c14490e2-c27f-4dd3-89e9-d8a0f17341f1"
 		)
 
 		ctx := cqrstest.TimeoutContext(t)
@@ -31,8 +30,24 @@ func TestCloseElectionByOwner(t *testing.T) {
 			Description:     "Election Description",
 			CommencedAt:     0,
 		}
+		proposal1 := electionrepository.Proposal{
+			ElectionID:  electionID,
+			ProposalID:  "e156a821-d2b2-404b-b8eb-53f052cbe30d",
+			OwnerUserID: "d0adb8db-b56e-4f53-8e4a-4e6cac0cb95b",
+			Name:        "Proposal Name",
+			Description: "Proposal Description",
+			ProposedAt:  0,
+		}
+		vote1 := electionrepository.Vote{
+			ElectionID:        electionID,
+			UserID:            "fa465d85-ad59-49ca-8ae4-9be7c88c6ef1",
+			RankedProposalIDs: []string{proposal1.ProposalID},
+		}
 		require.NoError(t, app.ElectionRepository.SaveElection(ctx, election1))
+		require.NoError(t, app.ElectionRepository.SaveProposal(ctx, proposal1))
+		require.NoError(t, app.ElectionRepository.SaveVote(ctx, vote1))
 
+		winningProposalID := proposal1.ProposalID
 		commandID := "4f4442af-a4b0-43d7-acc7-f83a6fd1220c"
 		command := election.CloseElectionByOwner{
 			ID:         commandID,

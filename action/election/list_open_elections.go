@@ -63,14 +63,17 @@ func (h *listOpenElectionsHandler) On(ctx context.Context, query ListOpenElectio
 		return ListOpenElectionsResponse{}, err
 	}
 
+	return ListOpenElectionsResponse{
+		OpenElections: ToOpenElections(elections),
+	}, nil
+}
+
+func ToOpenElections(elections []electionrepository.Election) []OpenElection {
 	openElections := make([]OpenElection, len(elections))
 	for i := range elections {
 		openElections[i] = ToOpenElection(elections[i])
 	}
-
-	return ListOpenElectionsResponse{
-		OpenElections: openElections,
-	}, nil
+	return openElections
 }
 
 func ToOpenElection(election electionrepository.Election) OpenElection {

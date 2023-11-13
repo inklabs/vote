@@ -41,7 +41,7 @@ func (h *listProposalsHandler) On(ctx context.Context, query ListProposals) (Lis
 
 	page, itemsPerPage := cqrs.DefaultPagination(query.Page, query.ItemsPerPage, electionrepository.DefaultItemsPerPage)
 
-	repoProposals, err := h.repository.ListProposals(ctx,
+	proposals, err := h.repository.ListProposals(ctx,
 		query.ElectionID,
 		page,
 		itemsPerPage,
@@ -50,14 +50,17 @@ func (h *listProposalsHandler) On(ctx context.Context, query ListProposals) (Lis
 		return ListProposalsResponse{}, err
 	}
 
+	return ListProposalsResponse{
+		Proposals: ToProposals(proposals),
+	}, nil
+}
+
+func ToProposals(repoProposals []electionrepository.Proposal) []Proposal {
 	proposals := make([]Proposal, len(repoProposals))
 	for i := range repoProposals {
 		proposals[i] = ToProposal(repoProposals[i])
 	}
-
-	return ListProposalsResponse{
-		Proposals: proposals,
-	}, nil
+	return proposals
 }
 
 func ToProposal(proposal electionrepository.Proposal) Proposal {

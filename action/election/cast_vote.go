@@ -34,7 +34,7 @@ func (h *castVoteHandler) On(ctx context.Context, cmd CastVote, eventRaiser cqrs
 	err := h.repository.SaveVote(ctx, electionrepository.Vote{
 		ElectionID:        cmd.ElectionID,
 		UserID:            cmd.UserID,
-		RankedProposalIDs: append([]string(nil), cmd.RankedProposalIDs...),
+		RankedProposalIDs: append([]string{}, cmd.RankedProposalIDs...),
 	})
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func (h *castVoteHandler) On(ctx context.Context, cmd CastVote, eventRaiser cqrs
 	eventRaiser.Raise(event.VoteWasCast{
 		ElectionID:        cmd.ElectionID,
 		UserID:            cmd.UserID,
-		RankedProposalIDs: append([]string(nil), cmd.RankedProposalIDs...),
+		RankedProposalIDs: append([]string{}, cmd.RankedProposalIDs...),
 		OccurredAt:        occurredAt,
 	})
 
