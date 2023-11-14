@@ -26,7 +26,9 @@ Ranked Choice Voting - https://fairvote.org/our-reforms/ranked-choice-voting/
 
 ## Examples:
 
-- CLI Examples can be found [here](cli_test.go)
+- [CLI Examples](cli_test.go)
+- [HTTP Schema Examples](http_schema_test.go)
+- [HTTP API Examples](http_test.go)
 
 ## Test
 
