@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/dgraph-io/badger/v4 v4.2.0
-	github.com/inklabs/cqrs v0.0.0-20231114065547-b1334532502d
+	github.com/inklabs/cqrs v0.0.0-20231114210627-1b4d833a4180
 	github.com/spf13/cobra v1.0.0
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/grpc v1.53.0

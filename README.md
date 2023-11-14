@@ -5,8 +5,8 @@ This is a demo application that implements
 also known as Instant Runoff Voting, where voters rank candidates in order of preference, and
 a single winner is selected.
 
-The sole purpose of this project is to demonstrate the capabilities of the
-[Go CQRS](https://github.com/inklabs/cqrs) application framework (currently private).
+The sole purpose of this project is to demonstrate the capabilities of the (currently private)
+[Go CQRS application framework](https://github.com/inklabs/cqrs).
 
 ## Design
 
@@ -33,8 +33,8 @@ be asynchronously processed, with the status and log messages available for late
 
 ### Events
 
-Events are used to remove temporal coupling between unrelated modules. Commands raise events,
-and Listeners subscribe to them.
+Events are used to remove temporal coupling between modules with separate responsibilities.
+Commands raise events and Listeners subscribe to them asynchronously.
 
 - [Events](event/election_events.go)
   - ElectionHasCommenced
@@ -52,6 +52,13 @@ Listeners subscribe to Events and execute code asynchronously.
   - [ElectionWinnerMediaNotification](listener/election_winner_media_notification.go)
     - TODO: send press release email
 
+## Code Generation
+
+The underlying Go CQRS application framework utilizes code generation to build
+the APIs and SDKs to execute this application. The [Vote App](app.go) uses
+`go:generate` directives to parse the domain and build various APIs.
+The generated output is **not yet** included in this project.
+
 ## APIs
 
 APIs are exposed through HTTP, gRPC, and CLI tooling.
@@ -59,15 +66,15 @@ APIs are exposed through HTTP, gRPC, and CLI tooling.
 ### Examples:
 
 - [CLI Examples](cli_test.go)
-- [HTTP Schema Examples](http_schema_test.go)
 - [HTTP API Examples](http_test.go)
+  - [HTTP Schema Examples](http_schema_test.go)
 
 ## SDK
 
-SDKs are auto-generated leveraging the gRPC API. Currently supported:
+SDKs are auto-generated leveraging the gRPC clients.
 
-- Go
-- Python
+- [Go](sdk_go_test.go)
+- [Python](python_test.py)
 
 ## Test
 
@@ -87,28 +94,6 @@ go run cmd/cli-local/main.go --help
 ## Test Python
 
 ```
-from __future__ import print_function
-from google.protobuf.json_format import MessageToJson
-from electionpb.election_pb2 import ListOpenElectionsRequest
-from electionpb import election_pb2_grpc
-
-import logging
-import grpc
-
-
-def run():
-    print("Will try to greet world ...")
-    with grpc.insecure_channel("localhost:8081") as channel:
-        stub = election_pb2_grpc.ElectionStub(channel)
-        response = stub.ListOpenElections(ListOpenElectionsRequest())
-    print("client received: " + MessageToJson(response))
-
-
-if __name__ == "__main__":
-    logging.basicConfig()
-    run()
+go run cmd/grpcapi/main.go
+python3 -m doctest python_test.py
 ```
-
-## Links
-
-- https://github.com/inklabs/cqrs

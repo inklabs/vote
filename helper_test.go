@@ -3,15 +3,21 @@ package vote_test
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
+	"net"
 	"strings"
 	"time"
 
 	"github.com/inklabs/cqrs"
 	"github.com/inklabs/cqrs/asynccommandstore"
 	"github.com/inklabs/cqrs/pkg/clock/provider/incrementingclock"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/test/bufconn"
 
 	"github.com/inklabs/vote"
 )
@@ -46,7 +52,7 @@ func (tw *TrimmingWriter) Write(p []byte) (n int, err error) {
 		if err != nil {
 			return n, err
 		}
-		n += len(trimmedLine) + 1 // Include the newline character
+		n += len(trimmedLine) + 1
 	}
 	return n, nil
 }
@@ -66,4 +72,28 @@ func newTestApp() cqrs.App {
 		vote.WithSyncLocalAsyncCommandBus(),
 		vote.WithClock(seededClock),
 	)
+}
+
+func startBufferedGRPCServer(grpcServer *grpc.Server) *grpc.ClientConn {
+	bufListener := bufconn.Listen(7)
+
+	go func() {
+		if err := grpcServer.Serve(bufListener); err != nil {
+			log.Fatalf("panic serving grpc: %v", err)
+		}
+	}()
+
+	dialer := grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
+		return bufListener.Dial()
+	})
+
+	conn, _ := grpc.DialContext(
+		context.Background(),
+		"bufnet",
+		dialer,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+	)
+
+	return conn
 }
