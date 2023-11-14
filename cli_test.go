@@ -2,11 +2,6 @@ package vote_test
 
 import (
 	"os"
-	"time"
-
-	"github.com/inklabs/cqrs"
-	"github.com/inklabs/cqrs/asynccommandstore"
-	"github.com/inklabs/cqrs/pkg/clock/provider/incrementingclock"
 
 	"github.com/inklabs/vote"
 )
@@ -179,15 +174,4 @@ func ExampleApp_cliElectionCloseElectionByOwner() {
 	//     "Message": "Closing election with winner: P1"
 	//   }
 	// ]
-}
-
-func newTestApp() cqrs.App {
-	startTime := time.Unix(1699900000, 0)
-	seededClock := incrementingclock.New(startTime)
-
-	return vote.NewApp(
-		vote.WithAsyncCommandStore(asynccommandstore.NewInMemory()),
-		vote.WithSyncLocalAsyncCommandBus(),
-		vote.WithClock(seededClock),
-	)
 }

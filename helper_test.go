@@ -7,6 +7,13 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
+
+	"github.com/inklabs/cqrs"
+	"github.com/inklabs/cqrs/asynccommandstore"
+	"github.com/inklabs/cqrs/pkg/clock/provider/incrementingclock"
+
+	"github.com/inklabs/vote"
 )
 
 // TrimmingWriter trims trailing whitespace for each line before writing to the underlying writer.
@@ -48,4 +55,15 @@ func PrettyPrint(buf *bytes.Buffer) {
 	var prettyJSON bytes.Buffer
 	_ = json.Indent(&prettyJSON, buf.Bytes(), "", "  ")
 	fmt.Print(prettyJSON.String())
+}
+
+func newTestApp() cqrs.App {
+	startTime := time.Unix(1699900000, 0)
+	seededClock := incrementingclock.New(startTime)
+
+	return vote.NewApp(
+		vote.WithAsyncCommandStore(asynccommandstore.NewInMemory()),
+		vote.WithSyncLocalAsyncCommandBus(),
+		vote.WithClock(seededClock),
+	)
 }
