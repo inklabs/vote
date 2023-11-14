@@ -1,9 +1,6 @@
 package vote_test
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 
@@ -270,10 +267,4 @@ func ExampleApp_httpSchemaElectionListOpenElections() {
 	//     "type": "ListOpenElectionsResponse"
 	//   }
 	// }
-}
-
-func PrettyPrint(buf *bytes.Buffer) {
-	var prettyJSON bytes.Buffer
-	_ = json.Indent(&prettyJSON, buf.Bytes(), "", "  ")
-	fmt.Print(prettyJSON.String())
 }

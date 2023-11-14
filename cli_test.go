@@ -119,7 +119,7 @@ func ExampleApp_cliElectionCloseElectionByOwner() {
 		"--ElectionID", "E1",
 		"--Name", "Election Name",
 		"--Description", "Election Description",
-		"--OrganizerUserID", "U2",
+		"--OrganizerUserID", "U1",
 	})
 	_ = cmd.Execute()
 	cmd.SetArgs([]string{"election", "MakeProposal",

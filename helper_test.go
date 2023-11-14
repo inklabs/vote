@@ -3,6 +3,8 @@ package vote_test
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"io"
 	"strings"
 )
@@ -40,4 +42,10 @@ func (tw *TrimmingWriter) Write(p []byte) (n int, err error) {
 		n += len(trimmedLine) + 1 // Include the newline character
 	}
 	return n, nil
+}
+
+func PrettyPrint(buf *bytes.Buffer) {
+	var prettyJSON bytes.Buffer
+	_ = json.Indent(&prettyJSON, buf.Bytes(), "", "  ")
+	fmt.Print(prettyJSON.String())
 }
