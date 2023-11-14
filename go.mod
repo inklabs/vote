@@ -4,8 +4,9 @@ go 1.21
 
 require (
 	github.com/dgraph-io/badger/v4 v4.2.0
-	github.com/inklabs/cqrs v0.0.0-20231111231429-ae0840a026de
+	github.com/inklabs/cqrs v0.0.0-20231114063431-1f6d76198dcc
 	github.com/spf13/cobra v1.0.0
+	github.com/stretchr/testify v1.8.4
 	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.28.1
 )
@@ -46,7 +47,6 @@ require (
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.8.4 // indirect
 	go.opencensus.io v0.22.5 // indirect
 	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df // indirect
 	golang.org/x/net v0.7.0 // indirect

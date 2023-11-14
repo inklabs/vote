@@ -1,0 +1,279 @@
+package vote_test
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+
+	"github.com/inklabs/cqrs/generator"
+	"github.com/inklabs/cqrs/jsonapi/schemaapi"
+
+	"github.com/inklabs/vote"
+)
+
+var domain, _ = generator.LoadDomainFromBytes(vote.DomainBytes)
+
+func ExampleApp_httpSchemaRoot() {
+	api, _ := schemaapi.New(domain, vote.ValidationRules, "http://example.com")
+
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
+	api.ServeHTTP(response, request)
+
+	PrettyPrint(response.Body)
+
+	// Output:
+	// {
+	//   "data": {
+	//     "relationships": {
+	//       "subdomain": {
+	//         "data": [
+	//           {
+	//             "attributes": {
+	//               "name": "election"
+	//             },
+	//             "links": "http://example.com/election",
+	//             "meta": {
+	//               "actions": [
+	//                 "CastVote",
+	//                 "CloseElectionByOwner",
+	//                 "CommenceElection",
+	//                 "GetElectionResults",
+	//                 "GetProposalDetails"
+	//               ],
+	//               "totalActions": 8
+	//             },
+	//             "type": "Subdomain"
+	//           }
+	//         ]
+	//       }
+	//     },
+	//     "type": "Domain"
+	//   },
+	//   "links": {
+	//     "self": "http://example.com"
+	//   },
+	//   "meta": {
+	//     "version": "v0.0.1-beta"
+	//   }
+	// }
+}
+
+func ExampleApp_httpSchemaElection() {
+	api, _ := schemaapi.New(domain, vote.ValidationRules, "http://example.com")
+
+	request := httptest.NewRequest(http.MethodGet, "/election", nil)
+	response := httptest.NewRecorder()
+	api.ServeHTTP(response, request)
+
+	PrettyPrint(response.Body)
+
+	// Output:
+	// {
+	//   "data": {
+	//     "attributes": {
+	//       "name": "election"
+	//     },
+	//     "type": "Subdomain"
+	//   },
+	//   "links": {
+	//     "parent": "http://example.com",
+	//     "self": "http://example.com/election"
+	//   },
+	//   "relationships": {
+	//     "command": {
+	//       "data": [
+	//         {
+	//           "attributes": {
+	//             "name": "CastVote"
+	//           },
+	//           "links": {
+	//             "self": "http://example.com/election/CastVote"
+	//           },
+	//           "type": "command"
+	//         },
+	//         {
+	//           "attributes": {
+	//             "name": "CloseElectionByOwner"
+	//           },
+	//           "isAsyncCommand": true,
+	//           "links": {
+	//             "self": "http://example.com/election/CloseElectionByOwner"
+	//           },
+	//           "type": "command"
+	//         },
+	//         {
+	//           "attributes": {
+	//             "name": "CommenceElection"
+	//           },
+	//           "links": {
+	//             "self": "http://example.com/election/CommenceElection"
+	//           },
+	//           "type": "command"
+	//         },
+	//         {
+	//           "attributes": {
+	//             "name": "MakeProposal"
+	//           },
+	//           "links": {
+	//             "self": "http://example.com/election/MakeProposal"
+	//           },
+	//           "type": "command"
+	//         }
+	//       ]
+	//     },
+	//     "query": {
+	//       "data": [
+	//         {
+	//           "attributes": {
+	//             "name": "GetElectionResults"
+	//           },
+	//           "links": {
+	//             "self": "http://example.com/election/GetElectionResults"
+	//           },
+	//           "type": "query"
+	//         },
+	//         {
+	//           "attributes": {
+	//             "name": "GetProposalDetails"
+	//           },
+	//           "links": {
+	//             "self": "http://example.com/election/GetProposalDetails"
+	//           },
+	//           "type": "query"
+	//         },
+	//         {
+	//           "attributes": {
+	//             "name": "ListOpenElections"
+	//           },
+	//           "links": {
+	//             "self": "http://example.com/election/ListOpenElections"
+	//           },
+	//           "type": "query"
+	//         },
+	//         {
+	//           "attributes": {
+	//             "name": "ListProposals"
+	//           },
+	//           "links": {
+	//             "self": "http://example.com/election/ListProposals"
+	//           },
+	//           "type": "query"
+	//         }
+	//       ]
+	//     }
+	//   }
+	// }
+}
+
+func ExampleApp_httpSchemaElectionCastVote() {
+	api, _ := schemaapi.New(domain, vote.ValidationRules, "http://example.com")
+
+	request := httptest.NewRequest(http.MethodGet, "/election/CastVote", nil)
+	response := httptest.NewRecorder()
+	api.ServeHTTP(response, request)
+
+	PrettyPrint(response.Body)
+
+	// Output:
+	// {
+	//   "data": {
+	//     "attributes": {
+	//       "documentation": "",
+	//       "fields": [
+	//         {
+	//           "isRequired": true,
+	//           "name": "ElectionID",
+	//           "type": "string"
+	//         },
+	//         {
+	//           "isRequired": true,
+	//           "name": "UserID",
+	//           "type": "string"
+	//         },
+	//         {
+	//           "isRequired": false,
+	//           "name": "RankedProposalIDs",
+	//           "type": "[]string"
+	//         }
+	//       ],
+	//       "name": "CastVote",
+	//       "subdomainName": "election"
+	//     },
+	//     "type": "command"
+	//   },
+	//   "links": {
+	//     "parent": "http://example.com/election",
+	//     "self": "http://example.com/election/CastVote"
+	//   }
+	// }
+}
+
+func ExampleApp_httpSchemaElectionListOpenElections() {
+	api, _ := schemaapi.New(domain, vote.ValidationRules, "http://example.com")
+
+	request := httptest.NewRequest(http.MethodGet, "/election/ListOpenElections", nil)
+	response := httptest.NewRecorder()
+	api.ServeHTTP(response, request)
+
+	PrettyPrint(response.Body)
+
+	// Output:
+	// {
+	//   "data": {
+	//     "attributes": {
+	//       "documentation": "",
+	//       "fields": [
+	//         {
+	//           "isRequired": false,
+	//           "name": "Page",
+	//           "type": "int",
+	//           "validationRule": "(optional) >= 1"
+	//         },
+	//         {
+	//           "isRequired": false,
+	//           "name": "ItemsPerPage",
+	//           "type": "int",
+	//           "validationRule": "(optional) 1 - 10"
+	//         },
+	//         {
+	//           "isRequired": false,
+	//           "name": "SortBy",
+	//           "type": "string",
+	//           "validationRule": "(optional) Name, CommencedAt"
+	//         },
+	//         {
+	//           "isRequired": false,
+	//           "name": "SortDirection",
+	//           "type": "string",
+	//           "validationRule": "(optional) ascending, descending"
+	//         }
+	//       ],
+	//       "name": "ListOpenElections",
+	//       "subdomainName": "election"
+	//     },
+	//     "type": "query"
+	//   },
+	//   "links": {
+	//     "parent": "http://example.com/election",
+	//     "self": "http://example.com/election/ListOpenElections"
+	//   },
+	//   "returnType": {
+	//     "fields": [
+	//       {
+	//         "name": "OpenElections",
+	//         "type": "[]OpenElection"
+	//       }
+	//     ],
+	//     "type": "ListOpenElectionsResponse"
+	//   }
+	// }
+}
+
+func PrettyPrint(buf *bytes.Buffer) {
+	var prettyJSON bytes.Buffer
+	_ = json.Indent(&prettyJSON, buf.Bytes(), "", "  ")
+	fmt.Print(prettyJSON.String())
+}
