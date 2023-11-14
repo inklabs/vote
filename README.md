@@ -6,7 +6,7 @@ also known as Instant Runoff Voting, where voters rank candidates in order of pr
 a single winner is selected.
 
 The sole purpose of this project is to demonstrate the capabilities of the
-[Go CQRS](https://github.com/inklabs/cqrs) application framework.
+[Go CQRS](https://github.com/inklabs/cqrs) application framework (currently private).
 
 ## Design
 
