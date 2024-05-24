@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/inklabs/cqrs"
-	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -16,6 +15,7 @@ import (
 func TestListOpenElections(t *testing.T) {
 	// Given
 	app := votetest.NewTestApp(t)
+	ctx := app.GetAuthenticatedUserContext()
 	election1 := electionrepository.Election{
 		ElectionID:      "00fa69d7-9e49-449e-9281-e5a6db476e33",
 		OrganizerUserID: "76574368-caa8-478b-9764-a7f1e0fa4662",
@@ -42,7 +42,6 @@ func TestListOpenElections(t *testing.T) {
 	openElection2 := election.ToOpenElection(election2)
 	openElection3 := election.ToOpenElection(election3)
 
-	ctx := cqrstest.TimeoutContext(t)
 	require.NoError(t, app.ElectionRepository.SaveElection(ctx, election1))
 	require.NoError(t, app.ElectionRepository.SaveElection(ctx, election2))
 	require.NoError(t, app.ElectionRepository.SaveElection(ctx, election3))
@@ -52,7 +51,7 @@ func TestListOpenElections(t *testing.T) {
 		query := election.ListOpenElections{}
 
 		// When
-		response, err := app.ExecuteQuery(query)
+		response, err := app.ExecuteQuery(ctx, query)
 
 		// Then
 		require.NoError(t, err)
@@ -73,7 +72,7 @@ func TestListOpenElections(t *testing.T) {
 		}
 
 		// When
-		response, err := app.ExecuteQuery(query)
+		response, err := app.ExecuteQuery(ctx, query)
 
 		// Then
 		require.NoError(t, err)
@@ -94,7 +93,7 @@ func TestListOpenElections(t *testing.T) {
 		}
 
 		// When
-		response, err := app.ExecuteQuery(query)
+		response, err := app.ExecuteQuery(ctx, query)
 
 		// Then
 		require.NoError(t, err)
@@ -115,7 +114,7 @@ func TestListOpenElections(t *testing.T) {
 		}
 
 		// When
-		response, err := app.ExecuteQuery(query)
+		response, err := app.ExecuteQuery(ctx, query)
 
 		// Then
 		require.NoError(t, err)
@@ -135,7 +134,7 @@ func TestListOpenElections(t *testing.T) {
 		}
 
 		// When
-		response, err := app.ExecuteQuery(query)
+		response, err := app.ExecuteQuery(ctx, query)
 
 		// Then
 		require.NoError(t, err)

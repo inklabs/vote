@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/inklabs/cqrs"
-	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -16,6 +15,7 @@ import (
 func TestListProposals(t *testing.T) {
 	// Given
 	app := votetest.NewTestApp(t)
+	ctx := app.GetAuthenticatedUserContext()
 	election1 := electionrepository.Election{
 		ElectionID:      "56320258-9b45-45c2-bb8b-4e5a204bbf23",
 		OrganizerUserID: "2aa3897d-fd75-4b05-831b-f250d72984ba",
@@ -52,7 +52,6 @@ func TestListProposals(t *testing.T) {
 	proposalDTO2 := election.ToProposal(proposal2)
 	proposalDTO3 := election.ToProposal(proposal3)
 
-	ctx := cqrstest.TimeoutContext(t)
 	require.NoError(t, app.ElectionRepository.SaveElection(ctx, election1))
 	require.NoError(t, app.ElectionRepository.SaveProposal(ctx, proposal1))
 	require.NoError(t, app.ElectionRepository.SaveProposal(ctx, proposal2))
@@ -65,7 +64,7 @@ func TestListProposals(t *testing.T) {
 		}
 
 		// When
-		response, err := app.ExecuteQuery(query)
+		response, err := app.ExecuteQuery(ctx, query)
 
 		// Then
 		require.NoError(t, err)
@@ -87,7 +86,7 @@ func TestListProposals(t *testing.T) {
 		}
 
 		// When
-		response, err := app.ExecuteQuery(query)
+		response, err := app.ExecuteQuery(ctx, query)
 
 		// Then
 		require.NoError(t, err)

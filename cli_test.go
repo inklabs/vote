@@ -22,6 +22,7 @@ func ExampleApp_cliRoot() {
 	//
 	// Available Commands:
 	//   async-command-status Async Command Status
+	//   completion           Generate the autocompletion script for the specified shell
 	//   election             8 actions: [CastVote, CloseElectionByOwner, CommenceElection, GetElectionResults, GetProposalDetails, ListOpenElections, ListProposals, MakeProposal]
 	//   help                 Help about any command
 	//

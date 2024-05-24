@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/inklabs/cqrs"
-	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -18,6 +17,7 @@ func TestCastVote(t *testing.T) {
 	t.Run("saves to repository and raises event", func(t *testing.T) {
 		// Given
 		app := votetest.NewTestApp(t)
+		ctx := app.GetAuthenticatedUserContext()
 		const (
 			electionID  = "eda792cc-9c16-4497-b21b-e64caa0e7629"
 			proposalID1 = "fe420ed3-d56e-419c-a242-522ba89f92a2"
@@ -25,7 +25,6 @@ func TestCastVote(t *testing.T) {
 			proposalID3 = "c7a3936f-c5d0-4f56-a85e-c1544934c00e"
 			ownerUserID = "a75f86b8-4454-4faa-af9e-19274264f621"
 		)
-		ctx := cqrstest.TimeoutContext(t)
 		election1 := electionrepository.Election{
 			ElectionID:      electionID,
 			OrganizerUserID: "09dce1e9-568a-4fb2-945d-0ee9b95f5b04",
@@ -70,7 +69,7 @@ func TestCastVote(t *testing.T) {
 		}
 
 		// When
-		response, err := app.ExecuteCommand(command)
+		response, err := app.ExecuteCommand(ctx, command)
 
 		// Then
 		require.NoError(t, err)
@@ -99,6 +98,7 @@ func TestCastVote(t *testing.T) {
 		t.Run("when election not found", func(t *testing.T) {
 			// Given
 			app := votetest.NewTestApp(t)
+			ctx := app.GetAuthenticatedUserContext()
 			command := election.CastVote{
 				ElectionID: "8493f7d9-1080-42a7-ae08-5d42d06941de",
 				UserID:     "19a0abe7-fdd7-49f8-a01f-4fc0e0f12480",
@@ -108,7 +108,7 @@ func TestCastVote(t *testing.T) {
 			}
 
 			// When
-			response, err := app.ExecuteCommand(command)
+			response, err := app.ExecuteCommand(ctx, command)
 
 			// Then
 			require.Equal(t, err, electionrepository.ErrElectionNotFound)
@@ -119,7 +119,7 @@ func TestCastVote(t *testing.T) {
 		t.Run("when proposal not found", func(t *testing.T) {
 			// Given
 			app := votetest.NewTestApp(t)
-			ctx := cqrstest.TimeoutContext(t)
+			ctx := app.GetAuthenticatedUserContext()
 			election1 := electionrepository.Election{
 				ElectionID:      "a771df96-3957-48d0-bcd3-63e3ab73ac75",
 				OrganizerUserID: "3c51a70e-14cc-4cbb-b2dc-f58317470729",
@@ -137,7 +137,7 @@ func TestCastVote(t *testing.T) {
 			}
 
 			// When
-			response, err := app.ExecuteCommand(command)
+			response, err := app.ExecuteCommand(ctx, command)
 
 			// Then
 			require.Equal(t, err, electionrepository.ErrProposalNotFound)
@@ -148,7 +148,7 @@ func TestCastVote(t *testing.T) {
 		t.Run("with proposal from another election", func(t *testing.T) {
 			// Given
 			app := votetest.NewTestApp(t)
-			ctx := cqrstest.TimeoutContext(t)
+			ctx := app.GetAuthenticatedUserContext()
 			election1 := electionrepository.Election{
 				ElectionID:      "dce69b68-aaa4-4602-88c6-0790c13c73b4",
 				OrganizerUserID: "0c57ef2b-f0e1-40ef-a95e-82df8da6ad4e",
@@ -181,7 +181,7 @@ func TestCastVote(t *testing.T) {
 			}
 
 			// When
-			response, err := app.ExecuteCommand(command)
+			response, err := app.ExecuteCommand(ctx, command)
 
 			// Then
 			require.Equal(t, err, electionrepository.ErrInvalidElectionProposal)

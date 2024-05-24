@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/inklabs/cqrs"
-	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -18,14 +17,12 @@ func TestCloseElectionByOwner(t *testing.T) {
 	t.Run("closes election and raises event", func(t *testing.T) {
 		// Given
 		app := votetest.NewTestApp(t)
-		const (
-			electionID = "c14490e2-c27f-4dd3-89e9-d8a0f17341f1"
-		)
+		ctx := app.GetAuthenticatedUserContext()
+		const electionID = "c14490e2-c27f-4dd3-89e9-d8a0f17341f1"
 
-		ctx := cqrstest.TimeoutContext(t)
 		election1 := electionrepository.Election{
 			ElectionID:      electionID,
-			OrganizerUserID: "1b207fbf-9797-4bfa-91e3-6b5eef1b9fc0",
+			OrganizerUserID: app.RegularUserID,
 			Name:            "Election Name",
 			Description:     "Election Description",
 			CommencedAt:     0,
@@ -55,7 +52,7 @@ func TestCloseElectionByOwner(t *testing.T) {
 		}
 
 		// When
-		response, err := app.EnqueueCommand(command)
+		response, err := app.EnqueueCommand(ctx, command)
 
 		// Then
 		require.NoError(t, err)
@@ -102,12 +99,12 @@ func TestCloseElectionByOwner(t *testing.T) {
 	})
 
 	t.Run("errors", func(t *testing.T) {
-		t.Run("when election not found", func(t *testing.T) {
+		t.Run("when election not found during authorization", func(t *testing.T) {
 			// Given
 			app := votetest.NewTestApp(t)
+			ctx := app.GetAuthenticatedUserContext()
 			const electionID = "a1255efd-3917-458e-83d3-24a7cc7e0b40"
 
-			ctx := cqrstest.TimeoutContext(t)
 			commandID := "4a9bc117-8ac9-4ad4-bee1-17ac1f044bf4"
 			command := election.CloseElectionByOwner{
 				ID:         commandID,
@@ -115,31 +112,38 @@ func TestCloseElectionByOwner(t *testing.T) {
 			}
 
 			// When
-			response, err := app.EnqueueCommand(command)
+			_, err := app.EnqueueCommand(ctx, command)
 
 			// Then
-			require.NoError(t, err)
-			assert.Equal(t, &cqrs.AsyncCommandResponse{
-				ID:            commandID,
-				Status:        "QUEUED",
-				HasBeenQueued: true,
-			}, response)
-			assert.Empty(t, app.EventDispatcher.GetEvents())
+			require.Equal(t, electionrepository.ErrElectionNotFound, err)
+		})
 
-			status, err := app.AsyncCommandStore.GetAsyncCommandStatus(ctx, commandID)
-			require.NoError(t, err)
-			assert.True(t, status.IsFinished)
-			assert.False(t, status.IsSuccess)
+		t.Run("when not authorized", func(t *testing.T) {
+			// Given
+			app := votetest.NewTestApp(t)
+			ctx := app.GetAuthenticatedUserContext()
+			const electionID = "c225599f-4c1e-4bce-91e8-84f09bfb663e"
 
-			logs, err := app.AsyncCommandStore.GetAsyncCommandLogs(ctx, commandID)
-			require.NoError(t, err)
-			assert.Equal(t, []cqrs.AsyncCommandLog{
-				{
-					Type:           cqrs.CommandLogError,
-					CreatedAtMicro: 2000000,
-					Message:        "election not found: " + electionID,
-				},
-			}, logs)
+			election1 := electionrepository.Election{
+				ElectionID:      electionID,
+				OrganizerUserID: "53293c94-dc72-4beb-8a1f-de9ad5f67329",
+				Name:            "Election Name",
+				Description:     "Election Description",
+				CommencedAt:     0,
+			}
+			require.NoError(t, app.ElectionRepository.SaveElection(ctx, election1))
+
+			commandID := "2d191963-1e65-49f8-9eef-db0571c48daf"
+			command := election.CloseElectionByOwner{
+				ID:         commandID,
+				ElectionID: electionID,
+			}
+
+			// When
+			_, err := app.EnqueueCommand(ctx, command)
+
+			// Then
+			require.Equal(t, cqrs.ErrAccessDenied, err)
 		})
 	})
 }

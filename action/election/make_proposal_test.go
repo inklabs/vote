@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/inklabs/cqrs"
-	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -18,12 +17,12 @@ func TestMakeProposal(t *testing.T) {
 	t.Run("saves proposal", func(t *testing.T) {
 		// Given
 		app := votetest.NewTestApp(t)
+		ctx := app.GetAuthenticatedUserContext()
 		const (
 			electionID = "130fd0f1-5872-447b-8938-ed97d8df082c"
 			proposalID = "324031bd-6071-45de-bce9-b69ea902d4c2"
 		)
 
-		ctx := cqrstest.TimeoutContext(t)
 		election1 := electionrepository.Election{
 			ElectionID:      electionID,
 			OrganizerUserID: "b916d870-ea41-4ca0-a6dd-e1b06ba33105",
@@ -42,7 +41,7 @@ func TestMakeProposal(t *testing.T) {
 		}
 
 		// When
-		response, err := app.ExecuteCommand(command)
+		response, err := app.ExecuteCommand(ctx, command)
 
 		// Then
 		require.NoError(t, err)

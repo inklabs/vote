@@ -3,7 +3,6 @@ package election_test
 import (
 	"testing"
 
-	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -16,6 +15,7 @@ func TestGetProposalDetails(t *testing.T) {
 	t.Run("returns proposal details", func(t *testing.T) {
 		// Given
 		app := votetest.NewTestApp(t)
+		ctx := app.GetAuthenticatedUserContext()
 		const (
 			electionID = "246f38ca-382c-4b8e-85a6-2c05d25093a2"
 			proposalID = "e0476e03-6c6e-4ab9-9c3b-c20970664b63"
@@ -35,7 +35,6 @@ func TestGetProposalDetails(t *testing.T) {
 			ProposedAt:  1,
 		}
 
-		ctx := cqrstest.TimeoutContext(t)
 		require.NoError(t, app.ElectionRepository.SaveElection(ctx, election1))
 		require.NoError(t, app.ElectionRepository.SaveProposal(ctx, proposal1))
 
@@ -44,7 +43,7 @@ func TestGetProposalDetails(t *testing.T) {
 		}
 
 		// When
-		response, err := app.ExecuteQuery(query)
+		response, err := app.ExecuteQuery(ctx, query)
 
 		// Then
 		require.NoError(t, err)
@@ -62,12 +61,13 @@ func TestGetProposalDetails(t *testing.T) {
 		t.Run("when proposal not found", func(t *testing.T) {
 			// Given
 			app := votetest.NewTestApp(t)
+			ctx := app.GetAuthenticatedUserContext()
 			query := election.GetProposalDetails{
 				ProposalID: "e0476e03-6c6e-4ab9-9c3b-c20970664b63",
 			}
 
 			// When
-			_, err := app.ExecuteQuery(query)
+			_, err := app.ExecuteQuery(ctx, query)
 
 			// Then
 			require.Equal(t, err, electionrepository.ErrProposalNotFound)

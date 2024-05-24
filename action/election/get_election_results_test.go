@@ -3,7 +3,6 @@ package election_test
 import (
 	"testing"
 
-	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -16,12 +15,12 @@ func TestGetElectionResults(t *testing.T) {
 	t.Run("returns election results", func(t *testing.T) {
 		// Given
 		app := votetest.NewTestApp(t)
+		ctx := app.GetAuthenticatedUserContext()
 		const (
 			electionID        = "ef18565e-eba3-43ed-964e-40d872568f0a"
 			winningProposalID = "35d414ea-4b5f-430a-9f57-ef48bce34ef2"
 		)
 
-		ctx := cqrstest.TimeoutContext(t)
 		election1 := electionrepository.Election{
 			ElectionID:        electionID,
 			OrganizerUserID:   "1b207fbf-9797-4bfa-91e3-6b5eef1b9fc0",
@@ -40,7 +39,7 @@ func TestGetElectionResults(t *testing.T) {
 		}
 
 		// When
-		response, err := app.ExecuteQuery(query)
+		response, err := app.ExecuteQuery(ctx, query)
 
 		// Then
 		require.NoError(t, err)
@@ -54,12 +53,13 @@ func TestGetElectionResults(t *testing.T) {
 	t.Run("errors when election not found", func(t *testing.T) {
 		// Given
 		app := votetest.NewTestApp(t)
+		ctx := app.GetAuthenticatedUserContext()
 		query := election.GetElectionResults{
 			ElectionID: "574af1df-542a-4644-8977-a5c6b1e0b26a",
 		}
 
 		// When
-		_, err := app.ExecuteQuery(query)
+		_, err := app.ExecuteQuery(ctx, query)
 
 		// Then
 		require.Equal(t, err, electionrepository.ErrElectionNotFound)

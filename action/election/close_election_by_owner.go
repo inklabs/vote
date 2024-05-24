@@ -3,11 +3,13 @@ package election
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/inklabs/cqrs"
 	"github.com/inklabs/cqrs/pkg/clock"
 
 	"github.com/inklabs/vote/event"
+	"github.com/inklabs/vote/internal/authorization"
 	"github.com/inklabs/vote/internal/electionrepository"
 	"github.com/inklabs/vote/internal/rcv"
 )
@@ -30,6 +32,27 @@ func NewCloseElectionByOwnerHandler(
 		repository: repository,
 		clock:      clock,
 	}
+}
+
+// VerifyAuthorization
+// TODO: Generate this method
+func (h *closeElectionByOwnerHandler) VerifyAuthorization(ctx authorization.Context, command cqrs.AsyncCommand) error {
+	cmd := command.(CloseElectionByOwner)
+	return h.Verify(ctx, cmd)
+}
+
+func (h *closeElectionByOwnerHandler) Verify(ctx authorization.Context, cmd CloseElectionByOwner) error {
+	election, err := h.repository.GetElection(ctx.Context(), cmd.ElectionID)
+	if err != nil {
+		return err
+	}
+
+	if ctx.UserID() != election.OrganizerUserID {
+		log.Printf("user %s does not match election organizer user %s", ctx.UserID(), election.OrganizerUserID)
+		return cqrs.ErrAccessDenied
+	}
+
+	return nil
 }
 
 func (h *closeElectionByOwnerHandler) On(ctx context.Context, cmd CloseElectionByOwner, eventRaiser cqrs.EventRaiser, logger cqrs.AsyncCommandLogger) error {
