@@ -91,6 +91,10 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/inklabs/cqrs v0.0.0-20240524005327-b3c125247867 h1:g0Cqs+3iceRCurlpDDQ2LhKvJgkY+FfNghGLAdujnhM=
 github.com/inklabs/cqrs v0.0.0-20240524005327-b3c125247867/go.mod h1:RkTf7oDvssi9+ioZEa0RpdaU8bREmmbWtxwsw7hEBsM=
+github.com/inklabs/cqrs v0.0.0-20240621170553-eff778d54d27 h1:NTwqzteT1qqLgG4cXV9Q90bJyoksOe6iEGVhnyUFBl4=
+github.com/inklabs/cqrs v0.0.0-20240621170553-eff778d54d27/go.mod h1:RkTf7oDvssi9+ioZEa0RpdaU8bREmmbWtxwsw7hEBsM=
+github.com/inklabs/cqrs v0.0.0-20240621172621-d161e264c595 h1:qmjSl3ZC1h3yAQP4OjpwTlbcn99d88YsS36kDjYzfNk=
+github.com/inklabs/cqrs v0.0.0-20240621172621-d161e264c595/go.mod h1:RkTf7oDvssi9+ioZEa0RpdaU8bREmmbWtxwsw7hEBsM=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/klauspost/compress v1.17.8 h1:YcnTYrq7MikUT7k0Yb5eceMmALQPYBW/Xltxn0NAMnU=

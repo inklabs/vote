@@ -34,13 +34,6 @@ func NewCloseElectionByOwnerHandler(
 	}
 }
 
-// VerifyAuthorization
-// TODO: Generate this method
-func (h *closeElectionByOwnerHandler) VerifyAuthorization(ctx authorization.Context, command cqrs.AsyncCommand) error {
-	cmd := command.(CloseElectionByOwner)
-	return h.Verify(ctx, cmd)
-}
-
 func (h *closeElectionByOwnerHandler) Verify(ctx authorization.Context, cmd CloseElectionByOwner) error {
 	election, err := h.repository.GetElection(ctx.Context(), cmd.ElectionID)
 	if err != nil {

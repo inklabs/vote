@@ -6,7 +6,7 @@ require (
 	github.com/dgraph-io/badger/v4 v4.2.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang/protobuf v1.5.4
-	github.com/inklabs/cqrs v0.0.0-20240524005327-b3c125247867
+	github.com/inklabs/cqrs v0.0.0-20240621172621-d161e264c595
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/grpc v1.53.0
