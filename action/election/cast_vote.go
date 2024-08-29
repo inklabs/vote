@@ -2,6 +2,7 @@ package election
 
 import (
 	"context"
+	"time"
 
 	"github.com/inklabs/cqrs"
 	"github.com/inklabs/cqrs/pkg/clock"
@@ -14,6 +15,17 @@ type CastVote struct {
 	ElectionID        string
 	UserID            string
 	RankedProposalIDs []string
+}
+
+// ValidationRules
+// TODO: Generate this when not present, not just look for Validate method
+func (c CastVote) ValidationRules() cqrs.ValidationRuleMap {
+	return cqrs.ValidationRuleMap{}
+}
+
+func (c CastVote) Validate() error {
+	time.Sleep(2 * time.Millisecond)
+	return nil
 }
 
 type castVoteHandler struct {
@@ -39,6 +51,8 @@ func (h *castVoteHandler) On(ctx context.Context, cmd CastVote, eventRaiser cqrs
 	if err != nil {
 		return err
 	}
+
+	time.Sleep(2 * time.Millisecond)
 
 	eventRaiser.Raise(event.VoteWasCast{
 		ElectionID:        cmd.ElectionID,

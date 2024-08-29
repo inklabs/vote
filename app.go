@@ -1,7 +1,9 @@
 package vote
 
 import (
+	"context"
 	_ "embed"
+	"fmt"
 	"log"
 
 	"github.com/dgraph-io/badger/v4"
@@ -11,11 +13,18 @@ import (
 	"github.com/inklabs/cqrs/commandbus"
 	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/inklabs/cqrs/eventdispatcher"
+	"github.com/inklabs/cqrs/eventdispatcher/provider/rabbitmqeventdispatcher"
 	"github.com/inklabs/cqrs/pkg/clock"
 	"github.com/inklabs/cqrs/pkg/clock/provider/systemclock"
 	"github.com/inklabs/cqrs/querybus"
+	"go.opentelemetry.io/otel/metric"
+	metricNoop "go.opentelemetry.io/otel/metric/noop"
+	"go.opentelemetry.io/otel/trace"
+	traceNoop "go.opentelemetry.io/otel/trace/noop"
 
 	"github.com/inklabs/vote/action/election"
+	"github.com/inklabs/vote/event"
+	"github.com/inklabs/vote/internal/authorization"
 	"github.com/inklabs/vote/internal/electionrepository"
 	"github.com/inklabs/vote/listener"
 )
@@ -38,8 +47,11 @@ type app struct {
 	authorization          cqrs.Authorization
 	clock                  clock.Clock
 	useSyncLocalCommandBus bool
+	ctxShutdowns           []func(ctx context.Context) error
 
 	electionRepository electionrepository.Repository
+	meterProvider      metric.MeterProvider
+	tracerProvider     trace.TracerProvider
 }
 
 type Option func(a *app)
@@ -80,14 +92,41 @@ func WithSyncLocalAsyncCommandBus() Option {
 	}
 }
 
+func WithTelemetry(meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) Option {
+	return func(a *app) {
+		a.meterProvider = meterProvider
+		a.tracerProvider = tracerProvider
+	}
+}
+
+func WithCtxShutdown(shutdowns ...func(ctx context.Context) error) Option {
+	return func(a *app) {
+		a.ctxShutdowns = append(a.ctxShutdowns, shutdowns...)
+	}
+}
+
 func NewProdApp() *app {
+	resource := NewResource()
+
+	tracerProvider := GetTracerProvider(resource)
+	meterProvider := GetMeterProvider(resource)
+
+	asyncCommandStore := asynccommandstore.NewBadgerAsyncCommandStore(
+		badger.DefaultOptions("./.badger.db").
+			WithLogger(nil),
+		GetAsyncCommands(),
+	)
+
+	eventDispatcher := newRabbitMQEventDispatcher(tracerProvider)
+
 	return NewApp(
-		WithAsyncCommandStore(
-			asynccommandstore.NewBadgerAsyncCommandStore(
-				badger.DefaultOptions("./.badger.db").
-					WithLogger(nil),
-				GetAsyncCommands(),
-			),
+		WithAuthorization(authorization.NewDelayAuth()),
+		WithAsyncCommandStore(asyncCommandStore),
+		WithTelemetry(meterProvider, tracerProvider),
+		WithEventDispatcher(eventDispatcher),
+		WithCtxShutdown(
+			tracerProvider.Shutdown,
+			meterProvider.Shutdown,
 		),
 	)
 }
@@ -98,11 +137,14 @@ func NewApp(opts ...Option) *app {
 		authorization:      cqrstest.NewPassThruAuth(),
 		asyncCommandStore:  asynccommandstore.NewInMemory(),
 		electionRepository: electionrepository.NewInMemory(),
+		meterProvider:      metricNoop.NewMeterProvider(),
+		tracerProvider:     traceNoop.NewTracerProvider(),
 	}
 
 	a.eventDispatcher = eventdispatcher.NewConcurrentLocal(
 		log.Default(),
-		a.getDomainEventListeners(),
+		a.GetEventListeners(),
+		a.tracerProvider,
 	)
 
 	for _, opt := range opts {
@@ -121,6 +163,8 @@ func NewApp(opts ...Option) *app {
 		commandHandlerRegistry,
 		a.eventDispatcher,
 		a.authorization,
+		a.meterProvider,
+		a.tracerProvider,
 	)
 
 	if a.useSyncLocalCommandBus {
@@ -130,6 +174,8 @@ func NewApp(opts ...Option) *app {
 			a.asyncCommandStore,
 			a.clock,
 			a.authorization,
+			a.meterProvider,
+			a.tracerProvider,
 		)
 	} else {
 		a.asyncCommandBus = asynccommandbus.NewConcurrentLocal(
@@ -138,6 +184,8 @@ func NewApp(opts ...Option) *app {
 			a.asyncCommandStore,
 			a.clock,
 			a.authorization,
+			a.meterProvider,
+			a.tracerProvider,
 		)
 	}
 
@@ -165,6 +213,10 @@ func (a *app) Stop() {
 	a.asyncCommandBus.Stop()
 	a.eventDispatcher.Stop()
 	_ = a.asyncCommandStore.Close()
+	ctx := context.Background()
+	for _, shutdown := range a.ctxShutdowns {
+		_ = shutdown(ctx)
+	}
 }
 
 func (a *app) getCommandHandlers() []cqrs.CommandHandler {
@@ -190,9 +242,36 @@ func (a *app) getQueryHandlers() []cqrs.QueryHandler {
 	}
 }
 
-func (a *app) getDomainEventListeners() []cqrs.EventListener {
+func (a *app) GetEventListeners() []cqrs.EventListener {
 	return []cqrs.EventListener{
 		listener.NewElectionWinnerVoterNotification(),
 		listener.NewElectionWinnerMediaNotification(),
 	}
+}
+
+func (a *app) GetTracerProvider() trace.TracerProvider {
+	return a.tracerProvider
+}
+
+func newRabbitMQEventDispatcher(tracerProvider trace.TracerProvider) cqrs.EventDispatcher {
+	eventRegistry := cqrs.NewEventRegistry()
+	event.BindEvents(eventRegistry)
+
+	eventSerializer := cqrs.NewEventPayloadSerializer(eventRegistry)
+
+	rabbitMQConfig := rabbitmqeventdispatcher.RabbitMQConfig{
+		URL:   "amqp://guest:guest@localhost:5672/",
+		Queue: "vote.events",
+	}
+	eventDispatcher, err := rabbitmqeventdispatcher.NewRabbitMQ(
+		rabbitMQConfig,
+		eventSerializer,
+		log.Default(),
+		tracerProvider,
+	)
+	if err != nil {
+		panic(fmt.Errorf("failed to create rabbitmq dispatcher: %w", err))
+	}
+
+	return eventDispatcher
 }

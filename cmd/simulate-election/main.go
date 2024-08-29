@@ -26,7 +26,7 @@ func main() {
 
 	totalElections := flag.Int("totalElections", 10, "Total # of elections to simulate")
 	maxProposals := flag.Int("maxProposals", 7, "Max # of proposals per election")
-	totalVoters := flag.Int("totalVoters", 10000, "Total # of voters")
+	totalVoters := flag.Int("totalVoters", 100, "Total # of voters")
 	host := flag.String("host", "127.0.0.1:8081", "Vote gRPC host address")
 	flag.Parse()
 
@@ -92,6 +92,11 @@ func (s *simulator) Start(ctx context.Context) {
 	if err != nil {
 		return
 	}
+
+	err = s.closeElections(ctx)
+	if err != nil {
+		return
+	}
 }
 
 func (s *simulator) setupElections(ctx context.Context) error {
@@ -149,6 +154,24 @@ func (s *simulator) castVotes(ctx context.Context) error {
 			}
 
 			electionsToVoteIn--
+		}
+	}
+
+	return nil
+}
+
+func (s *simulator) closeElections(ctx context.Context) error {
+	for electionID := range s.elections {
+		response, err := s.client.Election.CloseElectionByOwner(ctx, &electionpb.CloseElectionByOwnerRequest{
+			Id:         uuid.NewString(),
+			ElectionId: electionID,
+		})
+		if err != nil {
+			return fmt.Errorf("unable to close election: %w", err)
+		}
+
+		if !response.HasBeenQueued {
+			return fmt.Errorf("election %v has not been_queued", electionID)
 		}
 	}
 
