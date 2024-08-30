@@ -97,3 +97,11 @@ go run cmd/cli-local/main.go --help
 go run cmd/grpcapi/main.go
 python3 -m doctest python_test.py
 ```
+
+## Docker
+
+Create a Docker network so that the containers can talk to each other. 
+
+```
+docker network create otel
+```

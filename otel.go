@@ -1,13 +1,17 @@
 package vote
 
 import (
+	"context"
 	"log"
 	"time"
 
 	"go.opentelemetry.io/otel/exporters/jaeger"
-	"go.opentelemetry.io/otel/exporters/prometheus"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
 	sdkMetric "go.opentelemetry.io/otel/sdk/metric"
 	sdkResource "go.opentelemetry.io/otel/sdk/resource"
 	sdkTrace "go.opentelemetry.io/otel/sdk/trace"
@@ -39,14 +43,22 @@ func GetTracerProvider(resource *sdkResource.Resource) *sdkTrace.TracerProvider 
 }
 
 func GetMeterProvider(resource *sdkResource.Resource) *sdkMetric.MeterProvider {
-	exporter, err := prometheus.New()
+	conn, err := grpc.NewClient("localhost:4317",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
-		log.Fatalf("Failed to create prometheus exporter: %v", err)
+		log.Fatalf("Failed to create gRPC client connection: %v", err)
+	}
+
+	ctx := context.Background()
+	exporter, err := otlpmetricgrpc.New(ctx, otlpmetricgrpc.WithGRPCConn(conn))
+	if err != nil {
+		log.Fatalf("Failed to create metric exporter: %v", err)
 	}
 
 	meterProvider := sdkMetric.NewMeterProvider(
 		sdkMetric.WithResource(resource),
-		sdkMetric.WithReader(exporter),
+		sdkMetric.WithReader(sdkMetric.NewPeriodicReader(exporter)),
 	)
 
 	return meterProvider

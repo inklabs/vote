@@ -105,32 +105,6 @@ func WithCtxShutdown(shutdowns ...func(ctx context.Context) error) Option {
 	}
 }
 
-func NewProdApp() *app {
-	resource := NewResource()
-
-	tracerProvider := GetTracerProvider(resource)
-	meterProvider := GetMeterProvider(resource)
-
-	asyncCommandStore := asynccommandstore.NewBadgerAsyncCommandStore(
-		badger.DefaultOptions("./.badger.db").
-			WithLogger(nil),
-		GetAsyncCommands(),
-	)
-
-	eventDispatcher := newRabbitMQEventDispatcher(tracerProvider)
-
-	return NewApp(
-		WithAuthorization(authorization.NewDelayAuth()),
-		WithAsyncCommandStore(asyncCommandStore),
-		WithTelemetry(meterProvider, tracerProvider),
-		WithEventDispatcher(eventDispatcher),
-		WithCtxShutdown(
-			tracerProvider.Shutdown,
-			meterProvider.Shutdown,
-		),
-	)
-}
-
 func NewApp(opts ...Option) *app {
 	a := &app{
 		clock:              systemclock.New(),
@@ -195,6 +169,32 @@ func NewApp(opts ...Option) *app {
 	)
 
 	return a
+}
+
+func NewProdApp() *app {
+	resource := NewResource()
+
+	tracerProvider := GetTracerProvider(resource)
+	meterProvider := GetMeterProvider(resource)
+
+	asyncCommandStore := asynccommandstore.NewBadgerAsyncCommandStore(
+		badger.DefaultOptions("./.badger.db").
+			WithLogger(nil),
+		GetAsyncCommands(),
+	)
+
+	eventDispatcher := newRabbitMQEventDispatcher(tracerProvider)
+
+	return NewApp(
+		WithAuthorization(authorization.NewDelayAuth()),
+		WithAsyncCommandStore(asyncCommandStore),
+		WithTelemetry(meterProvider, tracerProvider),
+		WithEventDispatcher(eventDispatcher),
+		WithCtxShutdown(
+			tracerProvider.Shutdown,
+			meterProvider.Shutdown,
+		),
+	)
 }
 
 func (a *app) CommandBus() cqrs.CommandBus {
