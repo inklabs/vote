@@ -1,7 +1,7 @@
 package listener
 
 import (
-	"log"
+	"time"
 
 	"github.com/inklabs/vote/event"
 )
@@ -12,7 +12,7 @@ func NewElectionWinnerMediaNotification() *ElectionWinnerMediaNotification {
 	return &ElectionWinnerMediaNotification{}
 }
 
-func (e *ElectionWinnerMediaNotification) On(event event.ElectionWinnerWasSelected) error {
-	log.Printf("%#v", event)
+func (e *ElectionWinnerMediaNotification) On(_ event.ElectionWinnerWasSelected) error {
+	time.Sleep(2 * time.Millisecond)
 	return nil
 }

@@ -17,17 +17,6 @@ type CastVote struct {
 	RankedProposalIDs []string
 }
 
-// ValidationRules
-// TODO: Generate this when not present, not just look for Validate method
-func (c CastVote) ValidationRules() cqrs.ValidationRuleMap {
-	return cqrs.ValidationRuleMap{}
-}
-
-func (c CastVote) Validate() error {
-	time.Sleep(2 * time.Millisecond)
-	return nil
-}
-
 type castVoteHandler struct {
 	repository electionrepository.Repository
 	clock      clock.Clock
