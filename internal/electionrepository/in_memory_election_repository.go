@@ -9,7 +9,7 @@ import (
 	"go.opentelemetry.io/otel"
 )
 
-const instrumentationName = "github.com/pdt256/vote/internal/electionrepository/in-memory"
+const instrumentationName = "github.com/inklabs/vote/internal/electionrepository/in-memory"
 
 var (
 	tracer = otel.Tracer(instrumentationName)
