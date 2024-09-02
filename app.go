@@ -17,6 +17,7 @@ import (
 	"github.com/inklabs/cqrs/pkg/clock"
 	"github.com/inklabs/cqrs/pkg/clock/provider/systemclock"
 	"github.com/inklabs/cqrs/querybus"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 	metricNoop "go.opentelemetry.io/otel/metric/noop"
 	"go.opentelemetry.io/otel/trace"
@@ -174,8 +175,10 @@ func NewApp(opts ...Option) *app {
 func NewProdApp() *app {
 	resource := NewResource()
 
-	tracerProvider := GetTracerProvider(resource)
-	meterProvider := GetMeterProvider(resource)
+	tracerProvider := NewJaegerTracerProvider(resource)
+	meterProvider := NewOLTPMeterProvider(resource)
+	otel.SetTracerProvider(tracerProvider)
+	otel.SetMeterProvider(meterProvider)
 
 	asyncCommandStore := asynccommandstore.NewBadgerAsyncCommandStore(
 		badger.DefaultOptions("./.badger.db").

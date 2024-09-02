@@ -13,22 +13,34 @@ func NewDelayAuth() *delayAuth {
 	return &delayAuth{}
 }
 
-func (a *delayAuth) VerifyCommand(_ context.Context, _ cqrs.CommandHandler, _ cqrs.Command) error {
-	time.Sleep(2 * time.Millisecond)
+func (a *delayAuth) VerifyCommand(ctx context.Context, _ cqrs.CommandHandler, _ cqrs.Command) error {
+	_, span := tracer.Start(ctx, "auth.verify-command")
+	defer span.End()
+
+	time.Sleep(1 * time.Millisecond)
 	return nil
 }
 
-func (a *delayAuth) VerifyAsyncCommand(_ context.Context, _ cqrs.AsyncCommandHandler, _ cqrs.AsyncCommand) error {
-	time.Sleep(2 * time.Millisecond)
+func (a *delayAuth) VerifyAsyncCommand(ctx context.Context, _ cqrs.AsyncCommandHandler, _ cqrs.AsyncCommand) error {
+	_, span := tracer.Start(ctx, "auth.verify-async-command")
+	defer span.End()
+
+	time.Sleep(1 * time.Millisecond)
 	return nil
 }
 
-func (a *delayAuth) VerifyQuery(_ context.Context, _ cqrs.QueryHandler, _ cqrs.Query) error {
-	time.Sleep(2 * time.Millisecond)
+func (a *delayAuth) VerifyQuery(ctx context.Context, _ cqrs.QueryHandler, _ cqrs.Query) error {
+	_, span := tracer.Start(ctx, "auth.verify-query")
+	defer span.End()
+
+	time.Sleep(1 * time.Millisecond)
 	return nil
 }
 
-func (a *delayAuth) VerifyRequest(_ context.Context) error {
-	time.Sleep(2 * time.Millisecond)
+func (a *delayAuth) VerifyRequest(ctx context.Context) error {
+	_, span := tracer.Start(ctx, "auth.verify-request")
+	defer span.End()
+
+	time.Sleep(1 * time.Millisecond)
 	return nil
 }

@@ -28,7 +28,7 @@ func NewResource() *sdkResource.Resource {
 	return resource
 }
 
-func GetTracerProvider(resource *sdkResource.Resource) *sdkTrace.TracerProvider {
+func NewJaegerTracerProvider(resource *sdkResource.Resource) *sdkTrace.TracerProvider {
 	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://localhost:14268/api/traces")))
 	if err != nil {
 		log.Fatalf("Failed to create Jaeger exporter: %v", err)
@@ -42,7 +42,7 @@ func GetTracerProvider(resource *sdkResource.Resource) *sdkTrace.TracerProvider 
 	return tracerProvider
 }
 
-func GetMeterProvider(resource *sdkResource.Resource) *sdkMetric.MeterProvider {
+func NewOLTPMeterProvider(resource *sdkResource.Resource) *sdkMetric.MeterProvider {
 	conn, err := grpc.NewClient("localhost:4317",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)

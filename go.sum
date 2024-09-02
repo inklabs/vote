@@ -103,6 +103,13 @@ github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0 h1:bkypFPDjIYGfCYD5mRBvpqxfYX1
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0/go.mod h1:P+Lt/0by1T8bfcF3z737NnSbmxQAppXMRziHUxPOC8k=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
+github.com/inklabs/cqrs v0.0.0-20240829171800-998081cafe7d/go.mod h1:TxRpTUtXM7LAC2dJXQwo9ooocKiIqK9VHSA9aMkv4e0=
+github.com/inklabs/cqrs v0.0.0-20240902154605-77bd472e14e8 h1:5xtkQ8caaeoGJ4qx4CssZIlHH0rdOK6dvhN5Gn6wpXw=
+github.com/inklabs/cqrs v0.0.0-20240902154605-77bd472e14e8/go.mod h1:TxRpTUtXM7LAC2dJXQwo9ooocKiIqK9VHSA9aMkv4e0=
+github.com/inklabs/cqrs v0.0.0-20240902163109-9f7d7e38b540 h1:kiXw+rdZn0xg0oi3swF8EUTeldc2jPIR7KZjGFVHTvA=
+github.com/inklabs/cqrs v0.0.0-20240902163109-9f7d7e38b540/go.mod h1:TxRpTUtXM7LAC2dJXQwo9ooocKiIqK9VHSA9aMkv4e0=
+github.com/inklabs/cqrs v0.0.0-20240902163809-38739258bde8 h1:khS66yspcw2BP1eXyD9DkRQ3Xt/x75D6149KBaKLfms=
+github.com/inklabs/cqrs v0.0.0-20240902163809-38739258bde8/go.mod h1:TxRpTUtXM7LAC2dJXQwo9ooocKiIqK9VHSA9aMkv4e0=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/klauspost/compress v1.17.9 h1:6KIumPrER1LHsvBVuDa0r5xaG0Es51mhhB9BQB2qeMA=

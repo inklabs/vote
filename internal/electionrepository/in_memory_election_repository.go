@@ -6,6 +6,13 @@ import (
 	"sync"
 
 	"github.com/inklabs/cqrs"
+	"go.opentelemetry.io/otel"
+)
+
+const instrumentationName = "github.com/pdt256/vote/internal/electionrepository/in-memory"
+
+var (
+	tracer = otel.Tracer(instrumentationName)
 )
 
 type inMemoryElectionRepository struct {
@@ -29,7 +36,10 @@ func NewInMemory() *inMemoryElectionRepository {
 	}
 }
 
-func (r *inMemoryElectionRepository) SaveElection(_ context.Context, election Election) error {
+func (r *inMemoryElectionRepository) SaveElection(ctx context.Context, election Election) error {
+	_, span := tracer.Start(ctx, "db.save-election")
+	defer span.End()
+
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -38,7 +48,10 @@ func (r *inMemoryElectionRepository) SaveElection(_ context.Context, election El
 	return nil
 }
 
-func (r *inMemoryElectionRepository) GetElection(_ context.Context, electionID string) (Election, error) {
+func (r *inMemoryElectionRepository) GetElection(ctx context.Context, electionID string) (Election, error) {
+	_, span := tracer.Start(ctx, "db.get-election")
+	defer span.End()
+
 	r.mux.RLock()
 	defer r.mux.RUnlock()
 
@@ -49,7 +62,10 @@ func (r *inMemoryElectionRepository) GetElection(_ context.Context, electionID s
 	return Election{}, ErrElectionNotFound
 }
 
-func (r *inMemoryElectionRepository) SaveProposal(_ context.Context, proposal Proposal) error {
+func (r *inMemoryElectionRepository) SaveProposal(ctx context.Context, proposal Proposal) error {
+	_, span := tracer.Start(ctx, "db.save-election")
+	defer span.End()
+
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -62,7 +78,10 @@ func (r *inMemoryElectionRepository) SaveProposal(_ context.Context, proposal Pr
 	return nil
 }
 
-func (r *inMemoryElectionRepository) GetProposal(_ context.Context, electionID string) (Proposal, error) {
+func (r *inMemoryElectionRepository) GetProposal(ctx context.Context, electionID string) (Proposal, error) {
+	_, span := tracer.Start(ctx, "db.get-proposal")
+	defer span.End()
+
 	r.mux.RLock()
 	defer r.mux.RUnlock()
 
@@ -73,7 +92,10 @@ func (r *inMemoryElectionRepository) GetProposal(_ context.Context, electionID s
 	return Proposal{}, ErrProposalNotFound
 }
 
-func (r *inMemoryElectionRepository) GetProposals(_ context.Context, electionID string) ([]Proposal, error) {
+func (r *inMemoryElectionRepository) GetProposals(ctx context.Context, electionID string) ([]Proposal, error) {
+	_, span := tracer.Start(ctx, "db.get-proposals")
+	defer span.End()
+
 	r.mux.RLock()
 	defer r.mux.RUnlock()
 
@@ -91,7 +113,10 @@ func (r *inMemoryElectionRepository) GetProposals(_ context.Context, electionID 
 	return proposals, nil
 }
 
-func (r *inMemoryElectionRepository) SaveVote(_ context.Context, vote Vote) error {
+func (r *inMemoryElectionRepository) SaveVote(ctx context.Context, vote Vote) error {
+	_, span := tracer.Start(ctx, "db.save-vote")
+	defer span.End()
+
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
@@ -114,7 +139,10 @@ func (r *inMemoryElectionRepository) SaveVote(_ context.Context, vote Vote) erro
 	return nil
 }
 
-func (r *inMemoryElectionRepository) GetVotes(_ context.Context, electionID string) ([]Vote, error) {
+func (r *inMemoryElectionRepository) GetVotes(ctx context.Context, electionID string) ([]Vote, error) {
+	_, span := tracer.Start(ctx, "db.get-votes")
+	defer span.End()
+
 	r.mux.RLock()
 	defer r.mux.RUnlock()
 
@@ -125,7 +153,10 @@ func (r *inMemoryElectionRepository) GetVotes(_ context.Context, electionID stri
 	return nil, ErrElectionNotFound
 }
 
-func (r *inMemoryElectionRepository) ListOpenElections(_ context.Context, page, itemsPerPage int, sortBy, sortDirection *string) ([]Election, error) {
+func (r *inMemoryElectionRepository) ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) ([]Election, error) {
+	_, span := tracer.Start(ctx, "db.list-open-elections")
+	defer span.End()
+
 	r.mux.RLock()
 	defer r.mux.RUnlock()
 
@@ -142,7 +173,10 @@ func (r *inMemoryElectionRepository) ListOpenElections(_ context.Context, page, 
 	return pageEntity(openElections, page, itemsPerPage), nil
 }
 
-func (r *inMemoryElectionRepository) ListProposals(_ context.Context, electionID string, page, itemsPerPage int) ([]Proposal, error) {
+func (r *inMemoryElectionRepository) ListProposals(ctx context.Context, electionID string, page, itemsPerPage int) ([]Proposal, error) {
+	_, span := tracer.Start(ctx, "db.list-proposals")
+	defer span.End()
+
 	r.mux.RLock()
 	defer r.mux.RUnlock()
 

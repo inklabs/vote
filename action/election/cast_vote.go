@@ -30,6 +30,9 @@ func NewCastVoteHandler(repository electionrepository.Repository, clock clock.Cl
 }
 
 func (h *castVoteHandler) On(ctx context.Context, cmd CastVote, eventRaiser cqrs.EventRaiser) error {
+	ctx, span := tracer.Start(ctx, "cast-vote")
+	defer span.End()
+
 	occurredAt := int(h.clock.Now().Unix())
 
 	err := h.repository.SaveVote(ctx, electionrepository.Vote{
