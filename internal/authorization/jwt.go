@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/inklabs/cqrs"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 const Expiration = 24 * time.Hour
@@ -51,6 +52,9 @@ func NewJWTAuthorization(signingKey []byte) *jwtAuthorization {
 }
 
 func (a *jwtAuthorization) VerifyCommand(ctx context.Context, handler cqrs.CommandHandler, command cqrs.Command) error {
+	_, span := tracer.Start(ctx, "jwt-auth.verify-command")
+	defer span.End()
+
 	claimsContext, err := a.getContext(ctx)
 	if err != nil {
 		return err
@@ -67,10 +71,15 @@ func (a *jwtAuthorization) VerifyCommand(ctx context.Context, handler cqrs.Comma
 }
 
 func (a *jwtAuthorization) VerifyAsyncCommand(ctx context.Context, handler cqrs.AsyncCommandHandler, command cqrs.AsyncCommand) error {
+	_, span := tracer.Start(ctx, "jwt-auth.verify-async-command")
+	defer span.End()
+
 	claimsContext, err := a.getContext(ctx)
 	if err != nil {
 		return err
 	}
+
+	span.SetAttributes(attribute.String(UserIDKey, claimsContext.UserID()))
 
 	if verifier, ok := handler.(AsyncCommandVerifier); ok {
 		err = verifier.VerifyAuthorization(claimsContext, command)
@@ -83,10 +92,15 @@ func (a *jwtAuthorization) VerifyAsyncCommand(ctx context.Context, handler cqrs.
 }
 
 func (a *jwtAuthorization) VerifyQuery(ctx context.Context, handler cqrs.QueryHandler, query cqrs.Query) error {
+	_, span := tracer.Start(ctx, "jwt-auth.verify-query")
+	defer span.End()
+
 	claimsContext, err := a.getContext(ctx)
 	if err != nil {
 		return err
 	}
+
+	span.SetAttributes(attribute.String(UserIDKey, claimsContext.UserID()))
 
 	if verifier, ok := handler.(QueryVerifier); ok {
 		err = verifier.VerifyAuthorization(claimsContext, query)
@@ -99,8 +113,17 @@ func (a *jwtAuthorization) VerifyQuery(ctx context.Context, handler cqrs.QueryHa
 }
 
 func (a *jwtAuthorization) VerifyRequest(ctx context.Context) error {
-	_, err := a.getContext(ctx)
-	return err
+	_, span := tracer.Start(ctx, "jwt-auth.verify-request")
+	defer span.End()
+
+	claimsContext, err := a.getContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	span.SetAttributes(attribute.String(UserIDKey, claimsContext.UserID()))
+
+	return nil
 }
 
 func (a *jwtAuthorization) getContext(ctx context.Context) (*jwtClaimsContext, error) {

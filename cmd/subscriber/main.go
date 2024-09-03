@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	"github.com/inklabs/cqrs"
-	"github.com/inklabs/cqrs/eventdispatcher/provider/rabbitmqeventdispatcher"
+	"github.com/inklabs/cqrs/eventdispatcher/rabbitmq"
 
 	"github.com/inklabs/vote"
 	"github.com/inklabs/vote/event"
@@ -27,11 +27,11 @@ func main() {
 	event.BindEvents(eventRegistry)
 
 	eventSerializer := cqrs.NewEventPayloadSerializer(eventRegistry)
-	rabbitMQConfig := rabbitmqeventdispatcher.RabbitMQConfig{
+	rabbitMQConfig := rabbitmq.Config{
 		URL:   "amqp://guest:guest@localhost:5672/",
 		Queue: "vote.events",
 	}
-	subscriber, err := rabbitmqeventdispatcher.NewRabbitMQEventSubscriber(
+	subscriber, err := rabbitmq.NewEventSubscriber(
 		rabbitMQConfig,
 		eventSerializer,
 		log.Default(),

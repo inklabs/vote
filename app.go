@@ -13,7 +13,7 @@ import (
 	"github.com/inklabs/cqrs/commandbus"
 	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/inklabs/cqrs/eventdispatcher"
-	"github.com/inklabs/cqrs/eventdispatcher/provider/rabbitmqeventdispatcher"
+	"github.com/inklabs/cqrs/eventdispatcher/rabbitmq"
 	"github.com/inklabs/cqrs/pkg/clock"
 	"github.com/inklabs/cqrs/pkg/clock/provider/systemclock"
 	"github.com/inklabs/cqrs/querybus"
@@ -180,7 +180,7 @@ func NewProdApp() *app {
 	otel.SetTracerProvider(tracerProvider)
 	otel.SetMeterProvider(meterProvider)
 
-	asyncCommandStore := asynccommandstore.NewBadgerAsyncCommandStore(
+	asyncCommandStore := asynccommandstore.NewBadger(
 		badger.DefaultOptions("./.badger.db").
 			WithLogger(nil),
 		GetAsyncCommands(),
@@ -262,11 +262,11 @@ func newRabbitMQEventDispatcher(tracerProvider trace.TracerProvider) cqrs.EventD
 
 	eventSerializer := cqrs.NewEventPayloadSerializer(eventRegistry)
 
-	rabbitMQConfig := rabbitmqeventdispatcher.RabbitMQConfig{
+	rabbitMQConfig := rabbitmq.Config{
 		URL:   "amqp://guest:guest@localhost:5672/",
 		Queue: "vote.events",
 	}
-	eventDispatcher, err := rabbitmqeventdispatcher.NewRabbitMQ(
+	eventDispatcher, err := rabbitmq.NewEventDispatcher(
 		rabbitMQConfig,
 		eventSerializer,
 		log.Default(),

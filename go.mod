@@ -10,7 +10,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
-	github.com/inklabs/cqrs v0.0.0-20240902163809-38739258bde8
+	github.com/inklabs/cqrs v0.0.0-20240903041217-20e279f699f4
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/otel v1.29.0
@@ -19,8 +19,8 @@ require (
 	go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.28.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.28.0
 	go.opentelemetry.io/otel/metric v1.29.0
-	go.opentelemetry.io/otel/sdk v1.28.0
-	go.opentelemetry.io/otel/sdk/metric v1.28.0
+	go.opentelemetry.io/otel/sdk v1.29.0
+	go.opentelemetry.io/otel/sdk/metric v1.29.0
 	go.opentelemetry.io/otel/trace v1.29.0
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
@@ -67,7 +67,7 @@ require (
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	go.opentelemetry.io/contrib v1.28.0 // indirect
+	go.opentelemetry.io/contrib v1.29.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.3.1 // indirect
 	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
 	golang.org/x/net v0.28.0 // indirect
