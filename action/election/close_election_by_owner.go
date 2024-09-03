@@ -49,7 +49,7 @@ func (h *closeElectionByOwnerHandler) Verify(ctx authorization.Context, cmd Clos
 }
 
 func (h *closeElectionByOwnerHandler) On(ctx context.Context, cmd CloseElectionByOwner, eventRaiser cqrs.EventRaiser, logger cqrs.AsyncCommandLogger) error {
-	ctx, span := tracer.Start(ctx, "close-election-by-owner")
+	ctx, span := tracer.Start(ctx, "vote.close-election-by-owner")
 	defer span.End()
 
 	election, err := h.repository.GetElection(ctx, cmd.ElectionID)

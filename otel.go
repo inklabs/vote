@@ -19,8 +19,10 @@ import (
 )
 
 func NewResource() *sdkResource.Resource {
-	resource, _ := sdkResource.Merge(sdkResource.Default(),
-		sdkResource.NewWithAttributes(semconv.SchemaURL,
+	resource, _ := sdkResource.Merge(
+		sdkResource.Default(),
+		sdkResource.NewWithAttributes(
+			semconv.SchemaURL,
 			semconv.ServiceName("voting-demo"),
 			semconv.ServiceVersion("0.1.0"),
 		))

@@ -14,7 +14,7 @@ func NewElectionWinnerMediaNotification() *ElectionWinnerMediaNotification {
 }
 
 func (e *ElectionWinnerMediaNotification) On(ctx context.Context, _ event.ElectionWinnerWasSelected) error {
-	_, span := tracer.Start(ctx, "send-media-notification")
+	_, span := tracer.Start(ctx, "vote.send-media-notification")
 	defer span.End()
 
 	time.Sleep(1 * time.Millisecond)
