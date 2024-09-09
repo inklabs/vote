@@ -10,7 +10,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
-	github.com/inklabs/cqrs v0.0.0-20240903041217-20e279f699f4
+	github.com/inklabs/cqrs v0.0.0-20240909062437-f92076342a5d
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/otel v1.29.0

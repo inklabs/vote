@@ -13,7 +13,8 @@ import (
 	"github.com/inklabs/cqrs/commandbus"
 	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/inklabs/cqrs/eventdispatcher"
-	"github.com/inklabs/cqrs/eventdispatcher/rabbitmq"
+	"github.com/inklabs/cqrs/eventdispatcher/distributed"
+	"github.com/inklabs/cqrs/eventdispatcher/distributed/provider/rabbitmq"
 	"github.com/inklabs/cqrs/pkg/clock"
 	"github.com/inklabs/cqrs/pkg/clock/provider/systemclock"
 	"github.com/inklabs/cqrs/querybus"
@@ -262,14 +263,21 @@ func newRabbitMQEventDispatcher(tracerProvider trace.TracerProvider) cqrs.EventD
 
 	eventSerializer := cqrs.NewEventPayloadSerializer(eventRegistry)
 
-	rabbitMQConfig := rabbitmq.Config{
-		URL:   "amqp://guest:guest@localhost:5672/",
-		Queue: "vote.events",
+	config := rabbitmq.Config{
+		URL:       "amqp://guest:guest@localhost:5672/",
+		QueueName: "vote.events",
 	}
-	eventDispatcher, err := rabbitmq.NewEventDispatcher(
-		rabbitMQConfig,
+	logger := log.Default()
+	rabbitmqPublisher := rabbitmq.NewBroker(
+		config.URL,
+		logger,
+		tracerProvider,
+	)
+	eventDispatcher, err := distributed.NewEventDispatcher(
+		config.QueueName,
+		rabbitmqPublisher,
 		eventSerializer,
-		log.Default(),
+		logger,
 		tracerProvider,
 	)
 	if err != nil {
