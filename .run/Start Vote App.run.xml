@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Start Vote App" type="CompoundRunConfigurationType">
+    <toRun name="Run gRPC API" type="GoApplicationRunConfiguration" />
+    <toRun name="Start Subscriber" type="GoApplicationRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>

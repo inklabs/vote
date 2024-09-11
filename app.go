@@ -122,6 +122,7 @@ func NewApp(opts ...Option) *app {
 	a.eventDispatcher = eventdispatcher.NewConcurrentLocal(
 		log.Default(),
 		a.GetEventListeners(),
+		a.meterProvider,
 		a.tracerProvider,
 	)
 
@@ -189,7 +190,7 @@ func NewProdApp() *app {
 		GetAsyncCommands(),
 	)
 
-	eventDispatcher := newDistributedEventDispatcher(tracerProvider)
+	eventDispatcher := newDistributedEventDispatcher(meterProvider, tracerProvider)
 
 	return NewApp(
 		WithAuthorization(authorization.NewDelayAuth()),
@@ -255,11 +256,18 @@ func (a *app) GetEventListeners() []cqrs.EventListener {
 	}
 }
 
+func (a *app) GetMeterProvider() metric.MeterProvider {
+	return a.meterProvider
+}
+
 func (a *app) GetTracerProvider() trace.TracerProvider {
 	return a.tracerProvider
 }
 
-func newDistributedEventDispatcher(tracerProvider trace.TracerProvider) cqrs.EventDispatcher {
+func newDistributedEventDispatcher(
+	meterProvider metric.MeterProvider,
+	tracerProvider trace.TracerProvider,
+) cqrs.EventDispatcher {
 	eventRegistry := cqrs.NewEventRegistry()
 	event.BindEvents(eventRegistry)
 
@@ -268,14 +276,15 @@ func newDistributedEventDispatcher(tracerProvider trace.TracerProvider) cqrs.Eve
 	logger := log.Default()
 
 	const queueName = "vote-events"
-	//publisher := GetRabbitMQBroker(logger, tracerProvider)
-	publisher := GetNatsBroker(logger, tracerProvider)
+	//publisher := GetRabbitMQBroker(logger, meterProvider, tracerProvider)
+	publisher := GetNatsBroker(logger, meterProvider, tracerProvider)
 
 	eventDispatcher, err := distributed.NewEventDispatcher(
 		queueName,
 		publisher,
 		eventSerializer,
 		logger,
+		meterProvider,
 		tracerProvider,
 	)
 	if err != nil {
@@ -285,18 +294,28 @@ func newDistributedEventDispatcher(tracerProvider trace.TracerProvider) cqrs.Eve
 	return eventDispatcher
 }
 
-func GetNatsBroker(logger *log.Logger, tracerProvider trace.TracerProvider) distributed.Broker {
+func GetNatsBroker(
+	logger *log.Logger,
+	meterProvider metric.MeterProvider,
+	tracerProvider trace.TracerProvider,
+) distributed.Broker {
 	return nats.NewBroker(
 		natsClient.DefaultURL,
 		logger,
+		meterProvider,
 		tracerProvider,
 	)
 }
 
-func GetRabbitMQBroker(logger *log.Logger, tracerProvider trace.TracerProvider) distributed.Broker {
+func GetRabbitMQBroker(
+	logger *log.Logger,
+	meterProvider metric.MeterProvider,
+	tracerProvider trace.TracerProvider,
+) distributed.Broker {
 	return rabbitmq.NewBroker(
 		"amqp://guest:guest@localhost:5672/",
 		logger,
+		meterProvider,
 		tracerProvider,
 	)
 }

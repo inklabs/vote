@@ -30,8 +30,8 @@ func main() {
 	logger := log.Default()
 
 	const queueName = "vote-events"
-	//consumer, err := vote.GetRabbitMQBroker(logger, app.GetTracerProvider())
-	consumer := vote.GetNatsBroker(logger, app.GetTracerProvider())
+	//consumer := vote.GetRabbitMQBroker(logger, app.GetMeterProvider(), app.GetTracerProvider())
+	consumer := vote.GetNatsBroker(logger, app.GetMeterProvider(), app.GetTracerProvider())
 
 	subscriber, err := distributed.NewEventSubscriber(
 		queueName,
@@ -39,6 +39,7 @@ func main() {
 		eventSerializer,
 		logger,
 		app.GetEventListeners(),
+		app.GetMeterProvider(),
 		app.GetTracerProvider(),
 	)
 	if err != nil {

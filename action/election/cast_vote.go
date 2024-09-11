@@ -35,6 +35,8 @@ func (h *castVoteHandler) On(ctx context.Context, cmd CastVote, eventRaiser cqrs
 
 	occurredAt := int(h.clock.Now().Unix())
 
+	time.Sleep(2 * time.Millisecond)
+
 	err := h.repository.SaveVote(ctx, electionrepository.Vote{
 		ElectionID:        cmd.ElectionID,
 		UserID:            cmd.UserID,
@@ -43,8 +45,6 @@ func (h *castVoteHandler) On(ctx context.Context, cmd CastVote, eventRaiser cqrs
 	if err != nil {
 		return err
 	}
-
-	time.Sleep(2 * time.Millisecond)
 
 	eventRaiser.Raise(event.VoteWasCast{
 		ElectionID:        cmd.ElectionID,
