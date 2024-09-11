@@ -10,7 +10,6 @@ import (
 
 	"github.com/inklabs/cqrs"
 	"github.com/inklabs/cqrs/eventdispatcher/distributed"
-	"github.com/inklabs/cqrs/eventdispatcher/distributed/provider/rabbitmq"
 
 	"github.com/inklabs/vote"
 	"github.com/inklabs/vote/event"
@@ -28,19 +27,15 @@ func main() {
 	event.BindEvents(eventRegistry)
 
 	eventSerializer := cqrs.NewEventPayloadSerializer(eventRegistry)
-	config := rabbitmq.Config{
-		URL:       "amqp://guest:guest@localhost:5672/",
-		QueueName: "vote.events",
-	}
 	logger := log.Default()
-	rabbitmqConsumer := rabbitmq.NewBroker(
-		config.URL,
-		logger,
-		app.GetTracerProvider(),
-	)
+
+	const queueName = "vote-events"
+	//consumer, err := vote.GetRabbitMQBroker(logger, app.GetTracerProvider())
+	consumer := vote.GetNatsBroker(logger, app.GetTracerProvider())
+
 	subscriber, err := distributed.NewEventSubscriber(
-		config.QueueName,
-		rabbitmqConsumer,
+		queueName,
+		consumer,
 		eventSerializer,
 		logger,
 		app.GetEventListeners(),

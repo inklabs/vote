@@ -16,7 +16,6 @@
             </DockerPortBindingImpl>
           </list>
         </option>
-        <option name="commandLineOptions" value="" />
       </settings>
     </deployment>
     <method v="2" />

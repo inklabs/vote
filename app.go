@@ -14,10 +14,12 @@ import (
 	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/inklabs/cqrs/eventdispatcher"
 	"github.com/inklabs/cqrs/eventdispatcher/distributed"
+	"github.com/inklabs/cqrs/eventdispatcher/distributed/provider/nats"
 	"github.com/inklabs/cqrs/eventdispatcher/distributed/provider/rabbitmq"
 	"github.com/inklabs/cqrs/pkg/clock"
 	"github.com/inklabs/cqrs/pkg/clock/provider/systemclock"
 	"github.com/inklabs/cqrs/querybus"
+	natsClient "github.com/nats-io/nats.go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 	metricNoop "go.opentelemetry.io/otel/metric/noop"
@@ -187,7 +189,7 @@ func NewProdApp() *app {
 		GetAsyncCommands(),
 	)
 
-	eventDispatcher := newRabbitMQEventDispatcher(tracerProvider)
+	eventDispatcher := newDistributedEventDispatcher(tracerProvider)
 
 	return NewApp(
 		WithAuthorization(authorization.NewDelayAuth()),
@@ -257,25 +259,21 @@ func (a *app) GetTracerProvider() trace.TracerProvider {
 	return a.tracerProvider
 }
 
-func newRabbitMQEventDispatcher(tracerProvider trace.TracerProvider) cqrs.EventDispatcher {
+func newDistributedEventDispatcher(tracerProvider trace.TracerProvider) cqrs.EventDispatcher {
 	eventRegistry := cqrs.NewEventRegistry()
 	event.BindEvents(eventRegistry)
 
 	eventSerializer := cqrs.NewEventPayloadSerializer(eventRegistry)
 
-	config := rabbitmq.Config{
-		URL:       "amqp://guest:guest@localhost:5672/",
-		QueueName: "vote.events",
-	}
 	logger := log.Default()
-	rabbitmqPublisher := rabbitmq.NewBroker(
-		config.URL,
-		logger,
-		tracerProvider,
-	)
+
+	const queueName = "vote-events"
+	//publisher := GetRabbitMQBroker(logger, tracerProvider)
+	publisher := GetNatsBroker(logger, tracerProvider)
+
 	eventDispatcher, err := distributed.NewEventDispatcher(
-		config.QueueName,
-		rabbitmqPublisher,
+		queueName,
+		publisher,
 		eventSerializer,
 		logger,
 		tracerProvider,
@@ -285,4 +283,20 @@ func newRabbitMQEventDispatcher(tracerProvider trace.TracerProvider) cqrs.EventD
 	}
 
 	return eventDispatcher
+}
+
+func GetNatsBroker(logger *log.Logger, tracerProvider trace.TracerProvider) distributed.Broker {
+	return nats.NewBroker(
+		natsClient.DefaultURL,
+		logger,
+		tracerProvider,
+	)
+}
+
+func GetRabbitMQBroker(logger *log.Logger, tracerProvider trace.TracerProvider) distributed.Broker {
+	return rabbitmq.NewBroker(
+		"amqp://guest:guest@localhost:5672/",
+		logger,
+		tracerProvider,
+	)
 }
