@@ -4,9 +4,12 @@ import (
 	"context"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/inklabs/cqrs"
 	"go.opentelemetry.io/otel"
+
+	"github.com/inklabs/vote/pkg/sleep"
 )
 
 const instrumentationName = "github.com/inklabs/vote/internal/electionrepository/in-memory"
@@ -43,6 +46,8 @@ func (r *inMemoryElectionRepository) SaveElection(ctx context.Context, election 
 	r.mux.Lock()
 	defer r.mux.Unlock()
 
+	sleep.Rand(2 * time.Millisecond)
+
 	r.elections[election.ElectionID] = election
 
 	return nil
@@ -54,6 +59,8 @@ func (r *inMemoryElectionRepository) GetElection(ctx context.Context, electionID
 
 	r.mux.RLock()
 	defer r.mux.RUnlock()
+
+	sleep.Rand(1 * time.Millisecond)
 
 	if election, ok := r.elections[electionID]; ok {
 		return election, nil
@@ -68,6 +75,8 @@ func (r *inMemoryElectionRepository) SaveProposal(ctx context.Context, proposal 
 
 	r.mux.Lock()
 	defer r.mux.Unlock()
+
+	sleep.Rand(2 * time.Millisecond)
 
 	if _, ok := r.elections[proposal.ElectionID]; !ok {
 		return ErrElectionNotFound
@@ -85,6 +94,8 @@ func (r *inMemoryElectionRepository) GetProposal(ctx context.Context, electionID
 	r.mux.RLock()
 	defer r.mux.RUnlock()
 
+	sleep.Rand(1 * time.Millisecond)
+
 	if proposal, ok := r.proposals[electionID]; ok {
 		return proposal, nil
 	}
@@ -98,6 +109,8 @@ func (r *inMemoryElectionRepository) GetProposals(ctx context.Context, electionI
 
 	r.mux.RLock()
 	defer r.mux.RUnlock()
+
+	sleep.Rand(1 * time.Millisecond)
 
 	if _, ok := r.elections[electionID]; !ok {
 		return nil, ErrElectionNotFound
@@ -119,6 +132,8 @@ func (r *inMemoryElectionRepository) SaveVote(ctx context.Context, vote Vote) er
 
 	r.mux.Lock()
 	defer r.mux.Unlock()
+
+	sleep.Rand(2 * time.Millisecond)
 
 	if _, ok := r.elections[vote.ElectionID]; !ok {
 		return ErrElectionNotFound
@@ -146,6 +161,8 @@ func (r *inMemoryElectionRepository) GetVotes(ctx context.Context, electionID st
 	r.mux.RLock()
 	defer r.mux.RUnlock()
 
+	sleep.Rand(1 * time.Millisecond)
+
 	if votes, ok := r.votes[electionID]; ok {
 		return votes, nil
 	}
@@ -159,6 +176,8 @@ func (r *inMemoryElectionRepository) ListOpenElections(ctx context.Context, page
 
 	r.mux.RLock()
 	defer r.mux.RUnlock()
+
+	sleep.Rand(2 * time.Millisecond)
 
 	var openElections []Election
 
@@ -179,6 +198,8 @@ func (r *inMemoryElectionRepository) ListProposals(ctx context.Context, election
 
 	r.mux.RLock()
 	defer r.mux.RUnlock()
+
+	sleep.Rand(2 * time.Millisecond)
 
 	if _, ok := r.elections[electionID]; !ok {
 		return nil, ErrElectionNotFound

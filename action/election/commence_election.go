@@ -2,12 +2,14 @@ package election
 
 import (
 	"context"
+	"time"
 
 	"github.com/inklabs/cqrs"
 	"github.com/inklabs/cqrs/pkg/clock"
 
 	"github.com/inklabs/vote/event"
 	"github.com/inklabs/vote/internal/electionrepository"
+	"github.com/inklabs/vote/pkg/sleep"
 )
 
 type CommenceElection struct {
@@ -31,6 +33,8 @@ func NewCommenceElectionHandler(repository electionrepository.Repository, clock 
 
 func (h *commenceElectionHandler) On(ctx context.Context, cmd CommenceElection, eventRaiser cqrs.EventRaiser) error {
 	occurredAt := int(h.clock.Now().Unix())
+
+	sleep.Rand(2 * time.Millisecond)
 
 	err := h.repository.SaveElection(ctx, electionrepository.Election{
 		ElectionID:      cmd.ElectionID,

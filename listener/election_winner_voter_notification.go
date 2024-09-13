@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/inklabs/vote/event"
+	"github.com/inklabs/vote/pkg/sleep"
 )
 
 type ElectionWinnerVoterNotification struct{}
@@ -17,6 +18,6 @@ func (e *ElectionWinnerVoterNotification) On(ctx context.Context, _ event.Electi
 	_, span := tracer.Start(ctx, "vote.send-voter-notification")
 	defer span.End()
 
-	time.Sleep(1 * time.Millisecond)
+	sleep.Rand(1 * time.Millisecond)
 	return nil
 }

@@ -24,9 +24,10 @@ import (
 func main() {
 	fmt.Println("Election Simulator")
 
-	totalElections := flag.Int("totalElections", 10, "Total # of elections to simulate")
+	totalElections := flag.Int("totalElections", 100, "Total # of elections to simulate")
 	maxProposals := flag.Int("maxProposals", 7, "Max # of proposals per election")
 	totalVoters := flag.Int("totalVoters", 100, "Total # of voters")
+	delay := flag.Int("delay", 10, "Delay between calls in milliseconds")
 	host := flag.String("host", "127.0.0.1:8081", "Vote gRPC host address")
 	flag.Parse()
 
@@ -34,6 +35,7 @@ func main() {
 	fmt.Printf("totalElections: %d\n", *totalElections)
 	fmt.Printf("maxProposals: %d\n", *maxProposals)
 	fmt.Printf("totalVoters: %d\n", *totalVoters)
+	fmt.Printf("delay: %d\n", *delay)
 
 	dialCtx, connectDone := context.WithTimeout(context.Background(), time.Second*2)
 	conn, err := grpc.DialContext(
@@ -50,32 +52,49 @@ func main() {
 		connectDone()
 	}()
 
+	client := goclient.NewClient(conn)
+	s := NewSimulator(client, *totalElections, *maxProposals, *totalVoters, *delay)
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	client := goclient.NewClient(conn)
-	simulator := NewSimulator(client, *totalElections, *maxProposals, *totalVoters)
-	simulator.Start(ctx)
+	simulateUntilStopped(ctx, s)
 
 	fmt.Printf("\nDone\n")
 }
 
-func NewSimulator(client *goclient.GoClient, totalElections, maxProposals, totalVoters int) *simulator {
+func simulateUntilStopped(ctx context.Context, simulator *simulator) {
+	for {
+		fmt.Printf("Starting new Simulation\n")
+		simulator.Start(ctx)
+
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(1 * time.Second):
+		}
+	}
+}
+
+func NewSimulator(client *goclient.GoClient, totalElections, maxProposals, totalVoters, delay int) *simulator {
 	return &simulator{
 		client:          client,
 		totalElections:  totalElections,
 		maxProposals:    maxProposals,
 		totalVoters:     totalVoters,
+		delay:           time.Duration(delay) * time.Millisecond,
 		electionAdminID: uuid.NewString(),
 		elections:       make(map[string][]string),
 	}
 }
 
 type simulator struct {
-	client          *goclient.GoClient
-	totalElections  int
-	maxProposals    int
-	totalVoters     int
+	client         *goclient.GoClient
+	totalElections int
+	maxProposals   int
+	totalVoters    int
+	delay          time.Duration
+
 	electionAdminID string
 
 	// elections electionID => proposalIDs
@@ -100,7 +119,10 @@ func (s *simulator) Start(ctx context.Context) {
 }
 
 func (s *simulator) setupElections(ctx context.Context) error {
+	s.elections = make(map[string][]string)
+
 	for i := 0; i < s.totalElections; i++ {
+		time.Sleep(s.delay)
 		electionID := uuid.NewString()
 
 		_, err := s.client.Election.CommenceElection(ctx, &electionpb.CommenceElectionRequest{
@@ -135,6 +157,7 @@ func (s *simulator) setupElections(ctx context.Context) error {
 
 func (s *simulator) castVotes(ctx context.Context) error {
 	for i := 0; i < s.totalVoters; i++ {
+		time.Sleep(s.delay)
 		userID := uuid.NewString()
 		electionsToVoteIn := random(1, s.totalElections)
 
@@ -162,6 +185,7 @@ func (s *simulator) castVotes(ctx context.Context) error {
 
 func (s *simulator) closeElections(ctx context.Context) error {
 	for electionID := range s.elections {
+		time.Sleep(s.delay)
 		response, err := s.client.Election.CloseElectionByOwner(ctx, &electionpb.CloseElectionByOwnerRequest{
 			Id:         uuid.NewString(),
 			ElectionId: electionID,

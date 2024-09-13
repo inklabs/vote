@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"time"
 
 	"github.com/inklabs/cqrs"
 	"github.com/inklabs/cqrs/pkg/clock"
@@ -12,6 +13,7 @@ import (
 	"github.com/inklabs/vote/internal/authorization"
 	"github.com/inklabs/vote/internal/electionrepository"
 	"github.com/inklabs/vote/internal/rcv"
+	"github.com/inklabs/vote/pkg/sleep"
 )
 
 type CloseElectionByOwner struct {
@@ -51,6 +53,8 @@ func (h *closeElectionByOwnerHandler) Verify(ctx authorization.Context, cmd Clos
 func (h *closeElectionByOwnerHandler) On(ctx context.Context, cmd CloseElectionByOwner, eventRaiser cqrs.EventRaiser, logger cqrs.AsyncCommandLogger) error {
 	ctx, span := tracer.Start(ctx, "vote.close-election-by-owner")
 	defer span.End()
+
+	sleep.Rand(2 * time.Millisecond)
 
 	election, err := h.repository.GetElection(ctx, cmd.ElectionID)
 	if err != nil {

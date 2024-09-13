@@ -9,6 +9,7 @@ import (
 
 	"github.com/inklabs/vote/event"
 	"github.com/inklabs/vote/internal/electionrepository"
+	"github.com/inklabs/vote/pkg/sleep"
 )
 
 type CastVote struct {
@@ -35,7 +36,7 @@ func (h *castVoteHandler) On(ctx context.Context, cmd CastVote, eventRaiser cqrs
 
 	occurredAt := int(h.clock.Now().Unix())
 
-	time.Sleep(2 * time.Millisecond)
+	sleep.Rand(2 * time.Millisecond)
 
 	err := h.repository.SaveVote(ctx, electionrepository.Vote{
 		ElectionID:        cmd.ElectionID,

@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/inklabs/cqrs"
+
+	"github.com/inklabs/vote/pkg/sleep"
 )
 
 type delayAuth struct{}
@@ -17,7 +19,7 @@ func (a *delayAuth) VerifyCommand(ctx context.Context, _ cqrs.CommandHandler, _ 
 	_, span := tracer.Start(ctx, "auth.verify-command")
 	defer span.End()
 
-	time.Sleep(1 * time.Millisecond)
+	sleep.Rand(1 * time.Millisecond)
 	return nil
 }
 
@@ -25,7 +27,7 @@ func (a *delayAuth) VerifyAsyncCommand(ctx context.Context, _ cqrs.AsyncCommandH
 	_, span := tracer.Start(ctx, "auth.verify-async-command")
 	defer span.End()
 
-	time.Sleep(1 * time.Millisecond)
+	sleep.Rand(1 * time.Millisecond)
 	return nil
 }
 
@@ -33,7 +35,7 @@ func (a *delayAuth) VerifyQuery(ctx context.Context, _ cqrs.QueryHandler, _ cqrs
 	_, span := tracer.Start(ctx, "auth.verify-query")
 	defer span.End()
 
-	time.Sleep(1 * time.Millisecond)
+	sleep.Rand(1 * time.Millisecond)
 	return nil
 }
 
@@ -41,6 +43,6 @@ func (a *delayAuth) VerifyRequest(ctx context.Context) error {
 	_, span := tracer.Start(ctx, "auth.verify-request")
 	defer span.End()
 
-	time.Sleep(1 * time.Millisecond)
+	sleep.Rand(1 * time.Millisecond)
 	return nil
 }

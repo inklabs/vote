@@ -2,12 +2,14 @@ package election
 
 import (
 	"context"
+	"time"
 
 	"github.com/inklabs/cqrs"
 	"github.com/inklabs/cqrs/pkg/clock"
 
 	"github.com/inklabs/vote/event"
 	"github.com/inklabs/vote/internal/electionrepository"
+	"github.com/inklabs/vote/pkg/sleep"
 )
 
 type MakeProposal struct {
@@ -32,6 +34,8 @@ func NewMakeProposalHandler(repository electionrepository.Repository, clock cloc
 
 func (h *makeProposalHandler) On(ctx context.Context, cmd MakeProposal, eventRaiser cqrs.EventRaiser) error {
 	proposedAt := int(h.clock.Now().Unix())
+
+	sleep.Rand(2 * time.Millisecond)
 
 	err := h.repository.SaveProposal(ctx, electionrepository.Proposal{
 		ElectionID:  cmd.ElectionID,
