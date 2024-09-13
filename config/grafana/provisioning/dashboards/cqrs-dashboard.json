@@ -284,7 +284,7 @@
           "useBackend": false
         }
       ],
-      "title": "Command Bus Executions",
+      "title": "Command Executions",
       "type": "stat"
     },
     {
@@ -612,7 +612,7 @@
           "useBackend": false
         }
       ],
-      "title": "Async Command Bus Executions",
+      "title": "Async Command Executions",
       "type": "stat"
     },
     {
@@ -688,7 +688,7 @@
           "useBackend": false
         }
       ],
-      "title": "Events Listener Executions",
+      "title": "Event Listener Executions",
       "type": "stat"
     },
     {
