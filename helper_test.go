@@ -63,15 +63,16 @@ func PrettyPrint(buf *bytes.Buffer) {
 	fmt.Print(prettyJSON.String())
 }
 
-func newTestApp() cqrs.App {
+func newTestApp(opts ...vote.Option) cqrs.App {
 	startTime := time.Unix(1699900000, 0)
 	seededClock := incrementingclock.New(startTime)
 
-	return vote.NewApp(
+	options := append([]vote.Option{
 		vote.WithAsyncCommandStore(asynccommandstore.NewInMemory()),
-		vote.WithSyncLocalAsyncCommandBus(),
 		vote.WithClock(seededClock),
-	)
+	}, opts...)
+
+	return vote.NewApp(options...)
 }
 
 func startBufferedGRPCServer(grpcServer *grpc.Server) *grpc.ClientConn {

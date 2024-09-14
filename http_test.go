@@ -2,10 +2,13 @@ package vote_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"time"
 
+	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/inklabs/cqrs/jsonapi"
 
 	"github.com/inklabs/vote"
@@ -17,9 +20,14 @@ func ExampleApp_httpCloseElectionByOwner() {
 		baseUri       = "http://example.com"
 		schemaBaseUri = "http://example.com/schema"
 	)
-	app := newTestApp()
+	recordingEventDispatcher := cqrstest.NewRecordingEventDispatcher()
+	app := newTestApp(
+		vote.WithEventDispatcher(recordingEventDispatcher),
+	)
 	defer app.Stop()
 	api, _ := jsonapi.New(app, vote.NewHTTPActionDecoder(), baseUri, schemaBaseUri)
+
+	recordingEventDispatcher.Add(4)
 
 	body, _ := json.Marshal(election.CommenceElection{
 		ElectionID:      "E1",
@@ -66,6 +74,10 @@ func ExampleApp_httpCloseElectionByOwner() {
 	response = httptest.NewRecorder()
 	api.ServeHTTP(response, request)
 	PrettyPrint(response.Body)
+
+	ctx, done := context.WithTimeout(context.Background(), 5*time.Second)
+	defer done()
+	recordingEventDispatcher.Wait(ctx)
 
 	request = httptest.NewRequest(http.MethodGet, "/async-command-status/AC1?include_logs=true", nil)
 	response = httptest.NewRecorder()

@@ -26,7 +26,7 @@ func main() {
 
 	totalElections := flag.Int("totalElections", 100, "Total # of elections to simulate")
 	maxProposals := flag.Int("maxProposals", 7, "Max # of proposals per election")
-	totalVoters := flag.Int("totalVoters", 100, "Total # of voters")
+	totalVoters := flag.Int("totalVoters", 10, "Total # of voters")
 	delay := flag.Int("delay", 10, "Delay between calls in milliseconds")
 	host := flag.String("host", "127.0.0.1:8081", "Vote gRPC host address")
 	flag.Parse()
@@ -67,11 +67,12 @@ func simulateUntilStopped(ctx context.Context, simulator *simulator) {
 	for {
 		fmt.Printf("Starting new Simulation\n")
 		simulator.Start(ctx)
+		simulator.Errors(ctx)
 
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(1 * time.Second):
+		case <-time.After(2 * time.Second):
 		}
 	}
 }
@@ -99,6 +100,24 @@ type simulator struct {
 
 	// elections electionID => proposalIDs
 	elections map[string][]string
+}
+
+func (s *simulator) Errors(ctx context.Context) {
+	const (
+		unknownElectionID = "unknown-election-id"
+		unknownUserID     = "unknown-user-id"
+	)
+
+	_, _ = s.client.Election.CastVote(ctx, &electionpb.CastVoteRequest{
+		ElectionId:        unknownElectionID,
+		UserId:            unknownUserID,
+		RankedProposalIDs: []string{"unknown-proposal-id"},
+	})
+
+	_, _ = s.client.Election.CloseElectionByOwner(ctx, &electionpb.CloseElectionByOwnerRequest{
+		Id:         uuid.NewString(),
+		ElectionId: unknownElectionID,
+	})
 }
 
 func (s *simulator) Start(ctx context.Context) {

@@ -66,9 +66,9 @@ func WithAsyncCommandStore(store cqrs.AsyncCommandStore) Option {
 	}
 }
 
-func WithEventDispatcher(dispatcher cqrs.EventDispatcher) Option {
+func WithEventDispatcher(eventDispatcher cqrs.EventDispatcher) Option {
 	return func(a *app) {
-		a.eventDispatcher = dispatcher
+		a.eventDispatcher = eventDispatcher
 	}
 }
 
@@ -87,12 +87,6 @@ func WithClock(clock clock.Clock) Option {
 func WithElectionRepository(repository electionrepository.Repository) Option {
 	return func(a *app) {
 		a.electionRepository = repository
-	}
-}
-
-func WithSyncLocalAsyncCommandBus() Option {
-	return func(a *app) {
-		a.useSyncLocalCommandBus = true
 	}
 }
 
@@ -146,27 +140,15 @@ func NewApp(opts ...Option) *app {
 		a.tracerProvider,
 	)
 
-	if a.useSyncLocalCommandBus {
-		a.asyncCommandBus = asynccommandbus.NewSyncLocal(
-			commandHandlerRegistry,
-			a.eventDispatcher,
-			a.asyncCommandStore,
-			a.clock,
-			a.authorization,
-			a.meterProvider,
-			a.tracerProvider,
-		)
-	} else {
-		a.asyncCommandBus = asynccommandbus.NewConcurrentLocal(
-			commandHandlerRegistry,
-			a.eventDispatcher,
-			a.asyncCommandStore,
-			a.clock,
-			a.authorization,
-			a.meterProvider,
-			a.tracerProvider,
-		)
-	}
+	a.asyncCommandBus = asynccommandbus.NewConcurrentLocal(
+		commandHandlerRegistry,
+		a.eventDispatcher,
+		a.asyncCommandStore,
+		a.clock,
+		a.authorization,
+		a.meterProvider,
+		a.tracerProvider,
+	)
 
 	a.queryBus = querybus.NewLocal(
 		queryHandlerRegistry,

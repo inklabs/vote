@@ -50,6 +50,7 @@ func TestCloseElectionByOwner(t *testing.T) {
 			ID:         commandID,
 			ElectionID: electionID,
 		}
+		app.EventDispatcher.Add(1)
 
 		// When
 		response, err := app.EnqueueCommand(ctx, command)
@@ -62,6 +63,7 @@ func TestCloseElectionByOwner(t *testing.T) {
 			HasBeenQueued: true,
 		}, response)
 
+		app.EventDispatcher.Wait(ctx)
 		assert.Equal(t, event.ElectionWinnerWasSelected{
 			ElectionID:        electionID,
 			WinningProposalID: winningProposalID,

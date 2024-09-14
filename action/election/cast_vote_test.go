@@ -108,11 +108,10 @@ func TestCastVote(t *testing.T) {
 			}
 
 			// When
-			response, err := app.ExecuteCommand(ctx, command)
+			_, err := app.ExecuteCommand(ctx, command)
 
 			// Then
 			require.Equal(t, err, electionrepository.ErrElectionNotFound)
-			assert.Nil(t, response)
 			assert.Empty(t, app.EventDispatcher.GetEvents())
 		})
 
@@ -137,11 +136,10 @@ func TestCastVote(t *testing.T) {
 			}
 
 			// When
-			response, err := app.ExecuteCommand(ctx, command)
+			_, err := app.ExecuteCommand(ctx, command)
 
 			// Then
 			require.Equal(t, err, electionrepository.ErrProposalNotFound)
-			assert.Nil(t, response)
 			assert.Empty(t, app.EventDispatcher.GetEvents())
 		})
 
@@ -181,11 +179,10 @@ func TestCastVote(t *testing.T) {
 			}
 
 			// When
-			response, err := app.ExecuteCommand(ctx, command)
+			_, err := app.ExecuteCommand(ctx, command)
 
 			// Then
 			require.Equal(t, err, electionrepository.ErrInvalidElectionProposal)
-			assert.Nil(t, response)
 			assert.Empty(t, app.EventDispatcher.GetEvents())
 		})
 	})

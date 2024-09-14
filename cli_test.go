@@ -1,7 +1,11 @@
 package vote_test
 
 import (
+	"context"
 	"os"
+	"time"
+
+	"github.com/inklabs/cqrs/cqrstest"
 
 	"github.com/inklabs/vote"
 )
@@ -107,8 +111,14 @@ func ExampleApp_cliElectionListOpenElections() {
 }
 
 func ExampleApp_cliElectionCloseElectionByOwner() {
-	app := newTestApp()
+	recordingEventDispatcher := cqrstest.NewRecordingEventDispatcher()
+	app := newTestApp(
+		vote.WithEventDispatcher(recordingEventDispatcher),
+	)
 	defer app.Stop()
+
+	recordingEventDispatcher.Add(4)
+
 	cmd := vote.GetCobraRootCommand(app)
 	cmd.SetOut(NewTrimmingWriter(os.Stdout))
 	cmd.SetArgs([]string{"election", "CommenceElection",
@@ -134,6 +144,11 @@ func ExampleApp_cliElectionCloseElectionByOwner() {
 	_ = cmd.Execute()
 	cmd.SetArgs([]string{"election", "CloseElectionByOwner", "--ID", "AC1", "--ElectionID", "E1"})
 	_ = cmd.Execute()
+
+	ctx, done := context.WithTimeout(context.Background(), 5*time.Second)
+	defer done()
+	recordingEventDispatcher.Wait(ctx)
+
 	cmd.SetArgs([]string{"async-command-status", "--ID", "AC1", "--logs"})
 	_ = cmd.Execute()
 

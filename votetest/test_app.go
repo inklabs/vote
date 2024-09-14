@@ -46,7 +46,6 @@ func NewTestApp(t *testing.T) testApp {
 		vote.WithClock(incrementingclock.NewFromZero()),
 		vote.WithAsyncCommandStore(a.AsyncCommandStore),
 		vote.WithElectionRepository(a.ElectionRepository),
-		vote.WithSyncLocalAsyncCommandBus(),
 	)
 
 	return a

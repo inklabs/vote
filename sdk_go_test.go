@@ -7,8 +7,10 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/inklabs/cqrs"
+	"github.com/inklabs/cqrs/cqrstest"
 	"google.golang.org/grpc"
 
+	"github.com/inklabs/vote"
 	"github.com/inklabs/vote/grpc/go/asynccommandpb"
 	"github.com/inklabs/vote/grpc/go/electionpb"
 	voteserver "github.com/inklabs/vote/grpc/grpcserver"
@@ -67,7 +69,10 @@ func ExampleApp_grpcListOpenElections() {
 }
 
 func ExampleApp_grpcCloseElectionByOwner() {
-	app := newTestApp()
+	recordingEventDispatcher := cqrstest.NewRecordingEventDispatcher()
+	app := newTestApp(
+		vote.WithEventDispatcher(recordingEventDispatcher),
+	)
 	defer app.Stop()
 	grpcServer := grpc.NewServer()
 	defer grpcServer.Stop()
@@ -76,6 +81,8 @@ func ExampleApp_grpcCloseElectionByOwner() {
 	ctx, done := context.WithTimeout(context.Background(), 5*time.Second)
 	defer done()
 	client := goclient.NewClient(conn)
+
+	recordingEventDispatcher.Add(4)
 
 	_, _ = client.Election.CommenceElection(ctx, &electionpb.CommenceElectionRequest{
 		ElectionId:      "E1",
@@ -103,6 +110,8 @@ func ExampleApp_grpcCloseElectionByOwner() {
 		ElectionId: "E1",
 	})
 	fmt.Printf("asyncCommandResponse:\n%s", proto.MarshalTextString(asyncCommandResponse))
+
+	recordingEventDispatcher.Wait(ctx)
 
 	status, _ := client.AsyncCommand.Status(ctx, &asynccommandpb.StatusRequest{
 		CommandId:   "AC1",
