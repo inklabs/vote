@@ -285,6 +285,7 @@
         }
       ],
       "title": "Command Executions",
+      "transparent": true,
       "type": "stat"
     },
     {
@@ -361,6 +362,7 @@
         }
       ],
       "title": "Events Dispatched",
+      "transparent": true,
       "type": "stat"
     },
     {
@@ -613,6 +615,7 @@
         }
       ],
       "title": "Async Command Executions",
+      "transparent": true,
       "type": "stat"
     },
     {
@@ -689,6 +692,7 @@
         }
       ],
       "title": "Event Listener Executions",
+      "transparent": true,
       "type": "stat"
     },
     {
@@ -1212,6 +1216,7 @@
         }
       ],
       "title": "Errors",
+      "transparent": true,
       "type": "timeseries"
     },
     {
