@@ -7,6 +7,7 @@ import (
 
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"google.golang.org/grpc"
@@ -44,7 +45,7 @@ func NewJaegerTracerProvider(resource *sdkResource.Resource) *sdkTrace.TracerPro
 	return tracerProvider
 }
 
-func NewOLTPMeterProvider(resource *sdkResource.Resource) *sdkMetric.MeterProvider {
+func NewOLTPConn() *grpc.ClientConn {
 	conn, err := grpc.NewClient("localhost:4317",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
@@ -52,6 +53,26 @@ func NewOLTPMeterProvider(resource *sdkResource.Resource) *sdkMetric.MeterProvid
 		log.Fatalf("Failed to create gRPC client connection: %v", err)
 	}
 
+	return conn
+}
+
+func NewOTLPTracerProvider(resource *sdkResource.Resource, conn *grpc.ClientConn) *sdkTrace.TracerProvider {
+	ctx := context.Background()
+	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
+	if err != nil {
+		log.Fatalf("Failed to create metric exporter: %v", err)
+	}
+
+	batchSpanProcessor := sdkTrace.NewBatchSpanProcessor(exporter)
+	tracerProvider := sdkTrace.NewTracerProvider(
+		sdkTrace.WithResource(resource),
+		sdkTrace.WithSpanProcessor(batchSpanProcessor),
+	)
+
+	return tracerProvider
+}
+
+func NewOLTPMeterProvider(resource *sdkResource.Resource, conn *grpc.ClientConn) *sdkMetric.MeterProvider {
 	ctx := context.Background()
 	exporter, err := otlpmetricgrpc.New(ctx, otlpmetricgrpc.WithGRPCConn(conn))
 	if err != nil {

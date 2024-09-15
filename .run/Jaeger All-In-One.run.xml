@@ -4,6 +4,18 @@
       <settings>
         <option name="imageTag" value="jaegertracing/all-in-one:1.59" />
         <option name="containerName" value="jaeger" />
+        <option name="envVars">
+          <list>
+            <DockerEnvVarImpl>
+              <option name="name" value="COLLECTOR_OTLP_GRPC_HOST_PORT" />
+              <option name="value" value="0.0.0.0:4317" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="COLLECTOR_OTLP_HTTP_HOST_PORT" />
+              <option name="value" value="0.0.0.0:4318" />
+            </DockerEnvVarImpl>
+          </list>
+        </option>
         <option name="portBindings">
           <list>
             <DockerPortBindingImpl>
@@ -42,6 +54,7 @@
             </DockerPortBindingImpl>
           </list>
         </option>
+        <option name="commandLineOptions" value="--network otel" />
       </settings>
     </deployment>
     <method v="2" />

@@ -15,16 +15,13 @@ exporters:
     endpoint: 0.0.0.0:9090
     namespace: testapp
   debug:
-
 service:
   extensions: [health_check]
   pipelines:
     traces:
       receivers: [otlp]
-      processors: []
-      exporters: [otlp, debug]
+      exporters: [otlp]
 
     metrics:
       receivers: [otlp]
-      processors: []
-      exporters: [prometheus, debug]
+      exporters: [prometheus]

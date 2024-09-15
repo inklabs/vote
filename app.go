@@ -161,8 +161,9 @@ func NewApp(opts ...Option) *app {
 func NewProdApp() *app {
 	resource := NewResource()
 
-	tracerProvider := NewJaegerTracerProvider(resource)
-	meterProvider := NewOLTPMeterProvider(resource)
+	conn := NewOLTPConn()
+	tracerProvider := NewOTLPTracerProvider(resource, conn)
+	meterProvider := NewOLTPMeterProvider(resource, conn)
 	otel.SetTracerProvider(tracerProvider)
 	otel.SetMeterProvider(meterProvider)
 
