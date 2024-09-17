@@ -153,6 +153,8 @@ func NewApp(opts ...Option) *app {
 	a.queryBus = querybus.NewLocal(
 		queryHandlerRegistry,
 		a.authorization,
+		a.meterProvider,
+		a.tracerProvider,
 	)
 
 	return a

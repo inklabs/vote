@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/inklabs/cqrs"
+	"go.opentelemetry.io/otel/attribute"
 
 	"github.com/inklabs/vote/internal/electionrepository"
 )
@@ -38,8 +39,15 @@ func NewListProposalsHandler(repository electionrepository.Repository) *listProp
 }
 
 func (h *listProposalsHandler) On(ctx context.Context, query ListProposals) (ListProposalsResponse, error) {
+	ctx, span := tracer.Start(ctx, "vote.list-proposals")
+	defer span.End()
 
 	page, itemsPerPage := cqrs.DefaultPagination(query.Page, query.ItemsPerPage, electionrepository.DefaultItemsPerPage)
+
+	span.SetAttributes(
+		attribute.Int("page", page),
+		attribute.Int("itemsPerPage", itemsPerPage),
+	)
 
 	proposals, err := h.repository.ListProposals(ctx,
 		query.ElectionID,

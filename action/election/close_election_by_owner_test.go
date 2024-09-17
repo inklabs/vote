@@ -117,7 +117,7 @@ func TestCloseElectionByOwner(t *testing.T) {
 			_, err := app.EnqueueCommand(ctx, command)
 
 			// Then
-			require.Equal(t, electionrepository.ErrElectionNotFound, err)
+			require.Equal(t, electionrepository.NewErrElectionNotFound(electionID), err)
 		})
 
 		t.Run("when not authorized", func(t *testing.T) {

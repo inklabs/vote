@@ -111,7 +111,7 @@ func TestCastVote(t *testing.T) {
 			_, err := app.ExecuteCommand(ctx, command)
 
 			// Then
-			require.Equal(t, err, electionrepository.ErrElectionNotFound)
+			require.Equal(t, err, electionrepository.NewErrElectionNotFound(command.ElectionID))
 			assert.Empty(t, app.EventDispatcher.GetEvents())
 		})
 

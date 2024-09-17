@@ -37,23 +37,20 @@ func main() {
 	fmt.Printf("totalVoters: %d\n", *totalVoters)
 	fmt.Printf("delay: %d\n", *delay)
 
-	dialCtx, connectDone := context.WithTimeout(context.Background(), time.Second*2)
-	conn, err := grpc.DialContext(
-		dialCtx,
+	client, err := grpc.NewClient(
 		*host,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
 	)
+
 	if err != nil {
-		log.Fatalf("unable to dial (%s): %v", *host, err)
+		log.Fatalf("unable to get grpc client (%s): %v", *host, err)
 	}
 	defer func() {
-		_ = conn.Close()
-		connectDone()
+		_ = client.Close()
 	}()
 
-	client := goclient.NewClient(conn)
-	s := NewSimulator(client, *totalElections, *maxProposals, *totalVoters, *delay)
+	goClient := goclient.NewClient(client)
+	s := NewSimulator(goClient, *totalElections, *maxProposals, *totalVoters, *delay)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
@@ -106,33 +103,47 @@ func (s *simulator) Errors(ctx context.Context) {
 	const (
 		unknownElectionID = "unknown-election-id"
 		unknownUserID     = "unknown-user-id"
+		percent           = 15
 	)
 
-	_, _ = s.client.Election.CastVote(ctx, &electionpb.CastVoteRequest{
-		ElectionId:        unknownElectionID,
-		UserId:            unknownUserID,
-		RankedProposalIDs: []string{"unknown-proposal-id"},
+	maybeDo(percent, func() {
+		_, _ = s.client.Election.ListProposals(ctx, &electionpb.ListProposalsRequest{
+			ElectionId: unknownElectionID,
+		})
 	})
 
-	_, _ = s.client.Election.CloseElectionByOwner(ctx, &electionpb.CloseElectionByOwnerRequest{
-		Id:         uuid.NewString(),
-		ElectionId: unknownElectionID,
+	maybeDo(percent, func() {
+		_, _ = s.client.Election.CastVote(ctx, &electionpb.CastVoteRequest{
+			ElectionId:        unknownElectionID,
+			UserId:            unknownUserID,
+			RankedProposalIDs: []string{"unknown-proposal-id"},
+		})
+	})
+
+	maybeDo(percent, func() {
+		_, _ = s.client.Election.CloseElectionByOwner(ctx, &electionpb.CloseElectionByOwnerRequest{
+			Id:         uuid.NewString(),
+			ElectionId: unknownElectionID,
+		})
 	})
 }
 
 func (s *simulator) Start(ctx context.Context) {
 	err := s.setupElections(ctx)
 	if err != nil {
+		log.Printf("unable to setup elections: %v", err)
 		return
 	}
 
 	err = s.castVotes(ctx)
 	if err != nil {
+		log.Printf("unable to cast votes: %v", err)
 		return
 	}
 
 	err = s.closeElections(ctx)
 	if err != nil {
+		log.Printf("unable to close elections: %v", err)
 		return
 	}
 }
@@ -180,13 +191,25 @@ func (s *simulator) castVotes(ctx context.Context) error {
 		userID := uuid.NewString()
 		electionsToVoteIn := random(1, s.totalElections)
 
+		_, err := s.client.Election.ListOpenElections(ctx, &electionpb.ListOpenElectionsRequest{})
+		if err != nil {
+			return fmt.Errorf("unable to list elections: %w", err)
+		}
+
 		for electionID, proposals := range s.elections {
 			if electionsToVoteIn <= 0 {
 				break
 			}
 
+			_, err = s.client.Election.ListProposals(ctx, &electionpb.ListProposalsRequest{
+				ElectionId: electionID,
+			})
+			if err != nil {
+				return fmt.Errorf("unable to list proposals: %w", err)
+			}
+
 			shuffle(proposals)
-			_, err := s.client.Election.CastVote(ctx, &electionpb.CastVoteRequest{
+			_, err = s.client.Election.CastVote(ctx, &electionpb.CastVoteRequest{
 				ElectionId:        electionID,
 				UserId:            userID,
 				RankedProposalIDs: proposals,
@@ -229,5 +252,13 @@ func shuffle(slice []string) {
 	for i := range slice {
 		j := rand.Intn(i + 1)
 		slice[i], slice[j] = slice[j], slice[i]
+	}
+}
+
+func maybeDo(percentage int, callback func()) {
+	randomNumber := rand.Intn(100)
+
+	if randomNumber < percentage {
+		callback()
 	}
 }

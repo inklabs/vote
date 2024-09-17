@@ -46,6 +46,17 @@ type Repository interface {
 	ListProposals(ctx context.Context, electionID string, page, itemsPerPage int) ([]Proposal, error)
 }
 
-var ErrElectionNotFound = fmt.Errorf("election not found")
+type ErrElectionNotFound struct {
+	electionID string
+}
+
+func NewErrElectionNotFound(electionID string) *ErrElectionNotFound {
+	return &ErrElectionNotFound{electionID: electionID}
+}
+
+func (e ErrElectionNotFound) Error() string {
+	return fmt.Sprintf("election (%s) not found", e.electionID)
+}
+
 var ErrProposalNotFound = fmt.Errorf("proposal not found")
 var ErrInvalidElectionProposal = fmt.Errorf("invalid election")

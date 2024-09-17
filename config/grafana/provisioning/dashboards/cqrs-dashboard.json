@@ -255,7 +255,7 @@
         "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
-            "lastNotNull"
+            "last"
           ],
           "fields": "",
           "values": false
@@ -273,7 +273,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum(testapp_cqrs_command_bus_call_handle_duration_milliseconds_count)",
+          "expr": "round(sum(increase(testapp_cqrs_command_bus_call_handle_duration_milliseconds_count[$__range])), 1)",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -324,7 +324,7 @@
         "x": 12,
         "y": 1
       },
-      "id": 25,
+      "id": 28,
       "options": {
         "colorMode": "background",
         "graphMode": "area",
@@ -333,7 +333,7 @@
         "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
-            "lastNotNull"
+            "last"
           ],
           "fields": "",
           "values": false
@@ -350,8 +350,9 @@
             "uid": "ddxpne7bzg2kgf"
           },
           "disableTextWrap": false,
-          "editorMode": "code",
-          "expr": "sum(testapp_cqrs_event_dispatcher_publish_success_total)",
+          "editorMode": "builder",
+          "expr": "round(sum(increase(testapp_cqrs_query_bus_call_handle_duration_milliseconds_count[$__range])), 1)",
+          "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -361,7 +362,7 @@
           "useBackend": false
         }
       ],
-      "title": "Events Dispatched",
+      "title": "Query Executions",
       "transparent": true,
       "type": "stat"
     },
@@ -486,12 +487,12 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "cqrs_event_type"
+              "options": "cqrs_command_type"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "Event"
+                "value": "Async Command"
               }
             ]
           }
@@ -503,7 +504,7 @@
         "x": 16,
         "y": 1
       },
-      "id": 18,
+      "id": 27,
       "options": {
         "cellHeight": "sm",
         "footer": {
@@ -524,9 +525,9 @@
             "uid": "ddxpne7bzg2kgf"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(10, max_over_time(testapp_cqrs_event_dispatcher_publish_success_total[$__rate_interval]))",
+          "expr": "topk(10, max_over_time(testapp_cqrs_query_bus_call_handle_duration_milliseconds_count[$__rate_interval]))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -538,7 +539,7 @@
           "useBackend": false
         }
       ],
-      "title": "Top 10 Events",
+      "title": "Top 10 Queries",
       "type": "table"
     },
     {
@@ -586,7 +587,7 @@
         "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
-            "lastNotNull"
+            "last"
           ],
           "fields": "",
           "values": false
@@ -604,7 +605,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum(testapp_cqrs_async_command_bus_call_handle_duration_milliseconds_count)",
+          "expr": "round(sum(increase(testapp_cqrs_async_command_bus_call_handle_duration_milliseconds_count[$__range])), 1)",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -627,7 +628,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "dark-orange",
+            "fixedColor": "dark-red",
             "mode": "fixed"
           },
           "mappings": [],
@@ -654,7 +655,7 @@
         "x": 12,
         "y": 5
       },
-      "id": 26,
+      "id": 25,
       "options": {
         "colorMode": "background",
         "graphMode": "area",
@@ -663,7 +664,7 @@
         "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
-            "lastNotNull"
+            "last"
           ],
           "fields": "",
           "values": false
@@ -680,8 +681,8 @@
             "uid": "ddxpne7bzg2kgf"
           },
           "disableTextWrap": false,
-          "editorMode": "code",
-          "expr": "sum(testapp_cqrs_event_dispatcher_call_on_event_duration_milliseconds_count)",
+          "editorMode": "builder",
+          "expr": "round(sum(increase(testapp_cqrs_event_dispatcher_publish_success_total[$__range])), 1)",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -691,7 +692,7 @@
           "useBackend": false
         }
       ],
-      "title": "Event Listener Executions",
+      "title": "Events Dispatched",
       "transparent": true,
       "type": "stat"
     },
@@ -923,6 +924,448 @@
               {
                 "id": "color",
                 "value": {
+                  "fixedColor": "light-red",
+                  "mode": "shades"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 300
+              },
+              {
+                "id": "displayName",
+                "value": "Total"
+              },
+              {
+                "id": "custom.align",
+                "value": "center"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "exported_job"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "instance"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "job"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "cqrs_event_type"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Event"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 8
+      },
+      "id": 18,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ddxpne7bzg2kgf"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "topk(10, max_over_time(testapp_cqrs_event_dispatcher_publish_success_total[$__rate_interval]))",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Top 10 Events",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "ddxpne7bzg2kgf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "dark-orange",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 9
+      },
+      "id": 26,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ddxpne7bzg2kgf"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "round(sum(increase(testapp_cqrs_event_dispatcher_call_on_event_duration_milliseconds_count[$__range])), 1)",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Event Listener Executions",
+      "transparent": true,
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "ddxpne7bzg2kgf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 9,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": 3600000,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 8,
+        "y": 13
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ddxpne7bzg2kgf"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "sum(rate(testapp_cqrs_async_command_bus_enqueue_error_total[$__rate_interval]))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": false,
+          "instant": false,
+          "legendFormat": "Async Command Bus - Enqueue",
+          "range": true,
+          "refId": "B",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ddxpne7bzg2kgf"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "sum(rate(testapp_cqrs_command_bus_call_handle_error_total[$__rate_interval]))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Command Bus - Handle",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ddxpne7bzg2kgf"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "sum(rate(testapp_cqrs_query_bus_call_handle_error_total[$__rate_interval]))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Query Bus - Handle",
+          "range": true,
+          "refId": "F",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ddxpne7bzg2kgf"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "sum(rate(testapp_cqrs_event_dispatcher_publish_error_total[$__rate_interval]))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Event Dispatcher - Publish",
+          "range": true,
+          "refId": "C",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ddxpne7bzg2kgf"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "sum(rate(testapp_cqrs_event_dispatcher_call_on_event_error_total[$__rate_interval]))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Event Subscriber - OnEvent",
+          "range": true,
+          "refId": "D",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ddxpne7bzg2kgf"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "sum(rate(testapp_cqrs_broker_publish_error_total[$__rate_interval]))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "Broker - Publish",
+          "range": true,
+          "refId": "E",
+          "useBackend": false
+        }
+      ],
+      "title": "Errors",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "ddxpne7bzg2kgf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "locale"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "gauge",
+                  "valueDisplayMode": "color"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
                   "fixedColor": "orange",
                   "mode": "shades"
                 }
@@ -1007,7 +1450,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 8
+        "y": 15
       },
       "id": 22,
       "options": {
@@ -1048,184 +1491,12 @@
       "type": "table"
     },
     {
-      "datasource": {
-        "default": true,
-        "type": "prometheus",
-        "uid": "ddxpne7bzg2kgf"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 9,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": 3600000,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 6,
-        "w": 8,
-        "x": 8,
-        "y": 9
-      },
-      "id": 8,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ddxpne7bzg2kgf"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "expr": "sum(rate(testapp_cqrs_async_command_bus_enqueue_error_total[$__rate_interval]))",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": false,
-          "instant": false,
-          "legendFormat": "Async Command Bus - Enqueue",
-          "range": true,
-          "refId": "B",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ddxpne7bzg2kgf"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "sum(rate(testapp_cqrs_command_bus_call_handle_error_total[$__rate_interval]))",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Command Bus - Handle",
-          "range": true,
-          "refId": "A",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ddxpne7bzg2kgf"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "expr": "sum(rate(testapp_cqrs_event_dispatcher_publish_error_total[$__rate_interval]))",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Event Dispatcher - Publish",
-          "range": true,
-          "refId": "C",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ddxpne7bzg2kgf"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "expr": "sum(rate(testapp_cqrs_event_dispatcher_call_on_event_error_total[$__rate_interval]))",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "interval": "",
-          "legendFormat": "Event Subscriber - OnEvent",
-          "range": true,
-          "refId": "D",
-          "useBackend": false
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "ddxpne7bzg2kgf"
-          },
-          "disableTextWrap": false,
-          "editorMode": "code",
-          "expr": "sum(rate(testapp_cqrs_broker_publish_error_total[$__rate_interval]))",
-          "fullMetaSearch": false,
-          "hide": false,
-          "includeNullMetadata": true,
-          "instant": false,
-          "legendFormat": "Broker - Publish",
-          "range": true,
-          "refId": "E",
-          "useBackend": false
-        }
-      ],
-      "title": "Errors",
-      "transparent": true,
-      "type": "timeseries"
-    },
-    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 22
       },
       "id": 9,
       "panels": [],
@@ -1297,7 +1568,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 23
       },
       "id": 2,
       "options": {
@@ -1399,7 +1670,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 16
+        "y": 23
       },
       "id": 11,
       "options": {
@@ -1442,7 +1713,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 29
       },
       "id": 20,
       "panels": [],
@@ -1514,7 +1785,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 23
+        "y": 30
       },
       "id": 1,
       "options": {
@@ -1615,7 +1886,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 23
+        "y": 30
       },
       "id": 12,
       "options": {
@@ -1658,7 +1929,224 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 36
+      },
+      "id": 29,
+      "panels": [],
+      "title": "Query Bus",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "ddxpne7bzg2kgf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 9,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": 3600000,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 37
+      },
+      "id": 30,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ddxpne7bzg2kgf"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by(le, cqrs_query_type) (rate(testapp_cqrs_query_bus_call_handle_duration_milliseconds_bucket[$__rate_interval])))",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Query Bus - Call Handle - execution time (ms)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "ddxpne7bzg2kgf"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 9,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 37
+      },
+      "id": 31,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "ddxpne7bzg2kgf"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "expr": "rate(testapp_cqrs_query_bus_call_handle_duration_milliseconds_count[$__rate_interval])",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": false,
+          "instant": false,
+          "legendFormat": "{{cqrs_command_type}}",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Query Bus - Call Handle - Count",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 43
       },
       "id": 21,
       "panels": [],
@@ -1730,7 +2218,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 30
+        "y": 44
       },
       "id": 6,
       "options": {
@@ -1831,7 +2319,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 30
+        "y": 44
       },
       "id": 4,
       "options": {
@@ -1951,7 +2439,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 37
+        "y": 51
       },
       "id": 14,
       "options": {
@@ -2052,7 +2540,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 37
+        "y": 51
       },
       "id": 5,
       "options": {
@@ -2112,7 +2600,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 44
+        "y": 58
       },
       "id": 10,
       "panels": [],
@@ -2184,7 +2672,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 45
+        "y": 59
       },
       "id": 3,
       "options": {
@@ -2285,7 +2773,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 45
+        "y": 59
       },
       "id": 13,
       "options": {
@@ -2322,20 +2810,20 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "5s",
+  "refresh": "auto",
   "schemaVersion": 39,
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "CQRS",
   "uid": "edxpsnmucx2pse",
-  "version": 12,
+  "version": 3,
   "weekStart": ""
 }

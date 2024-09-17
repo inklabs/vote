@@ -66,7 +66,7 @@ func (r *inMemoryElectionRepository) GetElection(ctx context.Context, electionID
 		return election, nil
 	}
 
-	return Election{}, ErrElectionNotFound
+	return Election{}, NewErrElectionNotFound(electionID)
 }
 
 func (r *inMemoryElectionRepository) SaveProposal(ctx context.Context, proposal Proposal) error {
@@ -79,7 +79,7 @@ func (r *inMemoryElectionRepository) SaveProposal(ctx context.Context, proposal 
 	sleep.Rand(2 * time.Millisecond)
 
 	if _, ok := r.elections[proposal.ElectionID]; !ok {
-		return ErrElectionNotFound
+		return NewErrElectionNotFound(proposal.ElectionID)
 	}
 
 	r.proposals[proposal.ProposalID] = proposal
@@ -113,7 +113,7 @@ func (r *inMemoryElectionRepository) GetProposals(ctx context.Context, electionI
 	sleep.Rand(1 * time.Millisecond)
 
 	if _, ok := r.elections[electionID]; !ok {
-		return nil, ErrElectionNotFound
+		return nil, NewErrElectionNotFound(electionID)
 	}
 
 	var proposals []Proposal
@@ -136,7 +136,7 @@ func (r *inMemoryElectionRepository) SaveVote(ctx context.Context, vote Vote) er
 	sleep.Rand(2 * time.Millisecond)
 
 	if _, ok := r.elections[vote.ElectionID]; !ok {
-		return ErrElectionNotFound
+		return NewErrElectionNotFound(vote.ElectionID)
 	}
 
 	for _, proposalID := range vote.RankedProposalIDs {
@@ -167,7 +167,7 @@ func (r *inMemoryElectionRepository) GetVotes(ctx context.Context, electionID st
 		return votes, nil
 	}
 
-	return nil, ErrElectionNotFound
+	return nil, NewErrElectionNotFound(electionID)
 }
 
 func (r *inMemoryElectionRepository) ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) ([]Election, error) {
@@ -202,7 +202,7 @@ func (r *inMemoryElectionRepository) ListProposals(ctx context.Context, election
 	sleep.Rand(2 * time.Millisecond)
 
 	if _, ok := r.elections[electionID]; !ok {
-		return nil, ErrElectionNotFound
+		return nil, NewErrElectionNotFound(electionID)
 	}
 
 	var proposals []Proposal
