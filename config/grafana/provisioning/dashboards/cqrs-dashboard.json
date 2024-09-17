@@ -53,6 +53,7 @@
             "inspect": false
           },
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -195,7 +196,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "topk(10, max_over_time(testapp_cqrs_command_bus_call_handle_duration_milliseconds_count[$__rate_interval]))",
+          "expr": "topk(10, round(increase(testapp_cqrs_command_bus_call_handle_duration_milliseconds_count[$__range]), 1))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -384,7 +385,9 @@
             },
             "inspect": false
           },
+          "fieldMinMax": false,
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -525,9 +528,9 @@
             "uid": "ddxpne7bzg2kgf"
           },
           "disableTextWrap": false,
-          "editorMode": "code",
+          "editorMode": "builder",
           "exemplar": false,
-          "expr": "topk(10, max_over_time(testapp_cqrs_query_bus_call_handle_duration_milliseconds_count[$__rate_interval]))",
+          "expr": "topk(10, round(increase(testapp_cqrs_query_bus_call_handle_duration_milliseconds_count[$__range]), 1))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -715,6 +718,7 @@
             "inspect": false
           },
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -857,7 +861,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "topk(10, max_over_time(testapp_cqrs_async_command_bus_call_handle_duration_milliseconds_count[$__rate_interval]))",
+          "expr": "topk(10, round(increase(testapp_cqrs_async_command_bus_call_handle_duration_milliseconds_count[$__range]), 1))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -890,7 +894,9 @@
             },
             "inspect": false
           },
+          "fieldMinMax": false,
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1033,7 +1039,7 @@
           "disableTextWrap": false,
           "editorMode": "builder",
           "exemplar": false,
-          "expr": "topk(10, max_over_time(testapp_cqrs_event_dispatcher_publish_success_total[$__rate_interval]))",
+          "expr": "topk(10, round(increase(testapp_cqrs_event_dispatcher_publish_success_total[$__range]), 1))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -1160,7 +1166,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": 3600000,
+            "spanNulls": 300000,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1330,9 +1336,13 @@
             "cellOptions": {
               "type": "auto"
             },
-            "inspect": false
+            "filterable": false,
+            "inspect": false,
+            "minWidth": 50
           },
+          "fieldMinMax": true,
           "mappings": [],
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1381,6 +1391,10 @@
               {
                 "id": "custom.align",
                 "value": "center"
+              },
+              {
+                "id": "fieldMinMax",
+                "value": true
               }
             ]
           },
@@ -1473,9 +1487,9 @@
             "uid": "ddxpne7bzg2kgf"
           },
           "disableTextWrap": false,
-          "editorMode": "code",
+          "editorMode": "builder",
           "exemplar": false,
-          "expr": "topk(10, max_over_time(testapp_cqrs_event_dispatcher_call_on_event_duration_milliseconds_count[$__interval]))",
+          "expr": "topk(10, round(increase(testapp_cqrs_event_dispatcher_call_on_event_duration_milliseconds_count[$__range]), 1))",
           "format": "table",
           "fullMetaSearch": false,
           "hide": false,
@@ -1532,13 +1546,16 @@
             },
             "insertNulls": false,
             "lineInterpolation": "linear",
+            "lineStyle": {
+              "fill": "solid"
+            },
             "lineWidth": 2,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": 3600000,
+            "spanNulls": 300000,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1547,6 +1564,7 @@
               "mode": "off"
             }
           },
+          "fieldMinMax": false,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -1640,7 +1658,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": false,
+            "spanNulls": 300000,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1755,7 +1773,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": 3600000,
+            "spanNulls": 300000,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1856,7 +1874,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": false,
+            "spanNulls": 300000,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1971,7 +1989,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": 3600000,
+            "spanNulls": 300000,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2073,7 +2091,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": false,
+            "spanNulls": 300000,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2188,7 +2206,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": false,
+            "spanNulls": 300000,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2289,7 +2307,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": false,
+            "spanNulls": 300000,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2409,7 +2427,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": false,
+            "spanNulls": 300000,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2510,7 +2528,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": false,
+            "spanNulls": 300000,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2642,7 +2660,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": 3600000,
+            "spanNulls": 300000,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2743,7 +2761,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": false,
+            "spanNulls": 300000,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2810,20 +2828,20 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "auto",
+  "refresh": "5s",
   "schemaVersion": 39,
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "CQRS",
   "uid": "edxpsnmucx2pse",
-  "version": 3,
+  "version": 1,
   "weekStart": ""
 }

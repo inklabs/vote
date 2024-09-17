@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
@@ -29,20 +28,6 @@ func NewResource() *sdkResource.Resource {
 		))
 
 	return resource
-}
-
-func NewJaegerTracerProvider(resource *sdkResource.Resource) *sdkTrace.TracerProvider {
-	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://localhost:14268/api/traces")))
-	if err != nil {
-		log.Fatalf("Failed to create Jaeger exporter: %v", err)
-	}
-
-	tracerProvider := sdkTrace.NewTracerProvider(
-		sdkTrace.WithResource(resource),
-		sdkTrace.WithBatcher(exporter),
-	)
-
-	return tracerProvider
 }
 
 func NewOLTPConn() *grpc.ClientConn {
