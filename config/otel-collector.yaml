@@ -4,6 +4,23 @@ receivers:
       grpc:
         endpoint: 0.0.0.0:4317
 processors:
+  tail_sampling:
+    decision_wait: 1m
+    num_traces: 10000
+    expected_new_traces_per_sec: 10
+    policies:
+      [
+        {
+          name: errors-policy,
+          type: status_code,
+          status_code: {status_codes: [ERROR]}
+        },
+        {
+          name: randomized-policy,
+          type: probabilistic,
+          probabilistic: {sampling_percentage: 25}
+        },
+      ]
 extensions:
   health_check: {}
 exporters:

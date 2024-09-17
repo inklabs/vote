@@ -8,6 +8,8 @@ import (
 
 	"github.com/inklabs/cqrs"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/inklabs/vote/pkg/sleep"
 )
@@ -66,7 +68,10 @@ func (r *inMemoryElectionRepository) GetElection(ctx context.Context, electionID
 		return election, nil
 	}
 
-	return Election{}, NewErrElectionNotFound(electionID)
+	err := NewErrElectionNotFound(electionID)
+	recordSpanError(span, err)
+
+	return Election{}, err
 }
 
 func (r *inMemoryElectionRepository) SaveProposal(ctx context.Context, proposal Proposal) error {
@@ -79,7 +84,10 @@ func (r *inMemoryElectionRepository) SaveProposal(ctx context.Context, proposal 
 	sleep.Rand(2 * time.Millisecond)
 
 	if _, ok := r.elections[proposal.ElectionID]; !ok {
-		return NewErrElectionNotFound(proposal.ElectionID)
+		err := NewErrElectionNotFound(proposal.ElectionID)
+		recordSpanError(span, err)
+
+		return err
 	}
 
 	r.proposals[proposal.ProposalID] = proposal
@@ -100,7 +108,10 @@ func (r *inMemoryElectionRepository) GetProposal(ctx context.Context, electionID
 		return proposal, nil
 	}
 
-	return Proposal{}, ErrProposalNotFound
+	err := ErrProposalNotFound
+	recordSpanError(span, err)
+
+	return Proposal{}, err
 }
 
 func (r *inMemoryElectionRepository) GetProposals(ctx context.Context, electionID string) ([]Proposal, error) {
@@ -113,7 +124,10 @@ func (r *inMemoryElectionRepository) GetProposals(ctx context.Context, electionI
 	sleep.Rand(1 * time.Millisecond)
 
 	if _, ok := r.elections[electionID]; !ok {
-		return nil, NewErrElectionNotFound(electionID)
+		err := NewErrElectionNotFound(electionID)
+		recordSpanError(span, err)
+
+		return nil, err
 	}
 
 	var proposals []Proposal
@@ -136,16 +150,25 @@ func (r *inMemoryElectionRepository) SaveVote(ctx context.Context, vote Vote) er
 	sleep.Rand(2 * time.Millisecond)
 
 	if _, ok := r.elections[vote.ElectionID]; !ok {
-		return NewErrElectionNotFound(vote.ElectionID)
+		err := NewErrElectionNotFound(vote.ElectionID)
+		recordSpanError(span, err)
+
+		return err
 	}
 
 	for _, proposalID := range vote.RankedProposalIDs {
 		if proposal, ok := r.proposals[proposalID]; ok {
 			if proposal.ElectionID != vote.ElectionID {
-				return ErrInvalidElectionProposal
+				err := ErrInvalidElectionProposal
+				recordSpanError(span, err)
+
+				return err
 			}
 		} else {
-			return ErrProposalNotFound
+			err := ErrProposalNotFound
+			recordSpanError(span, err)
+
+			return err
 		}
 	}
 
@@ -167,7 +190,10 @@ func (r *inMemoryElectionRepository) GetVotes(ctx context.Context, electionID st
 		return votes, nil
 	}
 
-	return nil, NewErrElectionNotFound(electionID)
+	err := NewErrElectionNotFound(electionID)
+	recordSpanError(span, err)
+
+	return nil, err
 }
 
 func (r *inMemoryElectionRepository) ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) ([]Election, error) {
@@ -202,7 +228,10 @@ func (r *inMemoryElectionRepository) ListProposals(ctx context.Context, election
 	sleep.Rand(2 * time.Millisecond)
 
 	if _, ok := r.elections[electionID]; !ok {
-		return nil, NewErrElectionNotFound(electionID)
+		err := NewErrElectionNotFound(electionID)
+		recordSpanError(span, err)
+
+		return nil, err
 	}
 
 	var proposals []Proposal
@@ -264,4 +293,9 @@ func pageEntity[T any](entities []T, page, itemsPerPage int) []T {
 	}
 
 	return entities[startIndex:endIndex]
+}
+
+func recordSpanError(span trace.Span, err error) {
+	span.SetStatus(codes.Error, err.Error())
+	span.RecordError(err)
 }
