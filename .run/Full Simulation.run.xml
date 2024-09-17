@@ -1,8 +1,14 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Full Simulation" type="CompoundRunConfigurationType">
+    <toRun name="Jaeger All-In-One" type="docker-deploy" />
+    <toRun name="Prometheus" type="docker-deploy" />
+    <toRun name="Otel Collector" type="docker-deploy" />
+    <toRun name="Grafana" type="docker-deploy" />
+    <toRun name="NATS" type="docker-deploy" />
     <toRun name="Run gRPC API" type="GoApplicationRunConfiguration" />
     <toRun name="Simulate Elections" type="GoApplicationRunConfiguration" />
     <toRun name="Start Subscriber" type="GoApplicationRunConfiguration" />
+    <toRun name="Open Grafana" type="ShConfigurationType" />
     <method v="2" />
   </configuration>
 </component>
