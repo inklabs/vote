@@ -162,6 +162,16 @@
               {
                 "id": "displayName",
                 "value": "Command"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "View traces",
+                    "url": "http://localhost:16686/search?lookback=30m&service=voting-demo&tags={\"cqrs.command-type\":\"${__value.text}\"}"
+                  }
+                ]
               }
             ]
           }
@@ -496,6 +506,16 @@
               {
                 "id": "displayName",
                 "value": "Query"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "View traces",
+                    "url": "http://localhost:16686/search?lookback=30m&service=voting-demo&tags={\"cqrs.query-type\":\"${__value.text}\"}"
+                  }
+                ]
               }
             ]
           }
@@ -821,12 +841,22 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "cqrs_command_type"
+              "options": "cqrs_async_command_type"
             },
             "properties": [
               {
                 "id": "displayName",
                 "value": "Async Command"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "View traces",
+                    "url": "http://localhost:16686/search?lookback=30m&service=voting-demo&tags={\"cqrs.async-command-type\":\"${__value.text}\"}"
+                  }
+                ]
               }
             ]
           }
@@ -1005,6 +1035,16 @@
               {
                 "id": "displayName",
                 "value": "Event"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "View traces",
+                    "url": "http://localhost:16686/search?lookback=30m&service=voting-demo&tags={\"cqrs.event-type\":\"${__value.text}\"}"
+                  }
+                ]
               }
             ]
           }
@@ -1456,6 +1496,16 @@
               {
                 "id": "displayName",
                 "value": "Event Listener"
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "View traces",
+                    "url": "http://localhost:16686/search?lookback=30m&service=voting-demo&tags={\"cqrs.event-listener-type\":\"${__value.text}\"}"
+                  }
+                ]
               }
             ]
           }
@@ -1791,8 +1841,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1893,8 +1942,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2009,8 +2057,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2112,8 +2159,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2228,8 +2274,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2330,8 +2375,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2451,8 +2495,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2553,8 +2596,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2686,8 +2728,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2788,8 +2829,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2845,10 +2885,22 @@
   "schemaVersion": 39,
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "ddxpne7bzg2kgf"
+        },
+        "filters": [],
+        "hide": 0,
+        "name": "Filters",
+        "skipUrlSync": false,
+        "type": "adhoc"
+      }
+    ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
