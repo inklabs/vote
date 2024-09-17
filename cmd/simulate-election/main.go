@@ -103,7 +103,7 @@ func (s *simulator) Errors(ctx context.Context) {
 	const (
 		unknownElectionID = "unknown-election-id"
 		unknownUserID     = "unknown-user-id"
-		percent           = 15
+		percent           = 5
 	)
 
 	maybeDo(percent, func() {
