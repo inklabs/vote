@@ -10,21 +10,16 @@ import (
 	"github.com/inklabs/cqrs"
 	"github.com/inklabs/cqrs/asynccommandbus"
 	"github.com/inklabs/cqrs/asynccommandstore"
+	"github.com/inklabs/cqrs/broker/nats"
+	"github.com/inklabs/cqrs/broker/rabbitmq"
 	"github.com/inklabs/cqrs/commandbus"
 	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/inklabs/cqrs/eventdispatcher"
-	"github.com/inklabs/cqrs/eventdispatcher/distributed"
-	"github.com/inklabs/cqrs/eventdispatcher/distributed/provider/nats"
-	"github.com/inklabs/cqrs/eventdispatcher/distributed/provider/rabbitmq"
 	"github.com/inklabs/cqrs/pkg/clock"
 	"github.com/inklabs/cqrs/pkg/clock/provider/systemclock"
 	"github.com/inklabs/cqrs/querybus"
 	natsClient "github.com/nats-io/nats.go"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/metric"
-	metricNoop "go.opentelemetry.io/otel/metric/noop"
-	"go.opentelemetry.io/otel/trace"
-	traceNoop "go.opentelemetry.io/otel/trace/noop"
 
 	"github.com/inklabs/vote/action/election"
 	"github.com/inklabs/vote/event"
@@ -54,8 +49,6 @@ type app struct {
 	ctxShutdowns           []func(ctx context.Context) error
 
 	electionRepository electionrepository.Repository
-	meterProvider      metric.MeterProvider
-	tracerProvider     trace.TracerProvider
 }
 
 type Option func(a *app)
@@ -90,13 +83,6 @@ func WithElectionRepository(repository electionrepository.Repository) Option {
 	}
 }
 
-func WithTelemetry(meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) Option {
-	return func(a *app) {
-		a.meterProvider = meterProvider
-		a.tracerProvider = tracerProvider
-	}
-}
-
 func WithCtxShutdown(shutdowns ...func(ctx context.Context) error) Option {
 	return func(a *app) {
 		a.ctxShutdowns = append(a.ctxShutdowns, shutdowns...)
@@ -109,15 +95,11 @@ func NewApp(opts ...Option) *app {
 		authorization:      cqrstest.NewPassThruAuth(),
 		asyncCommandStore:  asynccommandstore.NewInMemory(),
 		electionRepository: electionrepository.NewInMemory(),
-		meterProvider:      metricNoop.NewMeterProvider(),
-		tracerProvider:     traceNoop.NewTracerProvider(),
 	}
 
 	a.eventDispatcher = eventdispatcher.NewConcurrentLocal(
 		log.Default(),
 		a.GetEventListeners(),
-		a.meterProvider,
-		a.tracerProvider,
 	)
 
 	for _, opt := range opts {
@@ -136,8 +118,6 @@ func NewApp(opts ...Option) *app {
 		commandHandlerRegistry,
 		a.eventDispatcher,
 		a.authorization,
-		a.meterProvider,
-		a.tracerProvider,
 	)
 
 	a.asyncCommandBus = asynccommandbus.NewConcurrentLocal(
@@ -146,15 +126,11 @@ func NewApp(opts ...Option) *app {
 		a.asyncCommandStore,
 		a.clock,
 		a.authorization,
-		a.meterProvider,
-		a.tracerProvider,
 	)
 
 	a.queryBus = querybus.NewLocal(
 		queryHandlerRegistry,
 		a.authorization,
-		a.meterProvider,
-		a.tracerProvider,
 	)
 
 	return a
@@ -175,12 +151,11 @@ func NewProdApp() *app {
 		GetAsyncCommands(),
 	)
 
-	eventDispatcher := newDistributedEventDispatcher(meterProvider, tracerProvider)
+	eventDispatcher := newDistributedEventDispatcher()
 
 	return NewApp(
 		WithAuthorization(authorization.NewDelayAuth()),
 		WithAsyncCommandStore(asyncCommandStore),
-		WithTelemetry(meterProvider, tracerProvider),
 		WithEventDispatcher(eventDispatcher),
 		WithCtxShutdown(
 			tracerProvider.Shutdown,
@@ -241,18 +216,7 @@ func (a *app) GetEventListeners() []cqrs.EventListener {
 	}
 }
 
-func (a *app) GetMeterProvider() metric.MeterProvider {
-	return a.meterProvider
-}
-
-func (a *app) GetTracerProvider() trace.TracerProvider {
-	return a.tracerProvider
-}
-
-func newDistributedEventDispatcher(
-	meterProvider metric.MeterProvider,
-	tracerProvider trace.TracerProvider,
-) cqrs.EventDispatcher {
+func newDistributedEventDispatcher() cqrs.EventDispatcher {
 	eventRegistry := cqrs.NewEventRegistry()
 	event.BindEvents(eventRegistry)
 
@@ -261,16 +225,14 @@ func newDistributedEventDispatcher(
 	logger := log.Default()
 
 	const queueName = "vote-events"
-	//publisher := GetRabbitMQBroker(logger, meterProvider, tracerProvider)
-	publisher := GetNatsBroker(logger, meterProvider, tracerProvider)
+	//publisher := GetRabbitMQBroker(logger)
+	publisher := GetNatsBroker(logger)
 
-	eventDispatcher, err := distributed.NewEventDispatcher(
+	eventDispatcher, err := eventdispatcher.NewDistributedEventDispatcher(
 		queueName,
 		publisher,
 		eventSerializer,
 		logger,
-		meterProvider,
-		tracerProvider,
 	)
 	if err != nil {
 		panic(fmt.Errorf("failed to create rabbitmq dispatcher: %w", err))
@@ -279,28 +241,16 @@ func newDistributedEventDispatcher(
 	return eventDispatcher
 }
 
-func GetNatsBroker(
-	logger *log.Logger,
-	meterProvider metric.MeterProvider,
-	tracerProvider trace.TracerProvider,
-) distributed.Broker {
+func GetNatsBroker(logger *log.Logger) cqrs.Broker {
 	return nats.NewBroker(
 		natsClient.DefaultURL,
 		logger,
-		meterProvider,
-		tracerProvider,
 	)
 }
 
-func GetRabbitMQBroker(
-	logger *log.Logger,
-	meterProvider metric.MeterProvider,
-	tracerProvider trace.TracerProvider,
-) distributed.Broker {
+func GetRabbitMQBroker(logger *log.Logger) cqrs.Broker {
 	return rabbitmq.NewBroker(
 		"amqp://guest:guest@localhost:5672/",
 		logger,
-		meterProvider,
-		tracerProvider,
 	)
 }

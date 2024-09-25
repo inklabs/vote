@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	"github.com/inklabs/cqrs"
-	"github.com/inklabs/cqrs/eventdispatcher/distributed"
+	"github.com/inklabs/cqrs/eventdispatcher"
 
 	"github.com/inklabs/vote"
 	"github.com/inklabs/vote/event"
@@ -31,16 +31,14 @@ func main() {
 
 	const queueName = "vote-events"
 	//consumer := vote.GetRabbitMQBroker(logger, app.GetMeterProvider(), app.GetTracerProvider())
-	consumer := vote.GetNatsBroker(logger, app.GetMeterProvider(), app.GetTracerProvider())
+	consumer := vote.GetNatsBroker(logger)
 
-	subscriber, err := distributed.NewEventSubscriber(
+	subscriber, err := eventdispatcher.NewDistributedEventSubscriber(
 		queueName,
 		consumer,
 		eventSerializer,
 		logger,
 		app.GetEventListeners(),
-		app.GetMeterProvider(),
-		app.GetTracerProvider(),
 	)
 	if err != nil {
 		log.Fatal(err)
