@@ -55,6 +55,7 @@ func ExampleApp_httpCloseElectionByOwner() {
 	PrettyPrint(response.Body)
 
 	body, _ = json.Marshal(election.CastVote{
+		VoteID:            "V1",
 		ElectionID:        "E1",
 		UserID:            "U3",
 		RankedProposalIDs: []string{"P1"},
@@ -146,6 +147,7 @@ func ExampleApp_httpCloseElectionByOwner() {
 	//   "meta": {
 	//     "request": {
 	//       "attributes": {
+	//         "VoteID": "V1",
 	//         "ElectionID": "E1",
 	//         "UserID": "U3",
 	//         "RankedProposalIDs": [

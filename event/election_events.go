@@ -18,6 +18,7 @@ type ProposalWasMade struct {
 }
 
 type VoteWasCast struct {
+	VoteID            string
 	ElectionID        string
 	UserID            string
 	RankedProposalIDs []string

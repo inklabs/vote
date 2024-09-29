@@ -62,6 +62,6 @@ func TestGetElectionResults(t *testing.T) {
 		_, err := app.ExecuteQuery(ctx, query)
 
 		// Then
-		require.Equal(t, err, electionrepository.NewErrElectionNotFound(query.ElectionID))
+		require.Equal(t, electionrepository.NewErrElectionNotFound(query.ElectionID), err)
 	})
 }

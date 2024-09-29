@@ -1,4 +1,4 @@
-package electionrepository
+package inmemoryrepo
 
 import (
 	"context"
@@ -11,37 +11,35 @@ import (
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
+	"github.com/inklabs/vote/internal/electionrepository"
 	"github.com/inklabs/vote/pkg/sleep"
 )
 
 const instrumentationName = "github.com/inklabs/vote/internal/electionrepository/in-memory"
 
-var (
-	tracer = otel.Tracer(instrumentationName)
-)
+var tracer = otel.Tracer(instrumentationName)
 
 type inMemoryElectionRepository struct {
 	mux sync.RWMutex
 
 	// elections key by electionID
-	elections map[string]Election
+	elections map[string]electionrepository.Election
 
 	// proposals key by proposalID
-	proposals map[string]Proposal
-
+	proposals map[string]electionrepository.Proposal
 	// votes key by electionID
-	votes map[string][]Vote
+	votes map[string][]electionrepository.Vote
 }
 
-func NewInMemory() *inMemoryElectionRepository {
+func New() *inMemoryElectionRepository {
 	return &inMemoryElectionRepository{
-		elections: make(map[string]Election),
-		proposals: make(map[string]Proposal),
-		votes:     make(map[string][]Vote),
+		elections: make(map[string]electionrepository.Election),
+		proposals: make(map[string]electionrepository.Proposal),
+		votes:     make(map[string][]electionrepository.Vote),
 	}
 }
 
-func (r *inMemoryElectionRepository) SaveElection(ctx context.Context, election Election) error {
+func (r *inMemoryElectionRepository) SaveElection(ctx context.Context, election electionrepository.Election) error {
 	_, span := tracer.Start(ctx, "db.save-election")
 	defer span.End()
 
@@ -55,7 +53,7 @@ func (r *inMemoryElectionRepository) SaveElection(ctx context.Context, election 
 	return nil
 }
 
-func (r *inMemoryElectionRepository) GetElection(ctx context.Context, electionID string) (Election, error) {
+func (r *inMemoryElectionRepository) GetElection(ctx context.Context, electionID string) (electionrepository.Election, error) {
 	_, span := tracer.Start(ctx, "db.get-election")
 	defer span.End()
 
@@ -68,13 +66,13 @@ func (r *inMemoryElectionRepository) GetElection(ctx context.Context, electionID
 		return election, nil
 	}
 
-	err := NewErrElectionNotFound(electionID)
+	err := electionrepository.NewErrElectionNotFound(electionID)
 	recordSpanError(span, err)
 
-	return Election{}, err
+	return electionrepository.Election{}, err
 }
 
-func (r *inMemoryElectionRepository) SaveProposal(ctx context.Context, proposal Proposal) error {
+func (r *inMemoryElectionRepository) SaveProposal(ctx context.Context, proposal electionrepository.Proposal) error {
 	_, span := tracer.Start(ctx, "db.save-election")
 	defer span.End()
 
@@ -84,7 +82,7 @@ func (r *inMemoryElectionRepository) SaveProposal(ctx context.Context, proposal 
 	sleep.Rand(2 * time.Millisecond)
 
 	if _, ok := r.elections[proposal.ElectionID]; !ok {
-		err := NewErrElectionNotFound(proposal.ElectionID)
+		err := electionrepository.NewErrElectionNotFound(proposal.ElectionID)
 		recordSpanError(span, err)
 
 		return err
@@ -95,7 +93,7 @@ func (r *inMemoryElectionRepository) SaveProposal(ctx context.Context, proposal 
 	return nil
 }
 
-func (r *inMemoryElectionRepository) GetProposal(ctx context.Context, electionID string) (Proposal, error) {
+func (r *inMemoryElectionRepository) GetProposal(ctx context.Context, proposalID string) (electionrepository.Proposal, error) {
 	_, span := tracer.Start(ctx, "db.get-proposal")
 	defer span.End()
 
@@ -104,43 +102,17 @@ func (r *inMemoryElectionRepository) GetProposal(ctx context.Context, electionID
 
 	sleep.Rand(1 * time.Millisecond)
 
-	if proposal, ok := r.proposals[electionID]; ok {
+	if proposal, ok := r.proposals[proposalID]; ok {
 		return proposal, nil
 	}
 
-	err := ErrProposalNotFound
+	err := electionrepository.NewErrProposalNotFound(proposalID)
 	recordSpanError(span, err)
 
-	return Proposal{}, err
+	return electionrepository.Proposal{}, err
 }
 
-func (r *inMemoryElectionRepository) GetProposals(ctx context.Context, electionID string) ([]Proposal, error) {
-	_, span := tracer.Start(ctx, "db.get-proposals")
-	defer span.End()
-
-	r.mux.RLock()
-	defer r.mux.RUnlock()
-
-	sleep.Rand(1 * time.Millisecond)
-
-	if _, ok := r.elections[electionID]; !ok {
-		err := NewErrElectionNotFound(electionID)
-		recordSpanError(span, err)
-
-		return nil, err
-	}
-
-	var proposals []Proposal
-	for _, proposal := range r.proposals {
-		if proposal.ElectionID == electionID {
-			proposals = append(proposals, proposal)
-		}
-	}
-
-	return proposals, nil
-}
-
-func (r *inMemoryElectionRepository) SaveVote(ctx context.Context, vote Vote) error {
+func (r *inMemoryElectionRepository) SaveVote(ctx context.Context, vote electionrepository.Vote) error {
 	_, span := tracer.Start(ctx, "db.save-vote")
 	defer span.End()
 
@@ -150,7 +122,7 @@ func (r *inMemoryElectionRepository) SaveVote(ctx context.Context, vote Vote) er
 	sleep.Rand(2 * time.Millisecond)
 
 	if _, ok := r.elections[vote.ElectionID]; !ok {
-		err := NewErrElectionNotFound(vote.ElectionID)
+		err := electionrepository.NewErrElectionNotFound(vote.ElectionID)
 		recordSpanError(span, err)
 
 		return err
@@ -159,13 +131,13 @@ func (r *inMemoryElectionRepository) SaveVote(ctx context.Context, vote Vote) er
 	for _, proposalID := range vote.RankedProposalIDs {
 		if proposal, ok := r.proposals[proposalID]; ok {
 			if proposal.ElectionID != vote.ElectionID {
-				err := ErrInvalidElectionProposal
+				err := electionrepository.NewErrInvalidElectionProposal(proposal.ProposalID, vote.ElectionID)
 				recordSpanError(span, err)
 
 				return err
 			}
 		} else {
-			err := ErrProposalNotFound
+			err := electionrepository.NewErrProposalNotFound(proposalID)
 			recordSpanError(span, err)
 
 			return err
@@ -177,7 +149,7 @@ func (r *inMemoryElectionRepository) SaveVote(ctx context.Context, vote Vote) er
 	return nil
 }
 
-func (r *inMemoryElectionRepository) GetVotes(ctx context.Context, electionID string) ([]Vote, error) {
+func (r *inMemoryElectionRepository) GetVotes(ctx context.Context, electionID string) ([]electionrepository.Vote, error) {
 	_, span := tracer.Start(ctx, "db.get-votes")
 	defer span.End()
 
@@ -190,13 +162,13 @@ func (r *inMemoryElectionRepository) GetVotes(ctx context.Context, electionID st
 		return votes, nil
 	}
 
-	err := NewErrElectionNotFound(electionID)
+	err := electionrepository.NewErrElectionNotFound(electionID)
 	recordSpanError(span, err)
 
 	return nil, err
 }
 
-func (r *inMemoryElectionRepository) ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) ([]Election, error) {
+func (r *inMemoryElectionRepository) ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) ([]electionrepository.Election, error) {
 	_, span := tracer.Start(ctx, "db.list-open-elections")
 	defer span.End()
 
@@ -205,7 +177,7 @@ func (r *inMemoryElectionRepository) ListOpenElections(ctx context.Context, page
 
 	sleep.Rand(2 * time.Millisecond)
 
-	var openElections []Election
+	var openElections []electionrepository.Election
 
 	for _, election := range r.elections {
 		if !election.IsClosed {
@@ -218,7 +190,7 @@ func (r *inMemoryElectionRepository) ListOpenElections(ctx context.Context, page
 	return pageEntity(openElections, page, itemsPerPage), nil
 }
 
-func (r *inMemoryElectionRepository) ListProposals(ctx context.Context, electionID string, page, itemsPerPage int) ([]Proposal, error) {
+func (r *inMemoryElectionRepository) ListProposals(ctx context.Context, electionID string, page, itemsPerPage int) ([]electionrepository.Proposal, error) {
 	_, span := tracer.Start(ctx, "db.list-proposals")
 	defer span.End()
 
@@ -228,13 +200,13 @@ func (r *inMemoryElectionRepository) ListProposals(ctx context.Context, election
 	sleep.Rand(2 * time.Millisecond)
 
 	if _, ok := r.elections[electionID]; !ok {
-		err := NewErrElectionNotFound(electionID)
+		err := electionrepository.NewErrElectionNotFound(electionID)
 		recordSpanError(span, err)
 
 		return nil, err
 	}
 
-	var proposals []Proposal
+	var proposals []electionrepository.Proposal
 
 	for _, proposal := range r.proposals {
 		if proposal.ElectionID == electionID {
@@ -249,7 +221,7 @@ func (r *inMemoryElectionRepository) ListProposals(ctx context.Context, election
 	return pageEntity(proposals, page, itemsPerPage), nil
 }
 
-func sortElections(elections []Election, by, direction *string) {
+func sortElections(elections []electionrepository.Election, by, direction *string) {
 	sortBy, sortDirection := cqrs.DefaultSort(by, direction, "CommencedAt", "ascending")
 
 	var sortFunction func(i, j int) bool

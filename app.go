@@ -25,6 +25,8 @@ import (
 	"github.com/inklabs/vote/event"
 	"github.com/inklabs/vote/internal/authorization"
 	"github.com/inklabs/vote/internal/electionrepository"
+	"github.com/inklabs/vote/internal/electionrepository/inmemoryrepo"
+	"github.com/inklabs/vote/internal/electionrepository/postgresrepo"
 	"github.com/inklabs/vote/listener"
 )
 
@@ -94,7 +96,7 @@ func NewApp(opts ...Option) *app {
 		clock:              systemclock.New(),
 		authorization:      cqrstest.NewPassThruAuth(),
 		asyncCommandStore:  asynccommandstore.NewInMemory(),
-		electionRepository: electionrepository.NewInMemory(),
+		electionRepository: inmemoryrepo.New(),
 	}
 
 	a.eventDispatcher = eventdispatcher.NewConcurrentLocal(
@@ -153,10 +155,22 @@ func NewProdApp() *app {
 
 	eventDispatcher := newDistributedEventDispatcher()
 
+	config := getPostgresConfig()
+	repository, err := postgresrepo.NewFromConfig(config)
+	if err != nil {
+		log.Fatalf("error loading repository: %s", err)
+	}
+	ctx := context.Background()
+	err = repository.InitDB(ctx)
+	if err != nil {
+		log.Fatalf("error initializing repository: %s", err)
+	}
+
 	return NewApp(
 		WithAuthorization(authorization.NewDelayAuth()),
 		WithAsyncCommandStore(asyncCommandStore),
 		WithEventDispatcher(eventDispatcher),
+		WithElectionRepository(repository),
 		WithCtxShutdown(
 			tracerProvider.Shutdown,
 			meterProvider.Shutdown,
@@ -253,4 +267,15 @@ func GetRabbitMQBroker(logger *log.Logger) cqrs.Broker {
 		"amqp://guest:guest@localhost:5672/",
 		logger,
 	)
+}
+
+func getPostgresConfig() postgresrepo.Config {
+	return postgresrepo.Config{
+		Host:       "localhost",
+		Port:       "5432",
+		User:       "admin",
+		Password:   "root",
+		DBName:     "vote_demo",
+		SearchPath: "",
+	}
 }

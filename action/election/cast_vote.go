@@ -13,6 +13,7 @@ import (
 )
 
 type CastVote struct {
+	VoteID            string
 	ElectionID        string
 	UserID            string
 	RankedProposalIDs []string
@@ -39,6 +40,7 @@ func (h *castVoteHandler) On(ctx context.Context, cmd CastVote, eventRaiser cqrs
 	sleep.Rand(2 * time.Millisecond)
 
 	err := h.repository.SaveVote(ctx, electionrepository.Vote{
+		VoteID:            cmd.VoteID,
 		ElectionID:        cmd.ElectionID,
 		UserID:            cmd.UserID,
 		RankedProposalIDs: append([]string{}, cmd.RankedProposalIDs...),
@@ -48,6 +50,7 @@ func (h *castVoteHandler) On(ctx context.Context, cmd CastVote, eventRaiser cqrs
 	}
 
 	eventRaiser.Raise(event.VoteWasCast{
+		VoteID:            cmd.VoteID,
 		ElectionID:        cmd.ElectionID,
 		UserID:            cmd.UserID,
 		RankedProposalIDs: append([]string{}, cmd.RankedProposalIDs...),

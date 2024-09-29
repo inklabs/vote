@@ -24,6 +24,7 @@ func TestCastVote(t *testing.T) {
 			proposalID2 = "6ade8319-ff51-4ea0-94bc-4b21b40cf872"
 			proposalID3 = "c7a3936f-c5d0-4f56-a85e-c1544934c00e"
 			ownerUserID = "a75f86b8-4454-4faa-af9e-19274264f621"
+			voteID      = "9e08f651-f02f-414c-bf3e-1148a8c87e0c"
 		)
 		election1 := electionrepository.Election{
 			ElectionID:      electionID,
@@ -63,6 +64,7 @@ func TestCastVote(t *testing.T) {
 			proposalID1,
 		}
 		command := election.CastVote{
+			VoteID:            voteID,
 			ElectionID:        electionID,
 			UserID:            ownerUserID,
 			RankedProposalIDs: rankedProposalIDs,
@@ -77,6 +79,7 @@ func TestCastVote(t *testing.T) {
 			Status: "OK",
 		}, response)
 		assert.Equal(t, event.VoteWasCast{
+			VoteID:            voteID,
 			ElectionID:        electionID,
 			UserID:            ownerUserID,
 			RankedProposalIDs: rankedProposalIDs,
@@ -87,6 +90,7 @@ func TestCastVote(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, []electionrepository.Vote{
 			{
+				VoteID:            voteID,
 				ElectionID:        electionID,
 				UserID:            ownerUserID,
 				RankedProposalIDs: rankedProposalIDs,
@@ -111,12 +115,13 @@ func TestCastVote(t *testing.T) {
 			_, err := app.ExecuteCommand(ctx, command)
 
 			// Then
-			require.Equal(t, err, electionrepository.NewErrElectionNotFound(command.ElectionID))
+			require.Equal(t, electionrepository.NewErrElectionNotFound(command.ElectionID), err)
 			assert.Empty(t, app.EventDispatcher.GetEvents())
 		})
 
 		t.Run("when proposal not found", func(t *testing.T) {
 			// Given
+			const unknownProposalID = "306cf23d-8196-4742-aca8-4bf9f43cd301"
 			app := votetest.NewTestApp(t)
 			ctx := app.GetAuthenticatedUserContext()
 			election1 := electionrepository.Election{
@@ -131,7 +136,7 @@ func TestCastVote(t *testing.T) {
 				ElectionID: election1.ElectionID,
 				UserID:     "19a0abe7-fdd7-49f8-a01f-4fc0e0f12480",
 				RankedProposalIDs: []string{
-					"306cf23d-8196-4742-aca8-4bf9f43cd301",
+					unknownProposalID,
 				},
 			}
 
@@ -139,7 +144,7 @@ func TestCastVote(t *testing.T) {
 			_, err := app.ExecuteCommand(ctx, command)
 
 			// Then
-			require.Equal(t, err, electionrepository.ErrProposalNotFound)
+			require.Equal(t, electionrepository.NewErrProposalNotFound(unknownProposalID), err)
 			assert.Empty(t, app.EventDispatcher.GetEvents())
 		})
 
@@ -182,7 +187,8 @@ func TestCastVote(t *testing.T) {
 			_, err := app.ExecuteCommand(ctx, command)
 
 			// Then
-			require.Equal(t, err, electionrepository.ErrInvalidElectionProposal)
+			expectedErr := electionrepository.NewErrInvalidElectionProposal(proposal1.ProposalID, election2.ElectionID)
+			require.Equal(t, expectedErr, err)
 			assert.Empty(t, app.EventDispatcher.GetEvents())
 		})
 	})

@@ -60,17 +60,18 @@ func TestGetProposalDetails(t *testing.T) {
 	t.Run("errors", func(t *testing.T) {
 		t.Run("when proposal not found", func(t *testing.T) {
 			// Given
+			const unknownProposalID = "0d5332ad-6ec1-4bc2-b1f5-d4e106435644"
 			app := votetest.NewTestApp(t)
 			ctx := app.GetAuthenticatedUserContext()
 			query := election.GetProposalDetails{
-				ProposalID: "e0476e03-6c6e-4ab9-9c3b-c20970664b63",
+				ProposalID: unknownProposalID,
 			}
 
 			// When
 			_, err := app.ExecuteQuery(ctx, query)
 
 			// Then
-			require.Equal(t, err, electionrepository.ErrProposalNotFound)
+			require.Equal(t, electionrepository.NewErrProposalNotFound(unknownProposalID), err)
 		})
 	})
 }

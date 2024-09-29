@@ -29,9 +29,11 @@ type Proposal struct {
 }
 
 type Vote struct {
+	VoteID            string
 	ElectionID        string
 	UserID            string
 	RankedProposalIDs []string
+	SubmittedAt       int
 }
 
 type Repository interface {
@@ -39,7 +41,6 @@ type Repository interface {
 	GetElection(ctx context.Context, electionID string) (Election, error)
 	SaveProposal(ctx context.Context, proposal Proposal) error
 	GetProposal(ctx context.Context, proposalID string) (Proposal, error)
-	GetProposals(ctx context.Context, electionID string) ([]Proposal, error)
 	SaveVote(ctx context.Context, vote Vote) error
 	GetVotes(ctx context.Context, electionID string) ([]Vote, error)
 	ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) ([]Election, error)
@@ -58,5 +59,30 @@ func (e ErrElectionNotFound) Error() string {
 	return fmt.Sprintf("election (%s) not found", e.electionID)
 }
 
-var ErrProposalNotFound = fmt.Errorf("proposal not found")
-var ErrInvalidElectionProposal = fmt.Errorf("invalid election")
+type ErrProposalNotFound struct {
+	proposalID string
+}
+
+func NewErrProposalNotFound(proposalID string) *ErrProposalNotFound {
+	return &ErrProposalNotFound{proposalID: proposalID}
+}
+
+func (e ErrProposalNotFound) Error() string {
+	return fmt.Sprintf("proposal (%s) not found", e.proposalID)
+}
+
+type ErrInvalidElectionProposal struct {
+	proposalID string
+	electionID string
+}
+
+func NewErrInvalidElectionProposal(proposalID, electionID string) *ErrInvalidElectionProposal {
+	return &ErrInvalidElectionProposal{
+		proposalID: proposalID,
+		electionID: electionID,
+	}
+}
+
+func (e ErrInvalidElectionProposal) Error() string {
+	return fmt.Sprintf("invalid proposal (%s) for wrong election (%s)", e.proposalID, e.electionID)
+}

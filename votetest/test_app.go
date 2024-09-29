@@ -2,17 +2,22 @@ package votetest
 
 import (
 	"context"
+	"database/sql"
+	"os"
 	"testing"
 
 	"github.com/inklabs/cqrs"
 	"github.com/inklabs/cqrs/asynccommandstore"
 	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/inklabs/cqrs/pkg/clock/provider/incrementingclock"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/inklabs/vote"
 	"github.com/inklabs/vote/internal/authorization"
 	"github.com/inklabs/vote/internal/electionrepository"
+	"github.com/inklabs/vote/internal/electionrepository/inmemoryrepo"
+	"github.com/inklabs/vote/internal/electionrepository/postgresrepo"
 )
 
 type testApp struct {
@@ -31,13 +36,25 @@ func NewTestApp(t *testing.T) testApp {
 	t.Helper()
 
 	a := testApp{
-		t:                  t,
-		jwtSigningKey:      []byte("9742fed04ba648bcb476a13b9e3d87e3"),
-		RegularUserID:      "de06e622-9169-4351-b14e-9109dfd9dee3",
-		AdminUserID:        "e5bca084-bf48-4b31-8bd2-233cfd5b6c92",
-		EventDispatcher:    cqrstest.NewRecordingEventDispatcher(),
-		AsyncCommandStore:  asynccommandstore.NewInMemory(),
-		ElectionRepository: electionrepository.NewInMemory(),
+		t:                 t,
+		jwtSigningKey:     []byte("9742fed04ba648bcb476a13b9e3d87e3"),
+		RegularUserID:     "de06e622-9169-4351-b14e-9109dfd9dee3",
+		AdminUserID:       "e5bca084-bf48-4b31-8bd2-233cfd5b6c92",
+		EventDispatcher:   cqrstest.NewRecordingEventDispatcher(),
+		AsyncCommandStore: asynccommandstore.NewInMemory(),
+	}
+
+	if os.Getenv("PG_HOST") != "" {
+		transactionalTestDB := getTestDB(t)
+		repository, err := postgresrepo.NewFromDB(transactionalTestDB)
+		require.NoError(t, err)
+
+		ctx := cqrstest.TimeoutContext(t)
+		require.NoError(t, repository.InitDB(ctx))
+
+		a.ElectionRepository = repository
+	} else {
+		a.ElectionRepository = inmemoryrepo.New()
 	}
 
 	a.app = vote.NewApp(
@@ -88,4 +105,31 @@ func (a *testApp) getSignedBearerToken(claims authorization.JWTClaims) string {
 	signedToken, err := authorization.NewSignedToken(claims, a.jwtSigningKey)
 	require.NoError(a.t, err)
 	return "Bearer " + signedToken
+}
+
+func getTestDB(t *testing.T) *sql.DB {
+	config, err := postgresrepo.NewConfigFromEnvironment()
+	require.NoError(t, err)
+
+	db, err := postgresrepo.NewDB(config)
+	require.NoError(t, err)
+
+	ctx := cqrstest.TimeoutContext(t)
+	sqlStatements := []string{
+		"TRUNCATE TABLE vote_ranked_proposal CASCADE",
+		"TRUNCATE TABLE vote CASCADE",
+		"TRUNCATE TABLE proposal CASCADE",
+		"TRUNCATE TABLE election CASCADE",
+	}
+
+	for _, sqlStatement := range sqlStatements {
+		_, err = db.ExecContext(ctx, sqlStatement)
+		require.NoError(t, err, sqlStatement)
+	}
+
+	t.Cleanup(func() {
+		assert.NoError(t, db.Close())
+	})
+
+	return db
 }

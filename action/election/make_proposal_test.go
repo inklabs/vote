@@ -57,17 +57,15 @@ func TestMakeProposal(t *testing.T) {
 			ProposedAt:  0,
 		}, app.EventDispatcher.GetEvent(0))
 
-		actualElection, err := app.ElectionRepository.GetProposals(ctx, electionID)
+		actualProposal, err := app.ElectionRepository.GetProposal(ctx, proposalID)
 		require.NoError(t, err)
-		assert.Equal(t, []electionrepository.Proposal{
-			{
-				ElectionID:  electionID,
-				ProposalID:  proposalID,
-				OwnerUserID: command.OwnerUserID,
-				Name:        command.Name,
-				Description: command.Description,
-				ProposedAt:  0,
-			},
-		}, actualElection)
+		assert.Equal(t, electionrepository.Proposal{
+			ElectionID:  electionID,
+			ProposalID:  proposalID,
+			OwnerUserID: command.OwnerUserID,
+			Name:        command.Name,
+			Description: command.Description,
+			ProposedAt:  0,
+		}, actualProposal)
 	})
 }

@@ -101,6 +101,7 @@ type simulator struct {
 
 func (s *simulator) Errors(ctx context.Context) {
 	const (
+		unknownVoteID     = "unknown-vote-id"
 		unknownElectionID = "unknown-election-id"
 		unknownUserID     = "unknown-user-id"
 		percent           = 5
@@ -114,6 +115,7 @@ func (s *simulator) Errors(ctx context.Context) {
 
 	maybeDo(percent, func() {
 		_, _ = s.client.Election.CastVote(ctx, &electionpb.CastVoteRequest{
+			VoteId:            unknownVoteID,
 			ElectionId:        unknownElectionID,
 			UserId:            unknownUserID,
 			RankedProposalIDs: []string{"unknown-proposal-id"},
@@ -210,6 +212,7 @@ func (s *simulator) castVotes(ctx context.Context) error {
 
 			shuffle(proposals)
 			_, err = s.client.Election.CastVote(ctx, &electionpb.CastVoteRequest{
+				VoteId:            uuid.NewString(),
 				ElectionId:        electionID,
 				UserId:            userID,
 				RankedProposalIDs: proposals,

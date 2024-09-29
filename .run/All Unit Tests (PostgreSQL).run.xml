@@ -1,0 +1,18 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="All Unit Tests (PostgreSQL)" type="GoTestRunConfiguration" factoryName="Go Test">
+    <module name="vote" />
+    <working_directory value="$PROJECT_DIR$" />
+    <envs>
+      <env name="PG_DBNAME" value="vote_test" />
+      <env name="PG_HOST" value="localhost" />
+      <env name="PG_PASSWORD" value="root" />
+      <env name="PG_USER" value="admin" />
+    </envs>
+    <kind value="DIRECTORY" />
+    <package value="github.com/inklabs/vote/" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$" />
+    <framework value="gotest" />
+    <method v="2" />
+  </configuration>
+</component>

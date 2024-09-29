@@ -36,6 +36,7 @@ func TestCloseElectionByOwner(t *testing.T) {
 			ProposedAt:  0,
 		}
 		vote1 := electionrepository.Vote{
+			VoteID:            "062b473e-681b-49f8-ab23-c8d897c37f71",
 			ElectionID:        electionID,
 			UserID:            "fa465d85-ad59-49ca-8ae4-9be7c88c6ef1",
 			RankedProposalIDs: []string{proposal1.ProposalID},
