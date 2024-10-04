@@ -24,12 +24,13 @@ func (q ListOpenElections) ValidationRules() cqrs.ValidationRuleMap {
 		),
 		"SortDirection": cqrs.OptionalValidSortDirection(),
 		"Page":          cqrs.OptionalValidMinRange(1),
-		"ItemsPerPage":  cqrs.OptionalValidRange(1, 10),
+		"ItemsPerPage":  cqrs.OptionalValidRange(1, 50),
 	}
 }
 
 type ListOpenElectionsResponse struct {
 	OpenElections []OpenElection
+	TotalResults  int
 }
 
 type OpenElection struct {
@@ -60,7 +61,7 @@ func (h *listOpenElectionsHandler) On(ctx context.Context, query ListOpenElectio
 		attribute.Int("itemsPerPage", itemsPerPage),
 	)
 
-	elections, err := h.repository.ListOpenElections(ctx,
+	totalResults, elections, err := h.repository.ListOpenElections(ctx,
 		page,
 		itemsPerPage,
 		query.SortBy,
@@ -72,6 +73,7 @@ func (h *listOpenElectionsHandler) On(ctx context.Context, query ListOpenElectio
 
 	return ListOpenElectionsResponse{
 		OpenElections: ToOpenElections(elections),
+		TotalResults:  totalResults,
 	}, nil
 }
 

@@ -74,6 +74,7 @@ func TestListProposals(t *testing.T) {
 				proposalDTO2,
 				proposalDTO3,
 			},
+			TotalResults: 3,
 		}, response)
 	})
 
@@ -95,6 +96,7 @@ func TestListProposals(t *testing.T) {
 				proposalDTO1,
 				proposalDTO2,
 			},
+			TotalResults: 3,
 		}, response)
 	})
 }

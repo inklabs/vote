@@ -61,6 +61,7 @@ func TestListOpenElections(t *testing.T) {
 				openElection2,
 				openElection3,
 			},
+			TotalResults: 3,
 		}, response)
 	})
 
@@ -82,6 +83,7 @@ func TestListOpenElections(t *testing.T) {
 				openElection2,
 				openElection1,
 			},
+			TotalResults: 3,
 		}, response)
 	})
 
@@ -103,6 +105,7 @@ func TestListOpenElections(t *testing.T) {
 				openElection2,
 				openElection1,
 			},
+			TotalResults: 3,
 		}, response)
 	})
 
@@ -123,6 +126,7 @@ func TestListOpenElections(t *testing.T) {
 				openElection1,
 				openElection2,
 			},
+			TotalResults: 3,
 		}, response)
 	})
 
@@ -142,6 +146,7 @@ func TestListOpenElections(t *testing.T) {
 			OpenElections: []election.OpenElection{
 				openElection3,
 			},
+			TotalResults: 3,
 		}, response)
 	})
 }

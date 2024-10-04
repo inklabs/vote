@@ -2213,7 +2213,7 @@
           "hide": false,
           "includeNullMetadata": false,
           "instant": false,
-          "legendFormat": "{{cqrs_command_type}}",
+          "legendFormat": "{{cqrs_query_type}}",
           "range": true,
           "refId": "A",
           "useBackend": false

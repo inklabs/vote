@@ -42,9 +42,16 @@ func ExampleApp_grpcListOpenElections() {
 		Description:     "Election Description 2",
 	})
 
+	_, _ = client.Election.CommenceElection(ctx, &electionpb.CommenceElectionRequest{
+		ElectionId:      "E3",
+		OrganizerUserId: "U1",
+		Name:            "Election Name 3",
+		Description:     "Election Description 3",
+	})
+
 	response, _ := client.Election.ListOpenElections(ctx, &electionpb.ListOpenElectionsRequest{
 		Page:          cqrs.Int64(1),
-		ItemsPerPage:  cqrs.Int64(10),
+		ItemsPerPage:  cqrs.Int64(2),
 		SortBy:        cqrs.String("Name"),
 		SortDirection: cqrs.SortAscending,
 	})
@@ -66,6 +73,7 @@ func ExampleApp_grpcListOpenElections() {
 	//   description: "Election Description 2"
 	//   commenced_at: 1699900001
 	// >
+	// total_results: 3
 }
 
 func ExampleApp_grpcCloseElectionByOwner() {
@@ -131,6 +139,9 @@ func ExampleApp_grpcCloseElectionByOwner() {
 	//   started_at_micro: 1699900004000000
 	//   finished_at_micro: 1699900007000000
 	//   execution_duration: "3s"
+	//   total_to_process: 1
+	//   total_processed: 1
+	//   percent_done: 100
 	//   is_success: true
 	//   is_finished: true
 	//   close_election_by_owner: <

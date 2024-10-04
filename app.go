@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/dgraph-io/badger/v4"
 	"github.com/inklabs/cqrs"
 	"github.com/inklabs/cqrs/asynccommandbus"
 	"github.com/inklabs/cqrs/asynccommandstore"
@@ -147,12 +146,6 @@ func NewProdApp() *app {
 	otel.SetTracerProvider(tracerProvider)
 	otel.SetMeterProvider(meterProvider)
 
-	asyncCommandStore := asynccommandstore.NewBadger(
-		badger.DefaultOptions("./.badger.db").
-			WithLogger(nil),
-		GetAsyncCommands(),
-	)
-
 	eventDispatcher := newDistributedEventDispatcher()
 
 	config := getPostgresConfig()
@@ -164,6 +157,24 @@ func NewProdApp() *app {
 	err = repository.InitDB(ctx)
 	if err != nil {
 		log.Fatalf("error initializing repository: %s", err)
+	}
+
+	postgresConfig := asynccommandstore.PostgresConfig{
+		Host:       config.Host,
+		Port:       config.Port,
+		User:       config.User,
+		Password:   config.Password,
+		DBName:     config.DBName,
+		SearchPath: config.SearchPath,
+	}
+
+	asyncCommandStore, err := asynccommandstore.NewPostgresFromConfig(postgresConfig, GetAsyncCommands())
+	if err != nil {
+		log.Fatalf("error getting async command store: %s", err)
+	}
+	err = asyncCommandStore.InitDB(ctx)
+	if err != nil {
+		log.Fatalf("error initializing async command store: %s", err)
 	}
 
 	return NewApp(
@@ -218,6 +229,7 @@ func (a *app) getQueryHandlers() []cqrs.QueryHandler {
 	return []cqrs.QueryHandler{
 		election.NewListOpenElectionsHandler(a.electionRepository),
 		election.NewListProposalsHandler(a.electionRepository),
+		election.NewGetElectionHandler(a.electionRepository),
 		election.NewGetProposalDetailsHandler(a.electionRepository),
 		election.NewGetElectionResultsHandler(a.electionRepository),
 	}

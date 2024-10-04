@@ -9,14 +9,23 @@ import (
 	"github.com/inklabs/vote/internal/electionrepository"
 )
 
+// ListProposals retrieves all election proposals. Sortable options are omitted.
 type ListProposals struct {
 	ElectionID   string
 	Page         *int
 	ItemsPerPage *int
 }
 
+func (q ListProposals) ValidationRules() cqrs.ValidationRuleMap {
+	return cqrs.ValidationRuleMap{
+		"Page":         cqrs.OptionalValidMinRange(1),
+		"ItemsPerPage": cqrs.OptionalValidRange(1, 10),
+	}
+}
+
 type ListProposalsResponse struct {
-	Proposals []Proposal
+	Proposals    []Proposal
+	TotalResults int
 }
 
 type Proposal struct {
@@ -49,7 +58,7 @@ func (h *listProposalsHandler) On(ctx context.Context, query ListProposals) (Lis
 		attribute.Int("itemsPerPage", itemsPerPage),
 	)
 
-	proposals, err := h.repository.ListProposals(ctx,
+	totalResults, proposals, err := h.repository.ListProposals(ctx,
 		query.ElectionID,
 		page,
 		itemsPerPage,
@@ -59,7 +68,8 @@ func (h *listProposalsHandler) On(ctx context.Context, query ListProposals) (Lis
 	}
 
 	return ListProposalsResponse{
-		Proposals: ToProposals(proposals),
+		Proposals:    ToProposals(proposals),
+		TotalResults: totalResults,
 	}, nil
 }
 

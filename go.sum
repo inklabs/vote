@@ -103,8 +103,8 @@ github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0 h1:asbCHRVmodnJTuQ3qamDwqVOIjw
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.22.0/go.mod h1:ggCgvZ2r7uOoQjOyu2Y1NhHmEPPzzuhWgcza5M1Ji1I=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
-github.com/inklabs/cqrs v0.0.0-20240925014043-4fb64fe7c84b h1:TyRF5r9waug5g8vHpe8BEF2EzReuYBMaK0jtqfhko1c=
-github.com/inklabs/cqrs v0.0.0-20240925014043-4fb64fe7c84b/go.mod h1:z0KzmPUvrXBNDywRXOObwaO2Fc0Uh+OAkBYxufinoms=
+github.com/inklabs/cqrs v0.0.0-20241004180448-c703dd5e9a6f h1:LRAZACXDfcIWHK9KZYChH89kSGvwVjyNw0Xj4LtGyVg=
+github.com/inklabs/cqrs v0.0.0-20241004180448-c703dd5e9a6f/go.mod h1:T3SBEOIMy6zUh5Pd7F7QzZClOY2DoQIkmxH7HR8x1Dc=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/klauspost/compress v1.17.9 h1:6KIumPrER1LHsvBVuDa0r5xaG0Es51mhhB9BQB2qeMA=

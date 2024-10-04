@@ -37,10 +37,10 @@ func ExampleApp_httpSchemaRoot() {
 	//                 "CastVote",
 	//                 "CloseElectionByOwner",
 	//                 "CommenceElection",
-	//                 "GetElectionResults",
-	//                 "GetProposalDetails"
+	//                 "GetElection",
+	//                 "GetElectionResults"
 	//               ],
-	//               "totalActions": 8
+	//               "totalActions": 9
 	//             },
 	//             "type": "Subdomain"
 	//           }
@@ -125,6 +125,15 @@ func ExampleApp_httpSchemaElection() {
 	//       "data": [
 	//         {
 	//           "attributes": {
+	//             "name": "GetElection"
+	//           },
+	//           "links": {
+	//             "self": "http://example.com/election/GetElection"
+	//           },
+	//           "type": "query"
+	//         },
+	//         {
+	//           "attributes": {
 	//             "name": "GetElectionResults"
 	//           },
 	//           "links": {
@@ -182,6 +191,11 @@ func ExampleApp_httpSchemaElectionCastVote() {
 	//       "fields": [
 	//         {
 	//           "isRequired": true,
+	//           "name": "VoteID",
+	//           "type": "string"
+	//         },
+	//         {
+	//           "isRequired": true,
 	//           "name": "ElectionID",
 	//           "type": "string"
 	//         },
@@ -233,7 +247,7 @@ func ExampleApp_httpSchemaElectionListOpenElections() {
 	//           "isRequired": false,
 	//           "name": "ItemsPerPage",
 	//           "type": "int",
-	//           "validationRule": "(optional) 1 - 10"
+	//           "validationRule": "(optional) 1 - 50"
 	//         },
 	//         {
 	//           "isRequired": false,
@@ -262,6 +276,10 @@ func ExampleApp_httpSchemaElectionListOpenElections() {
 	//       {
 	//         "name": "OpenElections",
 	//         "type": "[]OpenElection"
+	//       },
+	//       {
+	//         "name": "TotalResults",
+	//         "type": "int"
 	//       }
 	//     ],
 	//     "type": "ListOpenElectionsResponse"

@@ -2,6 +2,7 @@ package vote_test
 
 import (
 	"context"
+	"io"
 	"os"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 	"github.com/inklabs/vote"
 )
 
-func ExampleApp_cliRoot() {
+func ExampleApp_cliRoot_help() {
 	app := newTestApp()
 	defer app.Stop()
 	cmd := vote.GetCobraRootCommand(app)
@@ -27,7 +28,7 @@ func ExampleApp_cliRoot() {
 	// Available Commands:
 	//   async-command-status Async Command Status
 	//   completion           Generate the autocompletion script for the specified shell
-	//   election             8 actions: [CastVote, CloseElectionByOwner, CommenceElection, GetElectionResults, GetProposalDetails, ListOpenElections, ListProposals, MakeProposal]
+	//   election             9 actions: [CastVote, CloseElectionByOwner, CommenceElection, GetElection, GetElectionResults, GetProposalDetails, ListOpenElections, ListProposals, MakeProposal]
 	//   help                 Help about any command
 	//
 	// Flags:
@@ -36,7 +37,7 @@ func ExampleApp_cliRoot() {
 	// Use "cli [command] --help" for more information about a command.
 }
 
-func ExampleApp_cliElection() {
+func ExampleApp_cliElection_help() {
 	app := newTestApp()
 	defer app.Stop()
 	cmd := vote.GetCobraRootCommand(app)
@@ -54,6 +55,7 @@ func ExampleApp_cliElection() {
 	//   CastVote
 	//   CloseElectionByOwner
 	//   CommenceElection
+	//   GetElection
 	//   GetElectionResults
 	//   GetProposalDetails
 	//   ListOpenElections
@@ -66,7 +68,7 @@ func ExampleApp_cliElection() {
 	// Use "cli election [command] --help" for more information about a command.
 }
 
-func ExampleApp_cliElectionCastVote() {
+func ExampleApp_cliElectionCastVote_help() {
 	app := newTestApp()
 	defer app.Stop()
 	cmd := vote.GetCobraRootCommand(app)
@@ -82,10 +84,11 @@ func ExampleApp_cliElectionCastVote() {
 	//       --ElectionID string
 	//       --RankedProposalIDs strings
 	//       --UserID string
+	//       --VoteID string
 	//   -h, --help                        help for CastVote
 }
 
-func ExampleApp_cliElectionListOpenElections() {
+func ExampleApp_cliElectionListOpenElections_help() {
 	app := newTestApp()
 	defer app.Stop()
 	cmd := vote.GetCobraRootCommand(app)
@@ -96,14 +99,15 @@ func ExampleApp_cliElectionListOpenElections() {
 	// Output:
 	// Returns:
 	// election.ListOpenElectionsResponse {
-	// 	OpenElections []OpenElection
+	//	OpenElections []OpenElection
+	//	TotalResults int
 	// }
 	//
 	// Usage:
 	//   cli election ListOpenElections [flags]
 	//
 	// Flags:
-	//       --ItemsPerPage int       (optional) 1 - 10
+	//       --ItemsPerPage int       (optional) 1 - 50
 	//       --Page int               (optional) >= 1
 	//       --SortBy string          (optional) Name, CommencedAt
 	//       --SortDirection string   (optional) ascending, descending
@@ -137,6 +141,7 @@ func ExampleApp_cliElectionCloseElectionByOwner() {
 	})
 	_ = cmd.Execute()
 	cmd.SetArgs([]string{"election", "CastVote",
+		"--VoteID", "V1",
 		"--ElectionID", "E1",
 		"--UserID", "U3",
 		"--RankedProposalIDs", "P1",
@@ -177,9 +182,9 @@ func ExampleApp_cliElectionCloseElectionByOwner() {
 	//   "StartedAtMicro": 1699900004000000,
 	//   "FinishedAtMicro": 1699900007000000,
 	//   "ExecutionDuration": "3s",
-	//   "TotalToProcess": 0,
-	//   "TotalProcessed": 0,
-	//   "PercentDone": 0,
+	//   "TotalToProcess": 1,
+	//   "TotalProcessed": 1,
+	//   "PercentDone": 100,
 	//   "IsSuccess": true,
 	//   "IsFinished": true
 	// }
@@ -190,4 +195,66 @@ func ExampleApp_cliElectionCloseElectionByOwner() {
 	//     "Message": "Closing election with winner: P1"
 	//   }
 	// ]
+}
+
+func ExampleApp_cliListOpenElections() {
+	recordingEventDispatcher := cqrstest.NewRecordingEventDispatcher()
+	app := newTestApp(
+		vote.WithEventDispatcher(recordingEventDispatcher),
+	)
+	defer app.Stop()
+
+	recordingEventDispatcher.Add(4)
+
+	cmd := vote.GetCobraRootCommand(app)
+	cmd.SetOut(io.Discard)
+	cmd.SetArgs([]string{"election", "CommenceElection",
+		"--ElectionID", "E1",
+		"--Name", "Election Name 1",
+		"--Description", "Election Description 1",
+		"--OrganizerUserID", "U1",
+	})
+	_ = cmd.Execute()
+	cmd.SetArgs([]string{"election", "CommenceElection",
+		"--ElectionID", "E2",
+		"--Name", "Election Name 2",
+		"--Description", "Election Description 2",
+		"--OrganizerUserID", "U1",
+	})
+	_ = cmd.Execute()
+	cmd.SetArgs([]string{"election", "CommenceElection",
+		"--ElectionID", "E3",
+		"--Name", "Election Name 3",
+		"--Description", "Election Description 3",
+		"--OrganizerUserID", "U1",
+	})
+	_ = cmd.Execute()
+
+	cmd.SetOut(NewTrimmingWriter(os.Stdout))
+	cmd.SetArgs([]string{"election", "ListOpenElections",
+		"--ItemsPerPage", "2",
+		"--Page", "1",
+	})
+	_ = cmd.Execute()
+
+	// Output:
+	// Response: election.ListOpenElectionsResponse {
+	//   "OpenElections": [
+	//     {
+	//       "ElectionID": "E1",
+	//       "OrganizerUserID": "U1",
+	//       "Name": "Election Name 1",
+	//       "Description": "Election Description 1",
+	//       "CommencedAt": 1699900000
+	//     },
+	//     {
+	//       "ElectionID": "E2",
+	//       "OrganizerUserID": "U1",
+	//       "Name": "Election Name 2",
+	//       "Description": "Election Description 2",
+	//       "CommencedAt": 1699900001
+	//     }
+	//   ],
+	//   "TotalResults": 3
+	// }
 }

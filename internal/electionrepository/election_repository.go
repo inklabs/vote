@@ -43,8 +43,8 @@ type Repository interface {
 	GetProposal(ctx context.Context, proposalID string) (Proposal, error)
 	SaveVote(ctx context.Context, vote Vote) error
 	GetVotes(ctx context.Context, electionID string) ([]Vote, error)
-	ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) ([]Election, error)
-	ListProposals(ctx context.Context, electionID string, page, itemsPerPage int) ([]Proposal, error)
+	ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) (int, []Election, error)
+	ListProposals(ctx context.Context, electionID string, page, itemsPerPage int) (int, []Proposal, error)
 }
 
 type ErrElectionNotFound struct {

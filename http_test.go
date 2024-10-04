@@ -194,9 +194,9 @@ func ExampleApp_httpCloseElectionByOwner() {
 	//       "StartedAtMicro": 1699900004000000,
 	//       "FinishedAtMicro": 1699900007000000,
 	//       "ExecutionDuration": "3s",
-	//       "TotalToProcess": 0,
-	//       "TotalProcessed": 0,
-	//       "PercentDone": 0,
+	//       "TotalToProcess": 1,
+	//       "TotalProcessed": 1,
+	//       "PercentDone": 100,
 	//       "IsSuccess": true,
 	//       "IsFinished": true
 	//     },
@@ -215,6 +215,96 @@ func ExampleApp_httpCloseElectionByOwner() {
 	//   "links": {
 	//     "self": "http://example.com/async-command-status/AC1",
 	//     "self-include-logs": "http://example.com/async-command-status/AC1?include_logs=true"
+	//   }
+	// }
+}
+
+func ExampleApp_httpListOpenElections() {
+	const (
+		baseUri       = "http://example.com"
+		schemaBaseUri = "http://example.com/schema"
+	)
+	recordingEventDispatcher := cqrstest.NewRecordingEventDispatcher()
+	app := newTestApp(
+		vote.WithEventDispatcher(recordingEventDispatcher),
+	)
+	defer app.Stop()
+	api, _ := jsonapi.New(app, vote.NewHTTPActionDecoder(), baseUri, schemaBaseUri)
+
+	commands := []election.CommenceElection{
+		{
+			ElectionID:      "E1",
+			OrganizerUserID: "U1",
+			Name:            "Election Name 1",
+			Description:     "Election Description 1",
+		},
+		{
+			ElectionID:      "E2",
+			OrganizerUserID: "U1",
+			Name:            "Election Name 2",
+			Description:     "Election Description 2",
+		},
+		{
+			ElectionID:      "E3",
+			OrganizerUserID: "U1",
+			Name:            "Election Name 3",
+			Description:     "Election Description 3",
+		},
+	}
+
+	for _, command := range commands {
+		body, _ := json.Marshal(command)
+		request := httptest.NewRequest(http.MethodPost, "/election/CommenceElection", bytes.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		response := httptest.NewRecorder()
+		api.ServeHTTP(response, request)
+	}
+
+	request := httptest.NewRequest(http.MethodGet, "/election/ListOpenElections?SortBy=Name&SortDirection=ascending&ItemsPerPage=2&Page=1", nil)
+	request.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	api.ServeHTTP(response, request)
+	PrettyPrint(response.Body)
+
+	// Output:
+	// {
+	//   "data": {
+	//     "attributes": {
+	//       "OpenElections": [
+	//         {
+	//           "ElectionID": "E1",
+	//           "OrganizerUserID": "U1",
+	//           "Name": "Election Name 1",
+	//           "Description": "Election Description 1",
+	//           "CommencedAt": 1699900000
+	//         },
+	//         {
+	//           "ElectionID": "E2",
+	//           "OrganizerUserID": "U1",
+	//           "Name": "Election Name 2",
+	//           "Description": "Election Description 2",
+	//           "CommencedAt": 1699900001
+	//         }
+	//       ],
+	//       "TotalResults": 3
+	//     },
+	//     "type": "election.ListOpenElectionsResponse"
+	//   },
+	//   "links": {
+	//     "docs": "http://example.com/schema/election/ListOpenElections",
+	//     "self": "http://example.com/election/ListOpenElections"
+	//   },
+	//   "meta": {
+	//     "request": {
+	//       "attributes": {
+	//         "Page": 1,
+	//         "ItemsPerPage": 2,
+	//         "SortBy": "Name",
+	//         "SortDirection": "ascending"
+	//       },
+	//       "type": "election.ListOpenElections"
+	//     },
+	//     "status": "OK"
 	//   }
 	// }
 }

@@ -3,6 +3,7 @@ package election
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/inklabs/vote/internal/authorization"
 	"github.com/inklabs/vote/internal/electionrepository"
 	"github.com/inklabs/vote/internal/rcv"
-	"github.com/inklabs/vote/pkg/sleep"
 )
 
 type CloseElectionByOwner struct {
@@ -54,8 +54,6 @@ func (h *closeElectionByOwnerHandler) On(ctx context.Context, cmd CloseElectionB
 	ctx, span := tracer.Start(ctx, "vote.close-election-by-owner")
 	defer span.End()
 
-	sleep.Rand(2 * time.Millisecond)
-
 	election, err := h.repository.GetElection(ctx, cmd.ElectionID)
 	if err != nil {
 		logger.LogError("election not found: %s", cmd.ElectionID)
@@ -65,6 +63,8 @@ func (h *closeElectionByOwnerHandler) On(ctx context.Context, cmd CloseElectionB
 	winningProposalID, err := h.getWinningProposalID(ctx, cmd.ElectionID, logger)
 	if err != nil {
 		logger.LogError("unable to get winning proposal")
+		err = fmt.Errorf("unable to get winning proposal: %w", err)
+		cqrs.RecordSpanError(span, err)
 		return err
 	}
 
@@ -90,11 +90,35 @@ func (h *closeElectionByOwnerHandler) On(ctx context.Context, cmd CloseElectionB
 	return nil
 }
 
+func simulateProcessing(logger cqrs.AsyncCommandLogger, totalToProcess int) {
+	logger.SetTotalToProcess(totalToProcess)
+
+	sleepDuration := 3 * time.Second / time.Duration(totalToProcess)
+
+	for i := 0; i < totalToProcess; i++ {
+		logger.IncrementTotalProcessed()
+
+		if totalToProcess < 10 || i%(totalToProcess/10) == 0 {
+			logger.Flush()
+			time.Sleep(sleepDuration)
+		}
+	}
+
+	logger.Flush()
+}
+
 func (h *closeElectionByOwnerHandler) getWinningProposalID(ctx context.Context, electionID string, logger cqrs.AsyncCommandLogger) (string, error) {
 	votes, err := h.repository.GetVotes(ctx, electionID)
 	if err != nil {
 		return "", err
 	}
+
+	if len(votes) == 0 {
+		logger.LogError("no votes found for election")
+		return "", ErrNoVotesFound
+	}
+
+	simulateProcessing(logger, len(votes))
 
 	tabulator := rcv.NewSingleWinner(toRankedProposalVotes(votes))
 	winningProposalID, err := tabulator.GetWinningProposal()
@@ -118,3 +142,5 @@ func toRankedProposalVotes(votes []electionrepository.Vote) rcv.Ballots {
 
 	return rankedProposalVotes
 }
+
+var ErrNoVotesFound = errors.New("no votes found for election")

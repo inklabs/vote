@@ -27,6 +27,7 @@ type inMemoryElectionRepository struct {
 
 	// proposals key by proposalID
 	proposals map[string]electionrepository.Proposal
+
 	// votes key by electionID
 	votes map[string][]electionrepository.Vote
 }
@@ -168,7 +169,7 @@ func (r *inMemoryElectionRepository) GetVotes(ctx context.Context, electionID st
 	return nil, err
 }
 
-func (r *inMemoryElectionRepository) ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) ([]electionrepository.Election, error) {
+func (r *inMemoryElectionRepository) ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) (int, []electionrepository.Election, error) {
 	_, span := tracer.Start(ctx, "db.list-open-elections")
 	defer span.End()
 
@@ -187,10 +188,11 @@ func (r *inMemoryElectionRepository) ListOpenElections(ctx context.Context, page
 
 	sortElections(openElections, sortBy, sortDirection)
 
-	return pageEntity(openElections, page, itemsPerPage), nil
+	totalResults := len(openElections)
+	return totalResults, pageEntity(openElections, page, itemsPerPage), nil
 }
 
-func (r *inMemoryElectionRepository) ListProposals(ctx context.Context, electionID string, page, itemsPerPage int) ([]electionrepository.Proposal, error) {
+func (r *inMemoryElectionRepository) ListProposals(ctx context.Context, electionID string, page, itemsPerPage int) (int, []electionrepository.Proposal, error) {
 	_, span := tracer.Start(ctx, "db.list-proposals")
 	defer span.End()
 
@@ -203,7 +205,7 @@ func (r *inMemoryElectionRepository) ListProposals(ctx context.Context, election
 		err := electionrepository.NewErrElectionNotFound(electionID)
 		recordSpanError(span, err)
 
-		return nil, err
+		return 0, nil, err
 	}
 
 	var proposals []electionrepository.Proposal
@@ -214,11 +216,8 @@ func (r *inMemoryElectionRepository) ListProposals(ctx context.Context, election
 		}
 	}
 
-	sort.Slice(proposals, func(i, j int) bool {
-		return proposals[i].ProposedAt < proposals[j].ProposedAt
-	})
-
-	return pageEntity(proposals, page, itemsPerPage), nil
+	totalResults := len(proposals)
+	return totalResults, pageEntity(proposals, page, itemsPerPage), nil
 }
 
 func sortElections(elections []electionrepository.Election, by, direction *string) {

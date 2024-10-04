@@ -5,12 +5,11 @@ go 1.22.0
 toolchain go1.23.0
 
 require (
-	github.com/dgraph-io/badger/v4 v4.2.0
 	github.com/go-faker/faker/v4 v4.4.2
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
-	github.com/inklabs/cqrs v0.0.0-20240925014043-4fb64fe7c84b
+	github.com/inklabs/cqrs v0.0.0-20241004180448-c703dd5e9a6f
 	github.com/lib/pq v1.10.9
 	github.com/nats-io/nats.go v1.37.0
 	github.com/spf13/cobra v1.8.1
@@ -39,6 +38,7 @@ require (
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgraph-io/badger/v4 v4.2.0 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect

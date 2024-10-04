@@ -360,7 +360,7 @@ func (r *postgresRepository) GetVotes(ctx context.Context, electionID string) ([
 	return votes, nil
 }
 
-func (r *postgresRepository) ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) ([]electionrepository.Election, error) {
+func (r *postgresRepository) ListOpenElections(ctx context.Context, page, itemsPerPage int, sortBy, sortDirection *string) (int, []electionrepository.Election, error) {
 	_, span := tracer.Start(ctx, "db.list-open-elections")
 	defer span.End()
 
@@ -376,8 +376,10 @@ func (r *postgresRepository) ListOpenElections(ctx context.Context, page, itemsP
 						IsClosed,
 						CommencedAt,
 						ClosedAt,
-						SelectedAt
+						SelectedAt,
+						count(*) OVER()
                      FROM election
+					 WHERE IsClosed = FALSE
                      ` + orderBy + `
                      LIMIT $1 OFFSET $2`
 
@@ -385,10 +387,11 @@ func (r *postgresRepository) ListOpenElections(ctx context.Context, page, itemsP
 	if err != nil {
 		err = fmt.Errorf("unable to list open elections: %w", err)
 		recordSpanError(span, err)
-		return nil, err
+		return 0, nil, err
 	}
 
 	var elections []electionrepository.Election
+	var totalResults int
 
 	for rows.Next() {
 		var election electionrepository.Election
@@ -403,11 +406,12 @@ func (r *postgresRepository) ListOpenElections(ctx context.Context, page, itemsP
 			&election.CommencedAt,
 			&election.ClosedAt,
 			&election.SelectedAt,
+			&totalResults,
 		)
 		if err != nil {
 			err = fmt.Errorf("unable to get election data: %w", err)
 			recordSpanError(span, err)
-			return nil, err
+			return 0, nil, err
 		}
 
 		elections = append(elections, election)
@@ -416,13 +420,13 @@ func (r *postgresRepository) ListOpenElections(ctx context.Context, page, itemsP
 	if rows.Err() != nil {
 		err = fmt.Errorf("unable to get elections: %w", rows.Err())
 		recordSpanError(span, err)
-		return nil, err
+		return 0, nil, err
 	}
 
-	return elections, nil
+	return totalResults, elections, nil
 }
 
-func (r *postgresRepository) ListProposals(ctx context.Context, electionID string, page, itemsPerPage int) ([]electionrepository.Proposal, error) {
+func (r *postgresRepository) ListProposals(ctx context.Context, electionID string, page, itemsPerPage int) (int, []electionrepository.Proposal, error) {
 	_, span := tracer.Start(ctx, "db.list-proposals")
 	defer span.End()
 
@@ -434,7 +438,8 @@ func (r *postgresRepository) ListProposals(ctx context.Context, electionID strin
 						OwnerUserID,
 						Name,
 						Description,
-						ProposedAt
+						ProposedAt,
+						count(*) OVER()
                      FROM proposal
                      WHERE electionID = $1
                      ORDER BY ProposedAt ASC
@@ -444,10 +449,11 @@ func (r *postgresRepository) ListProposals(ctx context.Context, electionID strin
 	if err != nil {
 		err = fmt.Errorf("unable to list proposals: %w", err)
 		recordSpanError(span, err)
-		return nil, err
+		return 0, nil, err
 	}
 
 	var proposals []electionrepository.Proposal
+	var totalResults int
 
 	for rows.Next() {
 		var proposal electionrepository.Proposal
@@ -459,11 +465,12 @@ func (r *postgresRepository) ListProposals(ctx context.Context, electionID strin
 			&proposal.Name,
 			&proposal.Description,
 			&proposal.ProposedAt,
+			&totalResults,
 		)
 		if err != nil {
 			err = fmt.Errorf("unable to get election data: %w", err)
 			recordSpanError(span, err)
-			return nil, err
+			return 0, nil, err
 		}
 
 		proposals = append(proposals, proposal)
@@ -472,10 +479,10 @@ func (r *postgresRepository) ListProposals(ctx context.Context, electionID strin
 	if rows.Err() != nil {
 		err = fmt.Errorf("unable to get proposals: %w", rows.Err())
 		recordSpanError(span, err)
-		return nil, err
+		return 0, nil, err
 	}
 
-	return proposals, nil
+	return totalResults, proposals, nil
 }
 
 func NewDB(config Config) (*sql.DB, error) {

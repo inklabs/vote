@@ -44,6 +44,7 @@ func (h *castVoteHandler) On(ctx context.Context, cmd CastVote, eventRaiser cqrs
 		ElectionID:        cmd.ElectionID,
 		UserID:            cmd.UserID,
 		RankedProposalIDs: append([]string{}, cmd.RankedProposalIDs...),
+		SubmittedAt:       occurredAt,
 	})
 	if err != nil {
 		return err
