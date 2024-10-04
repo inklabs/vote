@@ -14,6 +14,7 @@ import (
 	"github.com/inklabs/vote/internal/authorization"
 	"github.com/inklabs/vote/internal/electionrepository"
 	"github.com/inklabs/vote/internal/rcv"
+	"github.com/inklabs/vote/pkg/sleep"
 )
 
 type CloseElectionByOwner struct {
@@ -93,14 +94,14 @@ func (h *closeElectionByOwnerHandler) On(ctx context.Context, cmd CloseElectionB
 func simulateProcessing(logger cqrs.AsyncCommandLogger, totalToProcess int) {
 	logger.SetTotalToProcess(totalToProcess)
 
-	sleepDuration := 3 * time.Second / time.Duration(totalToProcess)
+	sleepDuration := 5 * time.Second / time.Duration(totalToProcess)
 
 	for i := 0; i < totalToProcess; i++ {
 		logger.IncrementTotalProcessed()
 
 		if totalToProcess < 10 || i%(totalToProcess/10) == 0 {
 			logger.Flush()
-			time.Sleep(sleepDuration)
+			sleep.Sleep(sleepDuration)
 		}
 	}
 

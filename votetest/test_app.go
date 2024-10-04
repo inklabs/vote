@@ -45,12 +45,14 @@ func NewTestApp(t *testing.T) testApp {
 	}
 
 	if os.Getenv("PG_HOST") != "" {
-		transactionalTestDB := getTestDB(t)
-		repository, err := postgresrepo.NewFromDB(transactionalTestDB)
+		db := getTestDB(t)
+		repository, err := postgresrepo.NewFromDB(db)
 		require.NoError(t, err)
 
 		ctx := cqrstest.TimeoutContext(t)
 		require.NoError(t, repository.InitDB(ctx))
+
+		truncateTables(t, db)
 
 		a.ElectionRepository = repository
 	} else {
@@ -114,6 +116,14 @@ func getTestDB(t *testing.T) *sql.DB {
 	db, err := postgresrepo.NewDB(config)
 	require.NoError(t, err)
 
+	t.Cleanup(func() {
+		assert.NoError(t, db.Close())
+	})
+
+	return db
+}
+
+func truncateTables(t *testing.T, db *sql.DB) {
 	ctx := cqrstest.TimeoutContext(t)
 	sqlStatements := []string{
 		"TRUNCATE TABLE vote_ranked_proposal CASCADE",
@@ -123,13 +133,7 @@ func getTestDB(t *testing.T) *sql.DB {
 	}
 
 	for _, sqlStatement := range sqlStatements {
-		_, err = db.ExecContext(ctx, sqlStatement)
+		_, err := db.ExecContext(ctx, sqlStatement)
 		require.NoError(t, err, sqlStatement)
 	}
-
-	t.Cleanup(func() {
-		assert.NoError(t, db.Close())
-	})
-
-	return db
 }

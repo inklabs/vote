@@ -216,6 +216,10 @@ func (r *inMemoryElectionRepository) ListProposals(ctx context.Context, election
 		}
 	}
 
+	sort.Slice(proposals, func(i, j int) bool {
+		return proposals[i].ProposedAt < proposals[j].ProposedAt
+	})
+
 	totalResults := len(proposals)
 	return totalResults, pageEntity(proposals, page, itemsPerPage), nil
 }

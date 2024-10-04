@@ -101,6 +101,8 @@ export default {
           return
         }
 
+        this.showSuccess = false;
+        this.showError = false;
         this.loadProgress();
       }
   }

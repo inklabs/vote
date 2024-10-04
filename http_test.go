@@ -292,7 +292,7 @@ func ExampleApp_httpListOpenElections() {
 	//   },
 	//   "links": {
 	//     "docs": "http://example.com/schema/election/ListOpenElections",
-	//     "self": "http://example.com/election/ListOpenElections"
+	//     "self": "http://example.com/election/ListOpenElections?SortBy=Name&SortDirection=ascending&ItemsPerPage=2&Page=1"
 	//   },
 	//   "meta": {
 	//     "request": {
