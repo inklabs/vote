@@ -58,6 +58,12 @@ export default {
         method: "GET",
       })
         .then(response => {
+          if (!response.ok) {
+            this.loading = false;
+            console.log("error in response")
+            return
+          }
+
           response.json().then((body) => {
             this.progress = body.data.attributes.PercentDone
             if (!body.data.attributes.IsFinished) {

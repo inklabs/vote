@@ -20,7 +20,9 @@
           :key="proposal.ProposalID"
           class="cursor-move"
         >
-          <td><v-icon icon="mdi-drag"></v-icon></td>
+          <td>
+            <v-icon icon="mdi-drag"></v-icon>
+          </td>
           <td>{{ proposal.Name }}</td>
           <td>{{ proposal.Description }}</td>
         </tr>
@@ -40,6 +42,13 @@
       ></v-icon>
       Cast This Ballot
     </v-btn>
+
+    <CommandStatus
+      :status="castBallotStatus"
+      :loading="castBallotLoading"
+      successTitle="Success Casting Ballot"
+      errorTitle="Error Casting Ballot"
+    />
 
   </v-container>
 </template>
@@ -66,6 +75,8 @@ export default {
         totalResults: 0,
       },
       proposals: [],
+      castBallotStatus: "",
+      castBallotLoading: false,
       drag: false,
       loading: true,
     }
@@ -94,6 +105,7 @@ export default {
         });
     },
     castBallot() {
+      this.castBallotLoading = true;
       const rankedProposalsIDs = this.proposals.map(a => a.ProposalID);
 
       fetch(`http://localhost:8080/election/CastVote`, {
@@ -107,17 +119,27 @@ export default {
         })
       })
         .then(response => {
+          if (!response.ok) {
+            this.castBallotLoading = false;
+            this.castBallotStatus = "error"
+            return
+          }
+
+          this.castBallotLoading = false;
           response.json().then((body) => {
             if (body.data.attributes.Status !== "OK") {
               console.log("unable to cast vote")
               console.log(body)
+              this.castBallotStatus = "error"
               return
             }
 
-            this.$router.push(`/elections`);
+            this.castBallotStatus = "success"
           })
         })
         .catch(error => {
+          this.castBallotLoading = false;
+          this.castBallotStatus = "error"
           console.error('Error casting vote:', error);
         })
     },
