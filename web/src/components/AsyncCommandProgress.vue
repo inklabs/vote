@@ -52,52 +52,44 @@ export default {
     }
   },
   methods: {
-    loadProgress() {
+    async loadProgress() {
       this.loading = true;
-      fetch(`http://localhost:8080/async-command-status/${this.asyncCommandID}`, {
-        method: "GET",
-      })
-        .then(response => {
-          if (!response.ok) {
-            this.loading = false;
-            console.log("error in response")
-            return
-          }
+      try {
+        const body = await this.$sdk.AsyncCommandStatus({
+          AsyncCommandID: this.asyncCommandID,
+        });
 
-          response.json().then((body) => {
-            this.progress = body.data.attributes.PercentDone
-            if (!body.data.attributes.IsFinished) {
-              setTimeout(this.loadProgress, 500);
-              return
-            }
+        this.progress = body.data.attributes.PercentDone
+        if (!body.data.attributes.IsFinished) {
+          setTimeout(this.loadProgress, 500);
+          return
+        }
 
-            this.loading = false;
-            if (body.data.attributes.IsSuccess) {
-              this.showSuccess = true;
-            } else {
-              this.showLogsWithError()
-            }
-          })
-        })
-        .catch(error => {
-          console.error('Error fetching async command status:', error);
-        })
+        this.loading = false;
+        if (body.data.attributes.IsSuccess) {
+          this.showSuccess = true;
+        } else {
+          this.showLogsWithError()
+        }
+      } catch (error) {
+        console.error('Error fetching async command status:', error);
+      }
     },
-    showLogsWithError() {
-      fetch(`http://localhost:8080/async-command-status/${this.asyncCommandID}?include_logs=true`, {
-        method: "GET",
-      })
-        .then(response => {
-          response.json().then((body) => {
-            body.included.forEach(asyncCommandLog => {
-              this.errors.push(asyncCommandLog.attributes.Message)
-            })
-            this.showError = true;
-          })
+    async showLogsWithError() {
+      try {
+        const body = await this.$sdk.AsyncCommandStatus({
+          AsyncCommandID: this.asyncCommandID,
+          IncludeLogs: true,
+        });
+
+        body.included.forEach(asyncCommandLog => {
+          this.errors.push(asyncCommandLog.attributes.Message)
         })
-        .catch(error => {
-          console.error('Error fetching async command status logs:', error);
-        })
+        this.showError = true;
+
+      } catch (error) {
+        console.error('Error fetching async command status logs:', error);
+      }
     }
   },
   watch: {
@@ -109,6 +101,7 @@ export default {
 
         this.showSuccess = false;
         this.showError = false;
+        this.errors = [];
         this.loadProgress();
       }
   }

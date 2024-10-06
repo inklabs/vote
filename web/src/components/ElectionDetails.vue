@@ -19,18 +19,15 @@ export default {
     this.fetchElection(this.electionID);
   },
   methods: {
-    fetchElection(electionID) {
-      fetch(`http://localhost:8080/election/GetElection?ElectionID=${electionID}`, {
-        method: "GET",
-      })
-        .then(response => {
-          response.json().then((body) => {
-            this.election = body.data.attributes;
-          })
-        })
-        .catch(error => {
-          console.error('Error fetching election:', error);
+    async fetchElection(electionID) {
+      try {
+        const body = await this.$sdk.election.GetElection({
+          ElectionID: electionID,
         });
+        this.election = body.data.attributes;
+      } catch (error) {
+        console.error('Error fetching election:', error);
+      }
     },
   }
 }

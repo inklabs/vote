@@ -37,29 +37,18 @@ export default {
     }
   },
   methods: {
-    makeProposal() {
-      fetch('http://localhost:8080/election/MakeProposal', {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
+    async makeProposal() {
+      try {
+        await this.$sdk.election.MakeProposal({
           ElectionID: this.electionID,
           ProposalID: this.$uuid.v4(),
           Name: this.proposal.name,
           Description: this.proposal.description,
         })
-      })
-        .then(response => {
-          response.json().then((body) => {
-            if (body.data.attributes.Status === "OK") {
-              console.log("Make Proposal successfully created")
-              location.reload();
-            }
-            console.log(body)
-          })
-        })
-        .catch(error => {
-          console.error('Error making proposal:', error);
-        });
+        location.reload();
+      } catch (error) {
+        console.error('Error making proposal:', error);
+      }
     }
   }
 }

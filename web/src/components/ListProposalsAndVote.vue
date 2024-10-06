@@ -85,63 +85,40 @@ export default {
     this.fetchProposals({page: 1, itemsPerPage: 10});
   },
   methods: {
-    fetchProposals({page, itemsPerPage}) {
+    async fetchProposals({page, itemsPerPage}) {
       this.loading = true;
-      fetch(`http://localhost:8080/election/ListProposals?ElectionID=${this.electionID}&Page=${page}&ItemsPerPage=${itemsPerPage}`, {
-        method: "GET",
-      })
-        .then(response => {
-          response.json().then((body) => {
-            this.proposals = body.data.attributes.Proposals;
-
-            if (body.data.attributes.TotalResults > itemsPerPage) {
-              console.log("more results than were returned");
-            }
-            this.loading = false;
-          })
-        })
-        .catch(error => {
-          console.error('Error fetching proposals:', error);
+      try {
+        const body = await this.$sdk.election.ListProposals({
+          ElectionID: this.electionID,
+          Page: page,
+          ItemsPerPage: itemsPerPage,
         });
+
+        this.proposals = body.data.attributes.Proposals;
+      } catch (error) {
+        console.error('Error fetching proposals:', error);
+      }
+
+      this.loading = false;
     },
-    castBallot() {
+    async castBallot() {
       this.castBallotLoading = true;
       const rankedProposalsIDs = this.proposals.map(a => a.ProposalID);
 
-      fetch(`http://localhost:8080/election/CastVote`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
+      try {
+        await this.$sdk.election.CastVote({
           VoteID: this.$uuid.v4(),
           ElectionID: this.electionID,
           UserID: this.$uuid.v4(),
           RankedProposalIDs: rankedProposalsIDs
-        })
-      })
-        .then(response => {
-          if (!response.ok) {
-            this.castBallotLoading = false;
-            this.castBallotStatus = "error"
-            return
-          }
+        });
+        this.castBallotStatus = 'success';
+      } catch (error) {
+        this.castBallotStatus = 'error';
+        console.error('Error casting vote:', error);
+      }
 
-          this.castBallotLoading = false;
-          response.json().then((body) => {
-            if (body.data.attributes.Status !== "OK") {
-              console.log("unable to cast vote")
-              console.log(body)
-              this.castBallotStatus = "error"
-              return
-            }
-
-            this.castBallotStatus = "success"
-          })
-        })
-        .catch(error => {
-          this.castBallotLoading = false;
-          this.castBallotStatus = "error"
-          console.error('Error casting vote:', error);
-        })
+      this.castBallotLoading = false;
     },
   }
 }

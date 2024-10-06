@@ -47,27 +47,30 @@ export default {
     }
   },
   methods: {
-    fetchElections({page, itemsPerPage, sortBy}) {
+    async fetchElections({page, itemsPerPage, sortBy}) {
+      this.loading = true;
       let sortByVal = "CommencedAt"
       let sortDirection = "descending"
       if (sortBy.length) {
         sortByVal = sortBy[0].key
         sortDirection = sortBy[0].order === "desc" ? "descending" : "ascending";
       }
-      this.loading = true;
-      fetch(`http://localhost:8080/election/ListOpenElections?SortBy=${sortByVal}&SortDirection=${sortDirection}&Page=${page}&ItemsPerPage=${itemsPerPage}`, {
-        method: "GET",
-      })
-        .then(response => {
-          response.json().then((body) => {
-            this.elections = body.data.attributes.OpenElections;
-            this.pagination.totalResults = body.data.attributes.TotalResults;
-            this.loading = false;
-          })
+
+      try {
+        const body = await this.$sdk.election.ListOpenElections({
+          Page: page,
+          ItemsPerPage: itemsPerPage,
+          SortBy: sortByVal,
+          SortDirection: sortDirection,
         })
-        .catch(error => {
-          console.error('Error fetching elections:', error);
-        });
+
+        this.elections = body.data.attributes.OpenElections;
+        this.pagination.totalResults = body.data.attributes.TotalResults;
+      } catch (error) {
+        console.error('Error fetching elections:', error);
+      }
+
+      this.loading = false;
     },
     viewProposals(electionId) {
       this.$router.push(`/elections/${electionId}`);

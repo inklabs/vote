@@ -36,33 +36,20 @@ export default {
     }
   },
   methods: {
-    startElection() {
-      fetch('http://localhost:8080/election/CommenceElection', {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          ElectionID: this.$uuid.v4(),
+    async startElection() {
+      const electionID = this.$uuid.v4()
+
+      try {
+        await this.$sdk.election.CommenceElection({
+          ElectionID: electionID,
           Name: this.election.name,
           Description: this.election.description,
-        })
-      })
-        .then(response => {
-          response.json().then((body) => {
-            if (body.data.attributes.Status === "OK") {
-              const electionID = body.meta.request.attributes.ElectionID
-              if (electionID === "") {
-                console.error("unable to get election id")
-                return
-              }
-
-              this.$router.push(`/elections/${electionID}`)
-            }
-            console.log(body)
-          })
-        })
-        .catch(error => {
-          console.error('Error commencing election:', error);
         });
+
+        this.$router.push(`/elections/${electionID}`)
+      } catch (error) {
+        console.error('Error commencing election:', error);
+      }
     }
   }
 }

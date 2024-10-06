@@ -45,21 +45,21 @@ export default {
     }
   },
   methods: {
-    fetchProposals({page, itemsPerPage}) {
+    async fetchProposals({page, itemsPerPage}) {
       this.loading = true;
-      fetch(`http://localhost:8080/election/ListProposals?ElectionID=${this.electionID}&Page=${page}&ItemsPerPage=${itemsPerPage}`, {
-        method: "GET",
-      })
-        .then(response => {
-          response.json().then((body) => {
-            this.proposals = body.data.attributes.Proposals;
-            this.pagination.totalResults = body.data.attributes.TotalResults;
-            this.loading = false;
-          })
+      try {
+        const body = await this.$sdk.election.ListProposals({
+          ElectionID: this.electionID,
+          Page: page,
+          ItemsPerPage: itemsPerPage,
         })
-        .catch(error => {
-          console.error('Error fetching proposals:', error);
-        });
+        this.proposals = body.data.attributes.Proposals;
+        this.pagination.totalResults = body.data.attributes.TotalResults;
+      } catch (error) {
+        console.error('Error fetching proposals:', error);
+      }
+
+      this.loading = false;
     },
   }
 }
