@@ -10,7 +10,6 @@ import (
 	"github.com/inklabs/cqrs/asynccommandbus"
 	"github.com/inklabs/cqrs/asynccommandstore"
 	"github.com/inklabs/cqrs/broker/nats"
-	"github.com/inklabs/cqrs/broker/rabbitmq"
 	"github.com/inklabs/cqrs/commandbus"
 	"github.com/inklabs/cqrs/cqrstest"
 	"github.com/inklabs/cqrs/eventdispatcher"
@@ -32,7 +31,7 @@ import (
 //go:generate go run github.com/inklabs/cqrs/cmd/domaingenerator -module github.com/inklabs/vote
 //go:generate go run github.com/inklabs/cqrs/cmd/httpgenerator
 //go:generate go run github.com/inklabs/cqrs/cmd/grpcgenerator
-//go:generate go run github.com/inklabs/cqrs/cmd/sdkgenerator -js ./web/src/plugins/jsSDK.js
+//go:generate go run github.com/inklabs/cqrs/cmd/sdkgenerator -js ./web/src/plugins/jsSDK_gen.js
 //go:generate go run github.com/inklabs/cqrs/cmd/cligenerator
 
 //go:embed domain.gob
@@ -274,12 +273,12 @@ func GetNatsBroker(logger *log.Logger) cqrs.Broker {
 	)
 }
 
-func GetRabbitMQBroker(logger *log.Logger) cqrs.Broker {
-	return rabbitmq.NewBroker(
-		"amqp://guest:guest@localhost:5672/",
-		logger,
-	)
-}
+//func GetRabbitMQBroker(logger *log.Logger) cqrs.Broker {
+//	return rabbitmq.NewBroker(
+//		"amqp://guest:guest@localhost:5672/",
+//		logger,
+//	)
+//}
 
 func getPostgresConfig() postgresrepo.Config {
 	return postgresrepo.Config{

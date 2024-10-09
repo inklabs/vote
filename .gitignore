@@ -1,5 +1,6 @@
 .idea/
 *_gen.go
+*_gen.js
 .leveldb*/
 .badger.db/
 *.gob

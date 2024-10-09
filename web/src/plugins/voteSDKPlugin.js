@@ -1,4 +1,4 @@
-import {JsSDK} from './jsSdk';
+import {JsSDK} from './jsSdk_gen';
 
 const VoteSDKPlugin = {
   install(app, options) {
