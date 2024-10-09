@@ -9,7 +9,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/golang/protobuf v1.5.4
 	github.com/google/uuid v1.6.0
-	github.com/inklabs/cqrs v0.0.0-20241004223819-c38021a43067
+	github.com/inklabs/cqrs v0.0.0-20241009140444-ee8f880118bb
 	github.com/lib/pq v1.10.9
 	github.com/nats-io/nats.go v1.37.0
 	github.com/spf13/cobra v1.8.1
