@@ -17,6 +17,8 @@ import (
 	"github.com/inklabs/vote/pkg/sleep"
 )
 
+// CloseElectionByOwner is an asynchronous command that closes an election and
+// calculates a winner by using the Ranked Choice Voting (RCV) electoral system.
 type CloseElectionByOwner struct {
 	ID         string
 	ElectionID string

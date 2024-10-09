@@ -77,6 +77,10 @@ func ExampleApp_cliElectionCastVote_help() {
 	_ = cmd.Execute()
 
 	// Output:
+	// CastVote casts a ballot for a given ElectionID. RankedProposalIDs contains the
+	// ranked candidates in order of preference: first, second, third and so forth. If your
+	// first choice doesn’t have a chance to win, your ballot counts for your next choice.
+	//
 	// Usage:
 	//   cli election CastVote [flags]
 	//
@@ -97,6 +101,8 @@ func ExampleApp_cliElectionListOpenElections_help() {
 	_ = cmd.Execute()
 
 	// Output:
+	// ListOpenElections returns a paginated result of elections that are still open.
+	//
 	// Returns:
 	// election.ListOpenElectionsResponse {
 	//	OpenElections []OpenElection

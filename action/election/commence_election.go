@@ -12,6 +12,7 @@ import (
 	"github.com/inklabs/vote/pkg/sleep"
 )
 
+// CommenceElection instantiates a new open election that is ready for proposals and voting.
 type CommenceElection struct {
 	ElectionID      string
 	OrganizerUserID string

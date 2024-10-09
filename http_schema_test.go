@@ -187,7 +187,7 @@ func ExampleApp_httpSchemaElectionCastVote() {
 	// {
 	//   "data": {
 	//     "attributes": {
-	//       "documentation": "",
+	//       "documentation": "CastVote casts a ballot for a given ElectionID. RankedProposalIDs contains the\nranked candidates in order of preference: first, second, third and so forth. If your\nfirst choice doesn’t have a chance to win, your ballot counts for your next choice.",
 	//       "fields": [
 	//         {
 	//           "isRequired": true,
@@ -235,7 +235,7 @@ func ExampleApp_httpSchemaElectionListOpenElections() {
 	// {
 	//   "data": {
 	//     "attributes": {
-	//       "documentation": "",
+	//       "documentation": "ListOpenElections returns a paginated result of elections that are still open.",
 	//       "fields": [
 	//         {
 	//           "isRequired": false,

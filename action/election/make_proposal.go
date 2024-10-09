@@ -12,6 +12,7 @@ import (
 	"github.com/inklabs/vote/pkg/sleep"
 )
 
+// MakeProposal instantiates a new proposal for a given ElectionID.
 type MakeProposal struct {
 	ElectionID  string
 	ProposalID  string

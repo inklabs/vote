@@ -9,6 +9,7 @@ import (
 	"github.com/inklabs/vote/internal/electionrepository"
 )
 
+// ListOpenElections returns a paginated result of elections that are still open.
 type ListOpenElections struct {
 	Page          *int
 	ItemsPerPage  *int

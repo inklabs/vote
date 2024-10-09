@@ -6,6 +6,7 @@ import (
 	"github.com/inklabs/vote/internal/electionrepository"
 )
 
+// GetElection returns a single election by ElectionID.
 type GetElection struct {
 	ElectionID string
 }

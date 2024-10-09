@@ -9,7 +9,8 @@ import (
 	"github.com/inklabs/vote/internal/electionrepository"
 )
 
-// ListProposals retrieves all election proposals. Sortable options are omitted.
+// ListProposals returns a paginated result of election proposals.
+// Sortable options are omitted for this example.
 type ListProposals struct {
 	ElectionID   string
 	Page         *int

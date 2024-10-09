@@ -12,6 +12,9 @@ import (
 	"github.com/inklabs/vote/pkg/sleep"
 )
 
+// CastVote casts a ballot for a given ElectionID. RankedProposalIDs contains the
+// ranked candidates in order of preference: first, second, third and so forth. If your
+// first choice doesn’t have a chance to win, your ballot counts for your next choice.
 type CastVote struct {
 	VoteID            string
 	ElectionID        string

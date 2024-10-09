@@ -6,6 +6,7 @@ import (
 	"github.com/inklabs/vote/internal/electionrepository"
 )
 
+// GetProposalDetails returns the full details of a Proposal.
 type GetProposalDetails struct {
 	ProposalID string
 }
