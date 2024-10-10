@@ -48,6 +48,7 @@ export default {
         location.reload();
       } catch (error) {
         console.error('Error making proposal:', error);
+        this.$showSnackbar("Error making proposal");
       }
     }
   }

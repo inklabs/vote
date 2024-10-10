@@ -164,16 +164,16 @@ func ExampleApp_cliElectionCloseElectionByOwner() {
 	_ = cmd.Execute()
 
 	// Output:
-	// Response: *cqrs.CommandResponse {
+	// Response: cqrs.CommandResponse {
 	//   "Status": "OK"
 	// }
-	// Response: *cqrs.CommandResponse {
+	// Response: cqrs.CommandResponse {
 	//   "Status": "OK"
 	// }
-	// Response: *cqrs.CommandResponse {
+	// Response: cqrs.CommandResponse {
 	//   "Status": "OK"
 	// }
-	// Response: *cqrs.AsyncCommandResponse {
+	// Response: cqrs.AsyncCommandResponse {
 	//   "ID": "AC1",
 	//   "Status": "QUEUED",
 	//   "HasBeenQueued": true

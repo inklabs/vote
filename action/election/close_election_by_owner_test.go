@@ -58,7 +58,7 @@ func TestCloseElectionByOwner(t *testing.T) {
 
 		// Then
 		require.NoError(t, err)
-		assert.Equal(t, &cqrs.AsyncCommandResponse{
+		assert.Equal(t, cqrs.AsyncCommandResponse{
 			ID:            commandID,
 			Status:        "QUEUED",
 			HasBeenQueued: true,

@@ -27,6 +27,7 @@ export default {
         this.election = body.data.attributes;
       } catch (error) {
         console.error('Error fetching election:', error);
+        this.$showSnackbar("Error fetching election");
       }
     },
   }

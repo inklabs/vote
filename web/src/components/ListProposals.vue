@@ -57,6 +57,7 @@ export default {
         this.pagination.totalResults = body.data.attributes.TotalResults;
       } catch (error) {
         console.error('Error fetching proposals:', error);
+        this.$showSnackbar("Error fetching proposals");
       }
 
       this.loading = false;

@@ -45,7 +45,7 @@ func TestMakeProposal(t *testing.T) {
 
 		// Then
 		require.NoError(t, err)
-		assert.Equal(t, &cqrs.CommandResponse{
+		assert.Equal(t, cqrs.CommandResponse{
 			Status: "OK",
 		}, response)
 		assert.Equal(t, event.ProposalWasMade{

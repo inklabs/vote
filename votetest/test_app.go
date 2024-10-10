@@ -70,12 +70,11 @@ func NewTestApp(t *testing.T) testApp {
 	return a
 }
 
-func (a *testApp) ExecuteCommand(ctx context.Context, command cqrs.Command) (*cqrs.CommandResponse, error) {
+func (a *testApp) ExecuteCommand(ctx context.Context, command cqrs.Command) (cqrs.CommandResponse, error) {
 	return a.app.CommandBus().Execute(ctx, command)
 }
 
-// EnqueueCommand executes the async command synchronously via vote.WithSyncLocalAsyncCommandBus
-func (a *testApp) EnqueueCommand(ctx context.Context, asyncCommand cqrs.AsyncCommand) (*cqrs.AsyncCommandResponse, error) {
+func (a *testApp) EnqueueCommand(ctx context.Context, asyncCommand cqrs.AsyncCommand) (cqrs.AsyncCommandResponse, error) {
 	return a.app.AsyncCommandBus().Enqueue(ctx, asyncCommand)
 }
 

@@ -73,6 +73,7 @@ export default {
         }
       } catch (error) {
         console.error('Error fetching async command status:', error);
+        this.$showSnackbar("Error fetching async command status");
       }
     },
     async showLogsWithError() {
@@ -89,6 +90,7 @@ export default {
 
       } catch (error) {
         console.error('Error fetching async command status logs:', error);
+        this.$showSnackbar("Error fetching async command status logs");
       }
     }
   },

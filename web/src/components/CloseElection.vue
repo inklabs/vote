@@ -40,6 +40,7 @@ export default {
         this.asyncCommandID = asyncCommandID
       } catch (error) {
         console.error('Error closing election:', error);
+        this.$showSnackbar("Error closing election");
       }
     },
   }

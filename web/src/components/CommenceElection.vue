@@ -6,14 +6,12 @@
       <v-text-field
         label="Name"
         v-model="election.name"
-        :rules="nameRules"
         required
       ></v-text-field>
 
       <v-text-field
         label="Description"
         v-model="election.description"
-        :rules="descriptionRules"
         required
       ></v-text-field>
 
@@ -49,6 +47,7 @@ export default {
         this.$router.push(`/elections/${electionID}`)
       } catch (error) {
         console.error('Error commencing election:', error);
+        this.$showSnackbar("Error commencing election");
       }
     }
   }

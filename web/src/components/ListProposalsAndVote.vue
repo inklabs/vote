@@ -97,6 +97,7 @@ export default {
         this.proposals = body.data.attributes.Proposals;
       } catch (error) {
         console.error('Error fetching proposals:', error);
+        this.$showSnackbar("Error fetching proposals");
       }
 
       this.loading = false;
@@ -116,6 +117,7 @@ export default {
       } catch (error) {
         this.castBallotStatus = 'error';
         console.error('Error casting vote:', error);
+        this.$showSnackbar("Error casting vote");
       }
 
       this.castBallotLoading = false;

@@ -11,6 +11,7 @@
     "@mdi/font": "7.4.47",
     "core-js": "^3.37.1",
     "roboto-fontface": "*",
+    "tiny-emitter": "^2.1.0",
     "vue": "^3.4.31",
     "vue-draggable-plus": "^0.5.3",
     "vue-uuid": "^3.0.0",
