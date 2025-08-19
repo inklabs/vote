@@ -3,6 +3,10 @@ on:
   - push
   - pull_request
 
+env:
+  GOPRIVATE: github.com/inklabs/cqrs
+  GH_TOKEN: ${{ secrets.CQRS_READ_TOKEN }}
+
 jobs:
   unit-tests:
     name: Unit Tests
@@ -23,6 +27,9 @@ jobs:
 
       - name: Go Mod Verify
         run: go mod verify
+
+      - name: Go Generate
+        run: go generate .
 
       - name: Go Test
         run: go test -v -race -failfast ./...
