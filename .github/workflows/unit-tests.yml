@@ -22,7 +22,7 @@ jobs:
           cache: true
 
       - name: Configure Git for private modules
-        run: git config --global url."https://${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+        run: git config --global url."https://${GH_TOKEN}@github.com/inklabs/cqrs".insteadOf "https://github.com/inklabs/cqrs"
         env:
           GH_TOKEN: ${{ secrets.CQRS_READ_TOKEN }}
           
@@ -31,6 +31,9 @@ jobs:
 
       - name: Go Mod Verify
         run: go mod verify
+
+      - name: Install Protoc
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
 
       - name: Go Generate
         run: go generate .
