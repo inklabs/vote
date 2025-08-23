@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/inklabs/cqrs"
 	"github.com/inklabs/cqrs/cqrstest"
+	"github.com/protocolbuffers/txtpbfmt/parser"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/encoding/prototext"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/inklabs/vote"
 	"github.com/inklabs/vote/grpc/go/asynccommandpb"
@@ -56,23 +58,23 @@ func ExampleApp_grpcListOpenElections() {
 		SortDirection: cqrs.SortAscending,
 	})
 
-	fmt.Printf(proto.MarshalTextString(response))
+	fmt.Print(MarshalTextString(response))
 
 	// Output:
-	// open_elections: <
+	//  open_elections: {
 	//   election_id: "E1"
 	//   organizer_user_id: "U1"
 	//   name: "Election Name 1"
 	//   description: "Election Description 1"
 	//   commenced_at: 1699900000
-	// >
-	// open_elections: <
+	// }
+	// open_elections: {
 	//   election_id: "E2"
 	//   organizer_user_id: "U1"
 	//   name: "Election Name 2"
 	//   description: "Election Description 2"
 	//   commenced_at: 1699900001
-	// >
+	// }
 	// total_results: 3
 }
 
@@ -117,7 +119,7 @@ func ExampleApp_grpcCloseElectionByOwner() {
 		Id:         "AC1",
 		ElectionId: "E1",
 	})
-	fmt.Printf("asyncCommandResponse:\n%s", proto.MarshalTextString(asyncCommandResponse))
+	fmt.Printf("asyncCommandResponse:\n%s", MarshalTextString(asyncCommandResponse))
 
 	recordingEventDispatcher.Wait(ctx)
 
@@ -125,7 +127,7 @@ func ExampleApp_grpcCloseElectionByOwner() {
 		CommandId:   "AC1",
 		IncludeLogs: true,
 	})
-	fmt.Printf("\n%s", proto.MarshalTextString(status))
+	fmt.Printf("\n%s", MarshalTextString(status))
 
 	// Output:
 	// asyncCommandResponse:
@@ -133,7 +135,7 @@ func ExampleApp_grpcCloseElectionByOwner() {
 	// status: "QUEUED"
 	// has_been_queued: true
 	//
-	// async_command_status: <
+	// async_command_status: {
 	//   created_at: 1699900003
 	//   modified_at: 1699900007
 	//   started_at_micro: 1699900004000000
@@ -144,14 +146,20 @@ func ExampleApp_grpcCloseElectionByOwner() {
 	//   percent_done: 100
 	//   is_success: true
 	//   is_finished: true
-	//   close_election_by_owner: <
+	//   close_election_by_owner: {
 	//     id: "AC1"
 	//     election_id: "E1"
-	//   >
-	// >
-	// logs: <
+	//   }
+	// }
+	// logs: {
 	//   type: "INFO"
 	//   created_at_micro: 1699900006000000
 	//   message: "Closing election with winner: P1"
-	// >
+	// }
+}
+
+func MarshalTextString(response proto.Message) string {
+	unstableOutput := prototext.Format(response)
+	out, _ := parser.Format([]byte(unstableOutput))
+	return string(out)
 }
