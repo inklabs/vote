@@ -18,6 +18,8 @@ import (
 	"github.com/inklabs/cqrs/querybus"
 	natsClient "github.com/nats-io/nats.go"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/inklabs/vote/action/election"
 	"github.com/inklabs/vote/event"
@@ -47,6 +49,8 @@ type app struct {
 	clock                  clock.Clock
 	useSyncLocalCommandBus bool
 	ctxShutdowns           []func(ctx context.Context) error
+	meterProvider          metric.MeterProvider
+	tracerProvider         trace.TracerProvider
 
 	electionRepository electionrepository.Repository
 }
@@ -89,15 +93,26 @@ func WithCtxShutdown(shutdowns ...func(ctx context.Context) error) Option {
 	}
 }
 
+func WithTelemetry(meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) Option {
+	return func(a *app) {
+		a.meterProvider = meterProvider
+		a.tracerProvider = tracerProvider
+	}
+}
+
 func NewApp(opts ...Option) *app {
 	a := &app{
 		clock:              systemclock.New(),
 		authorization:      cqrstest.NewPassThruAuth(),
 		asyncCommandStore:  asynccommandstore.NewInMemory(),
 		electionRepository: inmemoryrepo.New(),
+		meterProvider:      otel.GetMeterProvider(),
+		tracerProvider:     otel.GetTracerProvider(),
 	}
 
 	a.eventDispatcher = eventdispatcher.NewConcurrentLocal(
+		a.meterProvider,
+		a.tracerProvider,
 		log.Default(),
 		a.GetEventListeners(),
 	)
@@ -118,6 +133,8 @@ func NewApp(opts ...Option) *app {
 		commandHandlerRegistry,
 		a.eventDispatcher,
 		a.authorization,
+		a.meterProvider,
+		a.tracerProvider,
 	)
 
 	a.asyncCommandBus = asynccommandbus.NewConcurrentLocal(
@@ -126,11 +143,15 @@ func NewApp(opts ...Option) *app {
 		a.asyncCommandStore,
 		a.clock,
 		a.authorization,
+		a.meterProvider,
+		a.tracerProvider,
 	)
 
 	a.queryBus = querybus.NewLocal(
 		queryHandlerRegistry,
 		a.authorization,
+		a.meterProvider,
+		a.tracerProvider,
 	)
 
 	return a
@@ -142,10 +163,8 @@ func NewProdApp() *app {
 	conn := NewOLTPConn()
 	tracerProvider := NewOTLPTracerProvider(resource, conn)
 	meterProvider := NewOLTPMeterProvider(resource, conn)
-	otel.SetTracerProvider(tracerProvider)
-	otel.SetMeterProvider(meterProvider)
 
-	eventDispatcher := newDistributedEventDispatcher()
+	eventDispatcher := newDistributedEventDispatcher(meterProvider, tracerProvider)
 
 	config := getPostgresConfig()
 	repository, err := postgresrepo.NewFromConfig(config)
@@ -181,6 +200,7 @@ func NewProdApp() *app {
 		WithAsyncCommandStore(asyncCommandStore),
 		WithEventDispatcher(eventDispatcher),
 		WithElectionRepository(repository),
+		WithTelemetry(meterProvider, tracerProvider),
 		WithCtxShutdown(
 			tracerProvider.Shutdown,
 			meterProvider.Shutdown,
@@ -198,6 +218,14 @@ func (a *app) AsyncCommandBus() cqrs.AsyncCommandBus {
 
 func (a *app) QueryBus() cqrs.QueryBus {
 	return a.queryBus
+}
+
+func (a *app) MeterProvider() metric.MeterProvider {
+	return a.meterProvider
+}
+
+func (a *app) TracerProvider() trace.TracerProvider {
+	return a.tracerProvider
 }
 
 func (a *app) Stop() {
@@ -241,7 +269,7 @@ func (a *app) GetEventListeners() []cqrs.EventListener {
 	}
 }
 
-func newDistributedEventDispatcher() cqrs.EventDispatcher {
+func newDistributedEventDispatcher(meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) cqrs.EventDispatcher {
 	eventRegistry := cqrs.NewEventRegistry()
 	event.BindEvents(eventRegistry)
 
@@ -251,12 +279,14 @@ func newDistributedEventDispatcher() cqrs.EventDispatcher {
 
 	const queueName = "vote-events"
 	//publisher := GetRabbitMQBroker(logger)
-	publisher := GetNatsBroker(logger)
+	publisher := GetNatsBroker(logger, meterProvider, tracerProvider)
 
 	eventDispatcher, err := eventdispatcher.NewDistributedEventDispatcher(
 		queueName,
 		publisher,
 		eventSerializer,
+		meterProvider,
+		tracerProvider,
 		logger,
 	)
 	if err != nil {
@@ -266,9 +296,11 @@ func newDistributedEventDispatcher() cqrs.EventDispatcher {
 	return eventDispatcher
 }
 
-func GetNatsBroker(logger *log.Logger) cqrs.Broker {
+func GetNatsBroker(logger *log.Logger, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) cqrs.Broker {
 	return nats.NewBroker(
 		natsClient.DefaultURL,
+		meterProvider,
+		tracerProvider,
 		logger,
 	)
 }

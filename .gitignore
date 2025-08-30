@@ -9,3 +9,4 @@
 *.private.env.json
 *_pb2.py*
 *_pb2_*
+coverage.out

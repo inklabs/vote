@@ -2,7 +2,7 @@
   <configuration default="false" name="All Unit Tests" type="GoTestRunConfiguration" factoryName="Go Test">
     <module name="vote" />
     <working_directory value="$PROJECT_DIR$" />
-    <go_parameters value="-failfast" />
+    <go_parameters value="-race -failfast" />
     <kind value="DIRECTORY" />
     <package value="github.com/inklabs/vote/" />
     <directory value="$PROJECT_DIR$" />

@@ -31,12 +31,14 @@ func main() {
 
 	const queueName = "vote-events"
 	//consumer := vote.GetRabbitMQBroker(logger, app.GetMeterProvider(), app.GetTracerProvider())
-	consumer := vote.GetNatsBroker(logger)
+	consumer := vote.GetNatsBroker(logger, app.MeterProvider(), app.TracerProvider())
 
 	subscriber, err := eventdispatcher.NewDistributedEventSubscriber(
 		queueName,
 		consumer,
 		eventSerializer,
+		app.MeterProvider(),
+		app.TracerProvider(),
 		logger,
 		app.GetEventListeners(),
 	)
