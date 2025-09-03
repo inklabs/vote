@@ -12,7 +12,8 @@ type Ballots [][]string
 type singleWinner struct {
 	totalVotes    int
 	threshold     int
-	proposalCount map[string]int
+	proposalCount map[string]int // proposalID:count
+	bordaCount    map[string]int // proposalID:bordaCount
 	ballots       Ballots
 }
 
@@ -24,10 +25,24 @@ type singleWinner struct {
 func NewSingleWinner(ballots Ballots) *singleWinner {
 	return &singleWinner{
 		totalVotes:    len(ballots),
-		threshold:     len(ballots) / 2,
+		threshold:     (len(ballots) / 2) + 1,
 		ballots:       ballots,
+		bordaCount:    calculateBordaCount(ballots),
 		proposalCount: make(map[string]int),
 	}
+}
+
+func calculateBordaCount(ballots Ballots) map[string]int {
+	bordaCount := make(map[string]int)
+
+	for _, rankedProposalIDs := range ballots {
+		total := len(rankedProposalIDs)
+		for position, proposalID := range rankedProposalIDs {
+			bordaCount[proposalID] += total - position
+		}
+	}
+
+	return bordaCount
 }
 
 // GetWinningProposal returns the winning proposal.
@@ -46,7 +61,7 @@ func (t *singleWinner) GetWinningProposal() (string, error) {
 
 func (t *singleWinner) getWinner() (string, bool) {
 	for proposalID, count := range t.proposalCount {
-		if count > t.threshold {
+		if count >= t.threshold {
 			return proposalID, true
 		}
 	}
@@ -82,15 +97,32 @@ func (t *singleWinner) getWinnerFromRemainingProposalIDs() (string, error) {
 	return "", ErrWinnerNotFound
 }
 
-// removeMinProposal removes the lowest ranked proposal.
+// removeMinProposal removes the lowest ranked proposal. The Borda Count
+// method is used as a tiebreaker.
 func (t *singleWinner) removeMinProposal() {
-	var minProposalID string
+	var minProposalIDs []string
 	var minVotes = t.totalVotes
 
 	for proposalID, count := range t.proposalCount {
 		if count < minVotes {
 			minVotes = count
-			minProposalID = proposalID
+			minProposalIDs = append([]string{}, proposalID)
+		} else if count == minVotes {
+			minProposalIDs = append(minProposalIDs, proposalID)
+		}
+	}
+
+	minProposalID := minProposalIDs[0]
+
+	isATie := len(minProposalIDs) > 1
+	if isATie {
+		minBordaCount := t.bordaCount[minProposalID]
+
+		for _, proposalID := range minProposalIDs {
+			if t.bordaCount[proposalID] < minBordaCount {
+				minProposalID = proposalID
+				minBordaCount = t.bordaCount[proposalID]
+			}
 		}
 	}
 
@@ -100,8 +132,8 @@ func (t *singleWinner) removeMinProposal() {
 // tallyVotes increments the count for the next highest-ranked proposal
 // still in the running
 func (t *singleWinner) tallyVotes() {
-	for _, rankedProposalIDS := range t.ballots {
-		for _, proposalID := range rankedProposalIDS {
+	for _, rankedProposalIDs := range t.ballots {
+		for _, proposalID := range rankedProposalIDs {
 			if _, ok := t.proposalCount[proposalID]; ok {
 				t.proposalCount[proposalID]++
 				break

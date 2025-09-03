@@ -57,9 +57,8 @@ func TestSingleWinner(t *testing.T) {
 			winner: B,
 		},
 		{
-			//https://github.com/BrightSpots/rcv/blob/develop/src/test/resources/network/brightspots/rcv/test_data/minimum_threshold_test/minimum_threshold_test_expected_summary.csv
-			// TODO: Fix this. Current implementation is non-deterministic.
-			name: "round 3: minimum threshold",
+			//https://github.com/BrightSpots/rcv/blob/develop/src/test/resources/network/brightspots/rcv/test_data/minimum_threshold_test
+			name: "round 3: minimum threshold with Borda Count tiebreaker",
 			ballots: rcv.Ballots{
 				{A, B, C},
 				{A, B, C},
@@ -72,7 +71,7 @@ func TestSingleWinner(t *testing.T) {
 				{C, B, A},
 				{C, B, A},
 			},
-			winner: A,
+			winner: B,
 		},
 		{
 			name: "3 rounds",
