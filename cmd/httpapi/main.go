@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/inklabs/cqrs/api/httpserver"
 
@@ -14,5 +15,17 @@ func main() {
 	app := vote.NewProdApp()
 	httpActionDecoder := vote.NewHTTPActionDecoder()
 
-	httpserver.Start(app, httpActionDecoder, vote.ValidationRules, vote.DomainBytes)
+	baseURI := url.URL{
+		Scheme: "https",
+		Host:   "api.vote.inklabs.dev",
+	}
+
+	httpserver.Start(
+		app,
+		httpActionDecoder,
+		vote.ValidationRules,
+		vote.DomainBytes,
+		baseURI.String(),
+		vote.Version,
+	)
 }

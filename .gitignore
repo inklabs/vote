@@ -10,3 +10,4 @@
 *_pb2.py*
 *_pb2_*
 coverage.out
+*.bin

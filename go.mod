@@ -6,7 +6,7 @@ require (
 	github.com/go-faker/faker/v4 v4.6.1
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
-	github.com/inklabs/cqrs v0.0.0-20250830055147-6a6aa585d7a9
+	github.com/inklabs/cqrs v0.0.0-20250912051330-9a7d40867550
 	github.com/lib/pq v1.10.9
 	github.com/nats-io/nats.go v1.45.0
 	github.com/protocolbuffers/txtpbfmt v0.0.0-20250627152318-f293424e46b5

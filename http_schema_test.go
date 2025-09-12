@@ -13,7 +13,7 @@ import (
 var domain, _ = generator.LoadDomainFromBytes(vote.DomainBytes)
 
 func ExampleApp_httpSchemaRoot() {
-	api, _ := schemaapi.New(domain, vote.ValidationRules, "http://example.com")
+	api, _ := schemaapi.New(domain, vote.ValidationRules, "http://example.com", "1.0.0")
 
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
@@ -53,13 +53,13 @@ func ExampleApp_httpSchemaRoot() {
 	//     "self": "http://example.com"
 	//   },
 	//   "meta": {
-	//     "version": "v0.0.1-beta"
+	//     "version": "1.0.0"
 	//   }
 	// }
 }
 
 func ExampleApp_httpSchemaElection() {
-	api, _ := schemaapi.New(domain, vote.ValidationRules, "http://example.com")
+	api, _ := schemaapi.New(domain, vote.ValidationRules, "http://example.com", "1.0.0")
 
 	request := httptest.NewRequest(http.MethodGet, "/election", nil)
 	response := httptest.NewRecorder()
@@ -175,7 +175,7 @@ func ExampleApp_httpSchemaElection() {
 }
 
 func ExampleApp_httpSchemaElectionCastVote() {
-	api, _ := schemaapi.New(domain, vote.ValidationRules, "http://example.com")
+	api, _ := schemaapi.New(domain, vote.ValidationRules, "http://example.com", "1.0.0")
 
 	request := httptest.NewRequest(http.MethodGet, "/election/CastVote", nil)
 	response := httptest.NewRecorder()
@@ -223,7 +223,7 @@ func ExampleApp_httpSchemaElectionCastVote() {
 }
 
 func ExampleApp_httpSchemaElectionListOpenElections() {
-	api, _ := schemaapi.New(domain, vote.ValidationRules, "http://example.com")
+	api, _ := schemaapi.New(domain, vote.ValidationRules, "http://example.com", "1.0.0")
 
 	request := httptest.NewRequest(http.MethodGet, "/election/ListOpenElections", nil)
 	response := httptest.NewRecorder()

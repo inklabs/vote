@@ -19,13 +19,14 @@ func ExampleApp_httpCloseElectionByOwner() {
 	const (
 		baseUri       = "http://example.com"
 		schemaBaseUri = "http://example.com/schema"
+		version       = "1.0.0"
 	)
 	recordingEventDispatcher := cqrstest.NewRecordingEventDispatcher()
 	app := newTestApp(
 		vote.WithEventDispatcher(recordingEventDispatcher),
 	)
 	defer app.Stop()
-	api, _ := jsonapi.New(app, vote.NewHTTPActionDecoder(), baseUri, schemaBaseUri)
+	api, _ := jsonapi.New(app, vote.NewHTTPActionDecoder(), baseUri, schemaBaseUri, version)
 
 	recordingEventDispatcher.Add(4)
 
@@ -223,13 +224,14 @@ func ExampleApp_httpListOpenElections() {
 	const (
 		baseUri       = "http://example.com"
 		schemaBaseUri = "http://example.com/schema"
+		version       = "1.0.0"
 	)
 	recordingEventDispatcher := cqrstest.NewRecordingEventDispatcher()
 	app := newTestApp(
 		vote.WithEventDispatcher(recordingEventDispatcher),
 	)
 	defer app.Stop()
-	api, _ := jsonapi.New(app, vote.NewHTTPActionDecoder(), baseUri, schemaBaseUri)
+	api, _ := jsonapi.New(app, vote.NewHTTPActionDecoder(), baseUri, schemaBaseUri, version)
 
 	commands := []election.CommenceElection{
 		{

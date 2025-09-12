@@ -9,6 +9,7 @@ import (
 	"github.com/inklabs/cqrs"
 	"github.com/inklabs/cqrs/asynccommandbus"
 	"github.com/inklabs/cqrs/asynccommandstore"
+	"github.com/inklabs/cqrs/broker/inmemory"
 	"github.com/inklabs/cqrs/broker/nats"
 	"github.com/inklabs/cqrs/commandbus"
 	"github.com/inklabs/cqrs/cqrstest"
@@ -38,6 +39,8 @@ import (
 
 //go:embed domain.gob
 var DomainBytes []byte
+
+var Version = "dev-build"
 
 type app struct {
 	commandBus             cqrs.CommandBus
@@ -166,34 +169,37 @@ func NewProdApp() *app {
 
 	eventDispatcher := newDistributedEventDispatcher(meterProvider, tracerProvider)
 
-	config := getPostgresConfig()
-	repository, err := postgresrepo.NewFromConfig(config)
-	if err != nil {
-		log.Fatalf("error loading repository: %s", err)
-	}
-	ctx := context.Background()
-	err = repository.InitDB(ctx)
-	if err != nil {
-		log.Fatalf("error initializing repository: %s", err)
-	}
+	repository := inmemoryrepo.New()
+	asyncCommandStore := asynccommandstore.NewInMemory()
 
-	postgresConfig := asynccommandstore.PostgresConfig{
-		Host:       config.Host,
-		Port:       config.Port,
-		User:       config.User,
-		Password:   config.Password,
-		DBName:     config.DBName,
-		SearchPath: config.SearchPath,
-	}
+	//config := getPostgresConfig()
+	//repository, err := postgresrepo.NewFromConfig(config)
+	//if err != nil {
+	//	log.Fatalf("error loading repository: %s", err)
+	//}
+	//ctx := context.Background()
+	//err = repository.InitDB(ctx)
+	//if err != nil {
+	//	log.Fatalf("error initializing repository: %s", err)
+	//}
 
-	asyncCommandStore, err := asynccommandstore.NewPostgresFromConfig(postgresConfig, GetAsyncCommands())
-	if err != nil {
-		log.Fatalf("error getting async command store: %s", err)
-	}
-	err = asyncCommandStore.InitDB(ctx)
-	if err != nil {
-		log.Fatalf("error initializing async command store: %s", err)
-	}
+	//postgresConfig := asynccommandstore.PostgresConfig{
+	//	Host:       config.Host,
+	//	Port:       config.Port,
+	//	User:       config.User,
+	//	Password:   config.Password,
+	//	DBName:     config.DBName,
+	//	SearchPath: config.SearchPath,
+	//}
+	//
+	//asyncCommandStore, err := asynccommandstore.NewPostgresFromConfig(postgresConfig, GetAsyncCommands())
+	//if err != nil {
+	//	log.Fatalf("error getting async command store: %s", err)
+	//}
+	//err = asyncCommandStore.InitDB(ctx)
+	//if err != nil {
+	//	log.Fatalf("error initializing async command store: %s", err)
+	//}
 
 	return NewApp(
 		WithAuthorization(authorization.NewDelayAuth()),
@@ -279,7 +285,8 @@ func newDistributedEventDispatcher(meterProvider metric.MeterProvider, tracerPro
 
 	const queueName = "vote-events"
 	//publisher := GetRabbitMQBroker(logger)
-	publisher := GetNatsBroker(logger, meterProvider, tracerProvider)
+	//publisher := GetNatsBroker(meterProvider, tracerProvider, logger)
+	publisher := inmemory.NewBroker(meterProvider, tracerProvider, logger)
 
 	eventDispatcher, err := eventdispatcher.NewDistributedEventDispatcher(
 		queueName,
@@ -296,7 +303,7 @@ func newDistributedEventDispatcher(meterProvider metric.MeterProvider, tracerPro
 	return eventDispatcher
 }
 
-func GetNatsBroker(logger *log.Logger, meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider) cqrs.Broker {
+func GetNatsBroker(meterProvider metric.MeterProvider, tracerProvider trace.TracerProvider, logger *log.Logger) cqrs.Broker {
 	return nats.NewBroker(
 		natsClient.DefaultURL,
 		meterProvider,

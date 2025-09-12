@@ -109,6 +109,8 @@ github.com/inklabs/cqrs v0.0.0-20250823060523-b58e81ed072a h1:EcG8JlQoD+mjymmSk0
 github.com/inklabs/cqrs v0.0.0-20250823060523-b58e81ed072a/go.mod h1:nh6uk/PzYQmDmEQPS22qd2o2e/R3YJ9g21hmmDixPlo=
 github.com/inklabs/cqrs v0.0.0-20250830055147-6a6aa585d7a9 h1:powkeUWKOiH7ChhkcAt+HkQsSFqUc4qVmrYtcQK+t2o=
 github.com/inklabs/cqrs v0.0.0-20250830055147-6a6aa585d7a9/go.mod h1:nh6uk/PzYQmDmEQPS22qd2o2e/R3YJ9g21hmmDixPlo=
+github.com/inklabs/cqrs v0.0.0-20250912051330-9a7d40867550 h1:rAGg5mwyfCqIlh+GDdtCyem3lXIorqGnLxRFAnZrfek=
+github.com/inklabs/cqrs v0.0.0-20250912051330-9a7d40867550/go.mod h1:nh6uk/PzYQmDmEQPS22qd2o2e/R3YJ9g21hmmDixPlo=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/klauspost/compress v1.18.0 h1:c/Cqfb0r+Yi+JtIEq73FWXVkRonBlf0CRNYc8Zttxdo=
