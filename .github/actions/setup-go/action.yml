@@ -4,9 +4,6 @@ description: "Checks out repo, sets up Go, installs tools, and runs go generate"
 runs:
   using: "composite"
   steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v4
-
     - name: Setup Go
       uses: actions/setup-go@v5
       with:

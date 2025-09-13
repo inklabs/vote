@@ -9,8 +9,8 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
-      - name: list .github/actions
-        run: ls -R .github/actions
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
       - uses: ./.github/actions/setup-go
 

@@ -11,6 +11,9 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
       - uses: ./.github/actions/setup-go
 
       - name: Get version
