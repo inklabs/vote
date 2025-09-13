@@ -13,6 +13,8 @@ jobs:
         uses: actions/checkout@v4
 
       - uses: ./.github/actions/setup-go
+        with:
+          gh-token: ${{ secrets.CQRS_READ_TOKEN }}
 
       - name: Go Test
         run: go test -v -count 1 -race -failfast ./...

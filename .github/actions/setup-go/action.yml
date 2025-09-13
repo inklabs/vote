@@ -1,6 +1,11 @@
 name: "Setup Go Project"
 description: "Checks out repo, sets up Go, installs tools, and runs go generate"
 
+inputs:
+  gh-token:
+    description: "GitHub token for private modules"
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -12,9 +17,7 @@ runs:
         cache: true
 
     - name: Configure Git for private modules
-      run: git config --global url."https://${GH_TOKEN}@github.com/inklabs/cqrs".insteadOf "https://github.com/inklabs/cqrs"
-      env:
-        GH_TOKEN: ${{ secrets.CQRS_READ_TOKEN }}
+      run: git config --global url."https://${{ inputs.gh-token }}@github.com/inklabs/cqrs".insteadOf "https://github.com/inklabs/cqrs"
 
     - name: Go Mod Download
       run: go mod download
