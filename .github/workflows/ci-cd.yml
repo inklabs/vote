@@ -1,27 +1,46 @@
-name: Build
+name: CI/CD
 on:
-  workflow_run:
-    workflows: [ "Unit Tests" ]
-    types:
-      - completed
+  push:
+    branches: [ main ]
+    tags: [ "v*" ]
 
 jobs:
-  call-setup:
-    uses: ./.github/workflows/setup.yml
-    secrets:
-      CQRS_READ_TOKEN: ${{ secrets.CQRS_READ_TOKEN }}
-
-  deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    name: Deploy
+  ci-cd:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          check-latest: true
+          cache: true
+
+      - name: Configure Git for private modules
+        run: git config --global url."https://${{ secrets.CQRS_READ_TOKEN }}@github.com/inklabs/cqrs".insteadOf "https://github.com/inklabs/cqrs"
+
+      - name: Go Mod Download
+        run: go mod download
+        env:
+          GOPRIVATE: github.com/inklabs/cqrs
+
+      - name: Go Mod Verify
+        run: go mod verify
+
+      - name: Install Dependencies
+        run: ./build/install-deps.sh
+
+      - name: Go Generate
+        run: go generate .
+
+      - name: Go Test
+        run: go test -v -count 1 -race -failfast ./...
+
       - name: Get version
         id: vars
         run: echo "version=$(git describe --tags --always --dirty)" >> $GITHUB_OUTPUT
 
       - name: Build
-        run: ./build/build-release.sh ${{ steps.vars.outputs.version }}"
+        run: ./build/build-release.sh ${{ steps.vars.outputs.version }}
 
       - name: Update Latest Release
         id: gh_release
