@@ -45,6 +45,12 @@ jobs:
       - name: Build
         run: ./build/build-release.sh ${{ steps.vars.outputs.version }}
 
+      - name: Purge Latest
+        if: ${{ github.ref_type != 'tag' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release delete latest -y
+
       - name: Update Latest Release
         id: gh_release
         uses: softprops/action-gh-release@v2
