@@ -65,8 +65,8 @@ jobs:
 
       - name: Notify Webhook
         run: |
-          echo '${{ steps.gh_release.outputs.assets }}' | jq .
-          echo "Notifying service of release: ${{ fromJSON(steps.gh_release.outputs.assets)[0].browser_download_url }}"
+          echo '${{ steps.gh_release.outputs }}' | jq .
+          echo "Notifying service of release: https://api.github.com/repos/inklabs/vote/releases/${{ steps.gh_release.outputs.id }}"
 #          curl -X POST -H "Content-Type: application/json" \
 #               -d '{"text":"New release available: '${{ steps.gh_release.outputs.html_url }}'"}' \
 #               ${{ secrets.NOTIFY_WEBHOOK }}
