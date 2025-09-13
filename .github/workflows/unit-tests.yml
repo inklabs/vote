@@ -5,16 +5,14 @@ on:
     tags: [ "v*" ]
 
 jobs:
+  call-setup:
+    uses: ./.github/workflows/setup.yml
+    with:
+      CQRS_READ_TOKEN: ${{ secrets.CQRS_READ_TOKEN }}
+
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-
-      - uses: ./.github/actions/setup-go
-        with:
-          gh-token: ${{ secrets.CQRS_READ_TOKEN }}
-
       - name: Go Test
         run: go test -v -count 1 -race -failfast ./...

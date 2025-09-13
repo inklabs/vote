@@ -1,0 +1,53 @@
+name: Setup
+on:
+  workflow_call:
+    inputs:
+      CQRS_READ_TOKEN:
+        description: "GitHub token for github.com/inklabs/cqrs read access"
+        required: true
+        type: string
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          check-latest: true
+          cache: true
+
+      - name: Configure Git for private modules
+        shell: bash
+        run: git config --global url."https://${{ inputs.CQRS_READ_TOKEN }}@github.com/inklabs/cqrs".insteadOf "https://github.com/inklabs/cqrs"
+
+      - name: Go Mod Download
+        shell: bash
+        run: go mod download
+        env:
+          GOPRIVATE: github.com/inklabs/cqrs
+
+      - name: Go Mod Verify
+        shell: bash
+        run: go mod verify
+
+      - name: Install Protoc
+        shell: bash
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
+      - name: Install protoc-gen-go and protoc-gen-go-grpc
+        shell: bash
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+      - name: Install Python grpcio-tools
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install grpcio-tools
+
+      - name: Go Generate
+        shell: bash
+        run: go generate .
