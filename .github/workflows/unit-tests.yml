@@ -9,6 +9,9 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
+      - name: list .github/actions
+        run: ls -R .github/actions
+
       - uses: ./.github/actions/setup-go
 
       - name: Go Test
