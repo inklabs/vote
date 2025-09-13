@@ -3,6 +3,7 @@
 *_gen.js
 .leveldb*/
 .badger.db/
+release/
 *.gob
 *.proto
 *.pb.go
