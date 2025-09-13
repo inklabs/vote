@@ -8,7 +8,7 @@ on:
 jobs:
   call-setup:
     uses: ./.github/workflows/setup.yml
-    with:
+    secrets:
       CQRS_READ_TOKEN: ${{ secrets.CQRS_READ_TOKEN }}
 
   deploy:

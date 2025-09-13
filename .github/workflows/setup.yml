@@ -1,11 +1,10 @@
 name: Setup
 on:
   workflow_call:
-    inputs:
+    secrets:
       CQRS_READ_TOKEN:
         description: "GitHub token for github.com/inklabs/cqrs read access"
         required: true
-        type: string
 
 jobs:
   setup:
@@ -20,7 +19,7 @@ jobs:
 
       - name: Configure Git for private modules
         shell: bash
-        run: git config --global url."https://${{ inputs.CQRS_READ_TOKEN }}@github.com/inklabs/cqrs".insteadOf "https://github.com/inklabs/cqrs"
+        run: git config --global url."https://${{ secrets.CQRS_READ_TOKEN }}@github.com/inklabs/cqrs".insteadOf "https://github.com/inklabs/cqrs"
 
       - name: Go Mod Download
         shell: bash
