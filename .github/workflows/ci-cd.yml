@@ -56,16 +56,23 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_type == 'tag' && steps.vars.outputs.version || 'latest' }}
-          name: ${{ github.ref_type == 'tag' && format('Release %s', steps.vars.outputs.version) || 'Latest Build' }}
+          name: ${{ github.ref_type == 'tag' && format('Release {0}', steps.vars.outputs.version) || format('Latest Build {0}', steps.vars.outputs.version )}}
+          body: |
+            Version: ${{ steps.vars.outputs.version }}
+            Commit: ${{ github.sha }}
           draft: false
           prerelease: ${{ github.ref_type != 'tag' }}
           files: release/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Notify Webhook
+      - name: Output Release Info
         run: |
-          echo "Notifying service of release: https://api.github.com/repos/inklabs/vote/releases/${{ steps.gh_release.outputs.id }}"
+          echo "Release: ${{ steps.gh_release.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+          echo "API: https://api.github.com/repos/inklabs/vote/releases/${{ steps.gh_release.outputs.id }}" >> $GITHUB_STEP_SUMMARY
+
+#      - name: Notify Webhook
+#        run: |
 #          curl -X POST -H "Content-Type: application/json" \
 #               -d '{"text":"New release available: '${{ steps.gh_release.outputs.html_url }}'"}' \
 #               ${{ secrets.NOTIFY_WEBHOOK }}
