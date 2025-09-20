@@ -20,7 +20,9 @@ import (
 	natsClient "github.com/nats-io/nats.go"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
+	noopM "go.opentelemetry.io/otel/metric/noop"
 	"go.opentelemetry.io/otel/trace"
+	noopT "go.opentelemetry.io/otel/trace/noop"
 
 	"github.com/inklabs/vote/action/election"
 	"github.com/inklabs/vote/event"
@@ -161,11 +163,13 @@ func NewApp(opts ...Option) *app {
 }
 
 func NewProdApp() *app {
-	resource := NewResource()
-
-	conn := NewOLTPConn()
-	tracerProvider := NewOTLPTracerProvider(resource, conn)
-	meterProvider := NewOLTPMeterProvider(resource, conn)
+	//resource := NewResource()
+	//
+	//conn := NewOLTPConn()
+	//tracerProvider := NewOTLPTracerProvider(resource, conn)
+	//meterProvider := NewOLTPMeterProvider(resource, conn)
+	tracerProvider := noopT.NewTracerProvider()
+	meterProvider := noopM.NewMeterProvider()
 
 	eventDispatcher := newDistributedEventDispatcher(meterProvider, tracerProvider)
 
@@ -207,10 +211,10 @@ func NewProdApp() *app {
 		WithEventDispatcher(eventDispatcher),
 		WithElectionRepository(repository),
 		WithTelemetry(meterProvider, tracerProvider),
-		WithCtxShutdown(
-			tracerProvider.Shutdown,
-			meterProvider.Shutdown,
-		),
+		//WithCtxShutdown(
+		//	tracerProvider.Shutdown,
+		//	meterProvider.Shutdown,
+		//),
 	)
 }
 
